@@ -25,7 +25,7 @@ export default function HomePage() {
       <div className="mt-10 flex items-center justify-center gap-x-6">
         <Button asChild size="lg">
           <Link href="/create">
-            Buat Landing Page Gratis Sekarang{" "}
+            Buat Landing Page GRATIS Sekarang{" "}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
         </Button>
