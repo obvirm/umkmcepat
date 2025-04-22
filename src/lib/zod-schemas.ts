@@ -71,7 +71,8 @@ const baseLandingPageSchema = z.object({
     try {
       JSON.parse(val);
       return true;
-    } catch (e) {
+    } catch (e: unknown) {
+      console.error('Error parsing color theme JSON:', e);
       return false;
     }
   }, { message: 'Format JSON skema warna tidak valid' })

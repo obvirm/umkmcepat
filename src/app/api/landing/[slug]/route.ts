@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { baseLandingPageSchemaForOmit as landingPageSchema } from '@/lib/zod-schemas';
-import { slugify, generateRandomString } from '@/lib/utils';
-import { uploadImageToCloudinary, fileToBuffer, deleteImagesFromCloudinary } from '@/lib/cloudinary';
 import { generateLandingPageContent } from '@/lib/ai';
-import bcrypt from 'bcrypt';
+import { deleteImagesFromCloudinary, fileToBuffer, uploadImageToCloudinary } from '@/lib/cloudinary';
+import { prisma } from '@/lib/prisma';
+import { generateRandomString, slugify } from '@/lib/utils';
+import { baseLandingPageSchemaForOmit as landingPageSchema } from '@/lib/zod-schemas';
+import { NextResponse } from 'next/server';
 
 // PUT /api/landing/[slug] - Update an existing landing page via token
 export async function PUT(request: Request, { params }: { params: { slug: string } }) {

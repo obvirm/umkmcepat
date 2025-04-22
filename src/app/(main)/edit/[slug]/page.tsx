@@ -1,11 +1,10 @@
-import { prisma } from '@/lib/prisma';
-import { notFound } from 'next/navigation';
-import bcrypt from 'bcrypt';
 import { CreateLandingPageForm } from '@/components/forms/CreateLandingPageForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle } from 'lucide-react';
 import { AiGeneratedContent } from '@/lib/ai';
+import { prisma } from '@/lib/prisma';
 import { LandingPageSchema } from '@/lib/zod-schemas';
+import { AlertCircle } from 'lucide-react';
+import { notFound } from 'next/navigation';
 
 // Gunakan nama standar 'Props' dan buat searchParams opsional
 type Props = {
@@ -137,4 +136,4 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-import type { Metadata } from 'next' // Ensure Metadata type is imported 
+import type { Metadata } from 'next'; // Ensure Metadata type is imported 

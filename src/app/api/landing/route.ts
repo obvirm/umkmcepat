@@ -56,15 +56,15 @@ export async function POST(request: Request) {
     const validationSchemaWithColor = baseLandingPageSchemaForOmit
       .omit({ images: true })
       .refine((data) => {
-          if (data.kategori === 'Lainnya') {
-              return !!data.kategoriLainnya && data.kategoriLainnya.trim().length > 0;
-          }
-          return true;
+        if (data.kategori === 'Lainnya') {
+          return !!data.kategoriLainnya && data.kategoriLainnya.trim().length > 0;
+        }
+        return true;
       }, {
-          message: 'Nama kategori harus diisi jika memilih \'Lainnya\'',
-          path: ['kategoriLainnya'],
+        message: 'Nama kategori harus diisi jika memilih \'Lainnya\'',
+        path: ['kategoriLainnya'],
       });
-      
+
     // Gunakan skema baru untuk validasi
     const validationResult = validationSchemaWithColor.safeParse(rawData);
 
@@ -179,6 +179,7 @@ export async function POST(request: Request) {
         namaUsaha: namaUsaha,
         kategori: finalKategori,
         whatsapp: whatsapp || null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         aiContent: aiContent as any,
         images: uploadedImageData.map(img => img.url),
         imagePublicIds: uploadedImageData.map(img => img.publicId),
@@ -186,8 +187,11 @@ export async function POST(request: Request) {
         isClaimed: !!userId, // Set isClaimed true jika user login
         tweaksLeft: 5,
         address: address || null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         testimonials: testimonials.length > 0 ? testimonials as any : undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         socialLinks: socialLinks.length > 0 ? socialLinks as any : undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         colorTheme: resolvedTheme as any, // Simpan tema warna (Prisma JSON type issue)
       },
     });

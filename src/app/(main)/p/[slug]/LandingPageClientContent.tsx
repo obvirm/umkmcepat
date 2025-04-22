@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState } from "react"; // Removed useEffect as it's no longer needed for token
 import { TweakDialog } from "@/components/landing-page/TweakDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Bot, Edit, Info, Loader2, Lock } from "lucide-react";
+import { Bot, Info, Lock } from "lucide-react";
 import { Session } from "next-auth"; // Ensure Session type is imported
 import { signIn } from "next-auth/react"; // Ensure signIn is imported
-import Link from "next/link";
 
 // Define TPageData based on expected props (simplified version)
 interface TPageData {
