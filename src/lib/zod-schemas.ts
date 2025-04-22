@@ -64,6 +64,17 @@ const baseLandingPageSchema = z.object({
     platform: z.enum(SOCIAL_PLATFORMS, { errorMap: () => ({ message: 'Pilih platform yang valid' }) }),
     url: z.string().url({ message: 'URL tidak valid' }).min(5, { message: 'URL minimal 5 karakter' }),
   })).max(3, { message: 'Maksimal 3 link sosial media' }).optional(),
+
+  // Optional Color Theme (passed as stringified JSON from form)
+  colorThemeJson: z.string().optional().refine((val) => {
+    if (!val) return true; // Optional is fine
+    try {
+      JSON.parse(val);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }, { message: 'Format JSON skema warna tidak valid' })
 });
 
 // Apply refinement to the base schema

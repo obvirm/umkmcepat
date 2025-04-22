@@ -25,6 +25,23 @@ export interface AiGeneratedContent {
   whatsappNumber?: string; // WhatsApp number (only if whatsappCTA is true)
 }
 
+// === Interface for Color Theme ===
+export interface ColorThemeJson {
+  primary: string;        // Hex color (e.g., "#2563eb")
+  "on-primary": string;   // Hex color (e.g., "#ffffff")
+  secondary: string;
+  "on-secondary": string;
+  background: string;
+  "on-background": string;
+  surface: string;
+  "on-surface": string;
+  accent: string;
+  muted: string;
+  border: string;
+  success: string;
+  error: string;
+}
+
 // Function to generate landing page content using GPT-4o-mini
 export async function generateLandingPageContent(
   namaUsaha: string,
@@ -216,5 +233,72 @@ export async function generateBusinessDescription(
   } catch (error) {
     console.error("Error generating business description:", error);
     throw new Error("Gagal menghasilkan deskripsi AI.");
+  }
+}
+
+// === NEW FUNCTION for Generating Color Theme ===
+export async function generateColorTheme(
+  namaUsaha: string,
+  kategori: string
+): Promise<ColorThemeJson> {
+  const systemPrompt = `
+    You are an expert UI/UX designer specializing in color theory for Indonesian SMEs.
+    Generate a harmonious and accessible 13-token color theme based on the user's business name and category.
+    Output ONLY a valid JSON object matching the ColorThemeJson interface, with no extra text or markdown formatting.
+    Interface: { primary: string; "on-primary": string; secondary: string; "on-secondary": string; background: string; "on-background": string; surface: string; "on-surface": string; accent: string; muted: string; border: string; success: string; error: string; }
+    Constraints & Guidelines:
+    - All colors MUST be lowercase hex codes (e.g., "#ffffff").
+    - primary: Choose a compelling main color suitable for the category (e.g., food=orange/red, tech=blue, beauty=pink/purple, eco=green). Avoid overly bright/neon colors unless category is very playful.
+    - on-primary: MUST be either "#ffffff" or "#111827" (near black) providing high contrast (WCAG AA+) against the chosen primary color. Choose white for dark primary, black for light primary.
+    - secondary: Choose a complementary or analogous color to primary, slightly less dominant.
+    - on-secondary: MUST be either "#ffffff" or "#111827" providing high contrast against the secondary color.
+    - background: Choose a light neutral color, typically near-white (e.g., "#f8fafc", "#f9fafb", "#ffffff").
+    - on-background: MUST be a dark, highly readable color (e.g., "#1f2937", "#111827") contrasting with background.
+    - surface: Choose a color for cards/containers, usually same as background or slightly different neutral (e.g., "#ffffff", "#f1f5f9").
+    - on-surface: MUST be a dark, highly readable color (e.g., "#334155", "#1f2937") contrasting with surface.
+    - accent: Choose an optional, distinct color for highlights or decorative elements. Can be brighter.
+    - muted: Choose a light gray for subtle text/borders (e.g., "#e5e7eb", "#f1f5f9").
+    - border: Choose a slightly darker gray than muted for UI borders (e.g., "#d1d5db", "#e2e8f0").
+    - success: Standard green (e.g., "#10b981", "#22c55e").
+    - error: Standard red (e.g., "#ef4444", "#f43f5e").
+    - Ensure overall theme harmony and professional feel appropriate for Indonesian SMEs.
+  `;
+
+  const userMessage = `
+    Nama Usaha: ${namaUsaha}
+    Kategori Usaha: ${kategori}
+    Generate the color theme JSON.
+  `;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage },
+      ],
+      temperature: 0.6,
+      response_format: { type: "json_object" },
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("OpenAI response for color theme is empty.");
+    }
+
+    const parsedContent: ColorThemeJson = JSON.parse(content);
+
+    // TODO: Add validation here to ensure all 13 keys exist and values are hex codes
+    // Example basic check:
+    if (!parsedContent.primary || !parsedContent["on-primary"] /* ... check all keys */) {
+       throw new Error("Generated color theme JSON is missing required fields.");
+    }
+
+    console.log("AI Generated Color Theme:", parsedContent);
+    return parsedContent;
+
+  } catch (error) {
+    console.error("Error generating color theme:", error);
+    throw new Error("Gagal menghasilkan skema warna AI.");
   }
 } 

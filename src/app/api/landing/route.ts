@@ -8,6 +8,24 @@ import { generateRandomString, slugify } from '@/lib/utils';
 // Import the base schema to apply refinement after omit
 import { baseLandingPageSchemaForOmit } from '@/lib/zod-schemas';
 import { auth } from '@/lib/auth'; // Import auth untuk cek sesi
+import type { ColorThemeJson } from '@/lib/ai'; // Import type ColorThemeJson
+
+// Definisikan tema warna default
+const defaultColorTheme: ColorThemeJson = {
+  primary: "#1f2937",        // slate-800
+  "on-primary": "#ffffff",   // white
+  secondary: "#4b5563",    // slate-600
+  "on-secondary": "#ffffff",
+  background: "#f9fafb",    // slate-50
+  "on-background": "#1f2937", // slate-800
+  surface: "#ffffff",       // white
+  "on-surface": "#1f2937",  // slate-800
+  accent: "#3b82f6",        // blue-500 (sebagai contoh)
+  muted: "#e5e7eb",        // slate-200
+  border: "#d1d5db",        // slate-300
+  success: "#10b981",      // green-500
+  error: "#ef4444"        // red-500
+};
 
 // POST /api/landing - Create a new landing page
 export async function POST(request: Request) {
@@ -22,31 +40,33 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
 
-    // Extract basic fields
+    // Extract basic fields AND optional color theme
+    const colorThemeJsonString = formData.get('colorThemeJson') as string | null;
     const rawData = {
       namaUsaha: formData.get('namaUsaha'),
       kategori: formData.get('kategori'),
       kategoriLainnya: formData.get('kategoriLainnya'),
       deskripsi_user: formData.get('deskripsi_user'),
       whatsapp: formData.get('whatsapp'),
-      // We will handle images separately
+      colorThemeJson: colorThemeJsonString, // Sertakan untuk validasi Zod
+      // Images handled later
     };
 
-    // Validate text fields: Omit images from the base schema, then apply refinement
-    const validationSchemaForText = baseLandingPageSchemaForOmit
+    // Validate text fields including colorThemeJson
+    const validationSchemaWithColor = baseLandingPageSchemaForOmit
       .omit({ images: true })
       .refine((data) => {
-        // Re-apply the same refinement logic
-        if (data.kategori === 'Lainnya') {
-          return !!data.kategoriLainnya && data.kategoriLainnya.trim().length > 0;
-        }
-        return true;
+          if (data.kategori === 'Lainnya') {
+              return !!data.kategoriLainnya && data.kategoriLainnya.trim().length > 0;
+          }
+          return true;
       }, {
-        message: 'Nama kategori harus diisi jika memilih \'Lainnya\'',
-        path: ['kategoriLainnya'],
+          message: 'Nama kategori harus diisi jika memilih \'Lainnya\'',
+          path: ['kategoriLainnya'],
       });
-
-    const validationResult = validationSchemaForText.safeParse(rawData);
+      
+    // Gunakan skema baru untuk validasi
+    const validationResult = validationSchemaWithColor.safeParse(rawData);
 
     if (!validationResult.success) {
       console.error("Validation Errors:", validationResult.error.flatten());
@@ -56,8 +76,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const { namaUsaha, kategori, deskripsi_user, whatsapp } = validationResult.data;
+    // Ambil data yang sudah divalidasi (termasuk colorThemeJson jika ada)
+    const { namaUsaha, kategori, deskripsi_user, whatsapp, colorThemeJson } = validationResult.data;
     const finalKategori = kategori === 'Lainnya' ? formData.get('kategoriLainnya') as string : kategori;
+
+    // Tentukan tema warna yang akan disimpan
+    let resolvedTheme: ColorThemeJson = defaultColorTheme;
+    if (colorThemeJson) {
+      try {
+        resolvedTheme = JSON.parse(colorThemeJson);
+        // TODO: Lakukan validasi lebih ketat di sini bahwa semua key ada dan formatnya benar
+      } catch (e) {
+        console.error("Failed to parse colorThemeJson, using default:", e);
+        // Jika gagal parse (meskipun Zod sudah cek), fallback ke default
+        resolvedTheme = defaultColorTheme;
+      }
+    }
 
     // Handle Image Uploads to Cloudinary
     const imageFiles = formData.getAll('images') as File[];
@@ -154,6 +188,7 @@ export async function POST(request: Request) {
         address: address || null,
         testimonials: testimonials.length > 0 ? testimonials as any : undefined,
         socialLinks: socialLinks.length > 0 ? socialLinks as any : undefined,
+        colorTheme: resolvedTheme as any, // Simpan tema warna (Prisma JSON type issue)
       },
     });
 

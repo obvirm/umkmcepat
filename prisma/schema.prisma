@@ -28,6 +28,9 @@ model LandingPage {
   testimonials Json?    // Changed to Json to store array of objects
   address      String? @db.VarChar(255) // Limit address length
   socialLinks  Json?    // Store social links as JSON
+
+  // === NEW COLOR THEME FIELD ===
+  colorTheme   Json?    // Store generated color theme JSON
 }
 
 // NextAuth.js (Auth.js v5) Models

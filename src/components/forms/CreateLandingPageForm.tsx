@@ -23,6 +23,7 @@ import {
   Sparkles,
   Trash2,
   UploadCloud,
+  Palette,
 } from "lucide-react";
 import { useRouter } from "next/navigation"; // Use next/navigation for App Router
 import React, { useState, useTransition } from "react";
@@ -74,6 +75,8 @@ export function CreateLandingPageForm({
   const [imagePreviews, setImagePreviews] =
     useState<string[]>(existingImageUrls);
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+  const [isGeneratingColors, setIsGeneratingColors] = useState(false);
+  const [generatedPrimaryColor, setGeneratedPrimaryColor] = useState<string | null>(null);
 
   const form = useForm<LandingPageSchema>({
     resolver: zodResolver(landingPageSchema),
@@ -87,6 +90,7 @@ export function CreateLandingPageForm({
       testimonials: initialData.testimonials || [], // Initialize as empty array
       address: initialData.address || "",
       socialLinks: initialData.socialLinks || [], // Initialize as empty array
+      colorThemeJson: undefined, // Initialize color theme field
     },
   });
 
@@ -150,25 +154,83 @@ export function CreateLandingPageForm({
     });
   };
 
+  // Function to handle AI Color Generation
+  const handleGenerateColors = async () => {
+    const namaUsaha = form.getValues("namaUsaha");
+    const kategori = form.getValues("kategori");
+
+    if (!namaUsaha || !kategori) {
+      toast.warning("Input Diperlukan", {
+        description: "Masukkan Nama Usaha dan Kategori terlebih dahulu untuk generate warna.",
+      });
+      return;
+    }
+
+    setIsGeneratingColors(true);
+    setGeneratedPrimaryColor(null);
+    toast.info("AI sedang meracik warna...", {
+      description: "Mohon tunggu sebentar 🎨",
+    });
+
+    try {
+      const response = await fetch("/api/ai/generate-colors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ namaUsaha, kategori }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Gagal generate warna AI.");
+      }
+
+      // Store the entire JSON string in the form state
+      form.setValue('colorThemeJson', JSON.stringify(result), { shouldValidate: true });
+      setGeneratedPrimaryColor(result.primary); // Show primary color as feedback
+      toast.success("Skema Warna Dihasilkan!", {
+          description: "Warna utama yang disarankan telah ditampilkan."
+      });
+
+    } catch (error) {
+        console.error("Color generation error:", error);
+        toast.error("Generate Warna Gagal", {
+            description: error instanceof Error ? error.message : "Terjadi kesalahan."
+        });
+    } finally {
+        setIsGeneratingColors(false);
+    }
+  };
+
   const onSubmit = (data: LandingPageSchema) => {
     // Clear previous toasts if any
     toast.dismiss();
 
     startTransition(async () => {
       try {
-        // Use FormData to send data including files
         const formData = new FormData();
+        // --- Loop to append data (adjust for colorThemeJson) ---
         Object.entries(data).forEach(([key, value]) => {
-          if (key === "images") {
-            // Append files from state if they exist
-            if (selectedFiles) {
-              Array.from(selectedFiles).forEach((file) => {
-                formData.append("images", file);
-              });
+            if (key === "images") {
+                if (selectedFiles) {
+                    Array.from(selectedFiles).forEach((file) => {
+                        formData.append("images", file);
+                    });
+                }
+            } else if (key === 'testimonials' || key === 'socialLinks') {
+                // Handle arrays of objects by stringifying
+                if (value && Array.isArray(value) && value.length > 0) {
+                    formData.append(key, JSON.stringify(value));
+                }
+            } else if (key === 'colorThemeJson') {
+                // Only append if it has a value (stringified JSON)
+                if (typeof value === 'string' && value.length > 2) { // Check if not undefined/empty string/empty JSON
+                    formData.append(key, value);
+                }
+            } else if (value !== undefined && value !== null && value !== "") {
+                // Append other simple values
+                formData.append(key, String(value));
             }
-          } else if (value !== undefined && value !== null && value !== "") {
-            formData.append(key, String(value));
-          }
         });
 
         // === Handle Social Links Object ===
@@ -345,7 +407,7 @@ export function CreateLandingPageForm({
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
       {/* --- Bagian Utama --- */}
       <Card className="border-none shadow-none p-0">
         {/* <CardHeader className="p-0 mb-6">
@@ -747,6 +809,49 @@ export function CreateLandingPageForm({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      {/* --- Optional Color Theme AccordionItem --- */}
+      <AccordionItem value="item-colors">
+        <AccordionTrigger className="text-base font-medium">
+          <div className="flex items-center gap-2">
+             <Palette className="h-5 w-5"/> Desain & Warna (Opsional)
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="pt-4 space-y-4">
+           <p className="text-sm text-muted-foreground">
+              Biarkan AI memilihkan skema warna terbaik berdasarkan usaha Anda, atau kosongkan untuk menggunakan tema default.
+           </p>
+          <div className="flex items-center gap-4">
+              <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={handleGenerateColors}
+                  disabled={isGeneratingColors || !form.watch('namaUsaha') || !form.watch('kategori')}
+              >
+              {isGeneratingColors ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                  <Sparkles className="mr-2 h-4 w-4" />
+              )}
+              Generate Warna Otomatis (AI)
+              </Button>
+              {generatedPrimaryColor && (
+                  <div className="flex items-center gap-2 text-sm">
+                      <span 
+                          className="h-5 w-5 rounded border border-border inline-block"
+                          style={{ backgroundColor: generatedPrimaryColor }}
+                      ></span>
+                      <span>Warna utama: {generatedPrimaryColor}</span>
+                  </div>
+              )}
+          </div>
+          {/* Hidden field to store the generated JSON string */}
+          <input type="hidden" {...form.register("colorThemeJson")} />
+           <p className="text-xs text-muted-foreground pt-2">
+              Catatan: AI akan membuat skema 13 warna (termasuk warna teks yang kontras) berdasarkan Nama Usaha & Kategori.
+           </p>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Submit Button */}
       <Button

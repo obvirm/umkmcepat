@@ -1,18 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { LandingPageRenderer } from "@/components/landing-page/LandingPageRenderer";
 import { StickyCTA } from "@/components/landing-page/StickyCTA";
-import { LandingPageClientContent } from "./LandingPageClientContent"; // Assuming this is also a client component or compatible
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import type { ColorThemeJson } from '@/lib/ai'; // Import type ColorThemeJson
 import { AiGeneratedContent } from "@/lib/ai"; // Type import is fine
-import { Instagram, Facebook, Linkedin, Youtube, Twitter, Globe, Send, Phone, MapPin, MessageCircle, Quote, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { motion } from 'framer-motion';
+import { ExternalLink, Facebook, Globe, Instagram, Linkedin, Link as LinkIcon, MapPin, Phone, Quote, Send, Twitter, Youtube } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from 'react';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import { LandingPageClientContent } from "./LandingPageClientContent"; // Assuming this is also a client component or compatible
 
 // Type for the fetched page data (adjust based on getLandingPageData return type)
 type PageData = {
@@ -29,6 +30,7 @@ type PageData = {
   testimonials: { name: string; comment: string }[];
   address: string | null;
   socialLinks: { platform: string; url: string }[];
+  colorTheme: ColorThemeJson | null; // Add colorTheme to PageData type
 };
 
 // Define props for the client component
@@ -36,6 +38,13 @@ interface LandingPageDisplayProps {
   pageData: PageData;
   session: any; // Replace 'any' with your actual session type
 }
+
+// Definisikan tema warna default (sama seperti di API route)
+const defaultColorTheme: ColorThemeJson = {
+  primary: "#1f2937", "on-primary": "#ffffff", secondary: "#4b5563", "on-secondary": "#ffffff",
+  background: "#f9fafb", "on-background": "#1f2937", surface: "#ffffff", "on-surface": "#1f2937",
+  accent: "#3b82f6", muted: "#e5e7eb", border: "#d1d5db", success: "#10b981", error: "#ef4444"
+};
 
 // Helper function to get icon based on platform (can stay here or be moved)
 const SocialIcon = ({ platform, className }: { platform: string, className?: string }) => {
@@ -58,6 +67,9 @@ export function LandingPageDisplay({ pageData, session }: LandingPageDisplayProp
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  // Resolve the color theme
+  const theme = pageData.colorTheme || defaultColorTheme;
+
   // Animation Variants
   const sectionVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -75,7 +87,7 @@ export function LandingPageDisplay({ pageData, session }: LandingPageDisplayProp
   const imagesForLightbox = pageData.images?.map(url => ({ src: url })) || [];
 
   return (
-    <div className="relative bg-background text-foreground overflow-x-hidden">
+    <div className="relative text-foreground overflow-x-hidden" style={{ backgroundColor: theme.background, color: theme["on-background"] }}>
       {/* Client Content (Claim/Tweak Buttons) */}
       <div className="container mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-8">
         {/* Assuming LandingPageClientContent is okay here */}
@@ -88,18 +100,20 @@ export function LandingPageDisplay({ pageData, session }: LandingPageDisplayProp
         <LandingPageRenderer
           data={pageData.aiContent}
           namaUsaha={pageData.namaUsaha}
+          colorTheme={theme}
         />
 
         {/* --- Gallery Section --- */}
         {pageData.images && pageData.images.length > 0 && (
           <motion.section
-            className="my-16 md:my-20 bg-slate-50 rounded-lg p-6 md:p-8 shadow-inner border border-slate-200/50"
+            className="my-16 md:my-20 rounded-lg p-6 md:p-8 shadow-inner"
+            style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}` }}
             variants={sectionVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            <h2 className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10 text-center">Galeri</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10 text-center" style={{ color: theme["on-surface"] }}>Galeri</h2>
             <div className="flex flex-wrap justify-center gap-4">
               {pageData.images.map((imgUrl, index) => (
                 <div
@@ -132,23 +146,25 @@ export function LandingPageDisplay({ pageData, session }: LandingPageDisplayProp
              whileInView="visible"
              viewport={{ once: true, amount: 0.2 }}
            >
-            <h2 className="text-2xl lg:text-3xl font-semibold mb-8">
+            <h2 className="text-2xl lg:text-3xl font-semibold mb-8" style={{ color: theme["on-background"] }}>
               Apa Kata Pelanggan Kami?
             </h2>
             <div className={`grid grid-cols-1 gap-6 ${testimonials.length > 1 ? 'md:grid-cols-2' : ''}`}>
               {testimonials.map((testimonial, index) => (
                 <blockquote
                   key={index}
-                  className="p-6 md:p-8 bg-white border-l-4 border-primary rounded-r-lg text-left shadow-lg transition duration-300 hover:shadow-xl"
+                  className="p-6 md:p-8 rounded-r-lg text-left shadow-lg transition duration-300 hover:shadow-xl"
+                  style={{ backgroundColor: theme.surface, color: theme["on-surface"], borderLeft: `4px solid ${theme.primary}` }}
                 >
                   <Quote
-                    className="h-5 w-5 text-primary mb-2 opacity-80"
+                    className="h-5 w-5 mb-2 opacity-80"
+                    style={{ color: theme.primary }}
                     aria-hidden="true"
                   />
-                  <p className="text-muted-foreground italic leading-relaxed mb-3">
+                  <p className="italic leading-relaxed mb-3" style={{ color: theme["on-surface"] }}>
                     {testimonial.comment}
                   </p>
-                  <footer className="text-sm font-medium text-foreground">
+                  <footer className="text-sm font-medium" style={{ color: theme["on-surface"] }}>
                     - {testimonial.name}
                   </footer>
                 </blockquote>
@@ -165,12 +181,15 @@ export function LandingPageDisplay({ pageData, session }: LandingPageDisplayProp
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            <Separator className="my-16 md:my-20" />
-            <section className="my-16 md:my-20 text-center bg-slate-50 rounded-lg p-8 md:p-10 shadow-inner border border-slate-200/50">
-              <h2 className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10">Hubungi Kami</h2>
+            <Separator className="my-16 md:my-20" style={{ backgroundColor: theme.border }} />
+            <section 
+                className="my-16 md:my-20 text-center rounded-lg p-8 md:p-10 shadow-inner"
+                style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}` }}
+             >
+              <h2 className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10" style={{ color: theme["on-surface"] }}>Hubungi Kami</h2>
               <div className="flex flex-col items-center gap-6">
                 {address && (
-                  <div className="flex items-center gap-3 text-muted-foreground md:text-lg">
+                  <div className="flex items-center gap-3 md:text-lg" style={{ color: theme["on-surface"] }}>
                     <MapPin className="w-5 h-5 flex-shrink-0" />
                     <span>{address}</span>
                   </div>
@@ -178,19 +197,26 @@ export function LandingPageDisplay({ pageData, session }: LandingPageDisplayProp
                 {socialLinks && socialLinks.length > 0 && (
                   <div className="flex flex-wrap items-center justify-center gap-4 mt-3">
                     {socialLinks.map((link, index) => (
-                      <Button key={index} variant="outline" size="sm" asChild>
+                      <Button 
+                        key={index} 
+                        variant="outline" 
+                        size="sm" 
+                        asChild 
+                        style={{ borderColor: theme.border, color: theme.primary }}
+                       >
                         <Link
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={link.platform}
+                          className="hover:bg-muted/50"
                         >
                           <SocialIcon
                             platform={link.platform}
                             className="w-4 h-4 mr-2"
                           />
                           {link.platform}
-                          <ExternalLink className="w-3 h-3 ml-1.5 text-muted-foreground/80" />
+                          <ExternalLink className="w-3 h-3 ml-1.5 opacity-80" />
                         </Link>
                       </Button>
                     ))}
@@ -201,12 +227,12 @@ export function LandingPageDisplay({ pageData, session }: LandingPageDisplayProp
           </motion.div>
         )}
 
-        {/* Sticky CTA remains at the bottom of the viewport */}
+        {/* Sticky CTA needs theme */}
         <StickyCTA
           ctaText={pageData.aiContent.ctaText}
-          primaryColor={pageData.aiContent.primaryColor}
           whatsappCTA={pageData.aiContent.whatsappCTA}
           whatsappNumber={pageData.aiContent.whatsappNumber}
+          colorTheme={theme}
         />
       </div>
 

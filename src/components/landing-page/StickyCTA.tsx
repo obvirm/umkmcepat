@@ -4,41 +4,42 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { MessageCircle, Send } from 'lucide-react'; // Ganti Phone ke MessageCircle
+import type { ColorThemeJson } from '@/lib/ai'; // Import ColorThemeJson
 
 interface StickyCTAProps {
   ctaText?: string;
-  primaryColor?: string;
   whatsappCTA?: boolean;
   whatsappNumber?: string;
+  colorTheme: ColorThemeJson; // Tambah colorTheme prop
 }
 
 export function StickyCTA({ 
     ctaText = "Hubungi Kami", 
-    primaryColor = '#3B82F6', 
     whatsappCTA = false, 
-    whatsappNumber 
+    whatsappNumber, 
+    colorTheme: theme // Terima theme
 }: StickyCTAProps) {
 
     const whatsappLink = whatsappNumber 
         ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}` 
         : '#';
 
-    // Tentukan warna dan ikon berdasarkan whatsappCTA
+    // Tentukan warna dan ikon berdasarkan whatsappCTA dan theme
     const isWhatsApp = whatsappCTA && whatsappNumber;
-    const buttonColor = isWhatsApp ? '#25D366' : primaryColor;
-    const ButtonIcon = isWhatsApp ? MessageCircle : Send; 
+    const finalButtonColor = theme.primary;
+    const finalButtonTextColor = theme["on-primary"];
+    const ButtonIcon = isWhatsApp ? MessageCircle : Send;
 
     const buttonStyle = {
-        backgroundColor: buttonColor,
-        // Pastikan warna teks kontras (opsional, bisa diatur via className)
-        // color: isWhatsApp ? 'white' : '#auto-contrast' 
+        backgroundColor: finalButtonColor,
+        color: finalButtonTextColor,
     };
 
     const CTAContent = () => (
         <Button 
             style={buttonStyle} 
             size="lg" 
-            className="cursor-pointer w-full sm:w-auto text-lg font-semibold shadow-lg hover:opacity-90 transition-opacity"
+            className="w-full sm:w-auto text-lg font-semibold shadow-lg hover:opacity-90 transition-opacity"
         >
             <ButtonIcon className="mr-2 h-5 w-5"/>
             {ctaText}

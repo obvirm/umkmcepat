@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { AiGeneratedContent } from "@/lib/ai";
+import type { ColorThemeJson } from "@/lib/ai";
 
 // Impor Client Component yang baru dibuat
 import { LandingPageDisplay } from "./LandingPageDisplay";
@@ -32,6 +33,7 @@ async function getLandingPageData(slug: string) {
       testimonials: true,
       address: true,
       socialLinks: true,
+      colorTheme: true,
     },
   });
 
@@ -54,6 +56,11 @@ async function getLandingPageData(slug: string) {
       }[])
     : [];
 
+  // Type assertion for colorTheme (safer way)
+  const colorThemeTyped = landingPage.colorTheme 
+    ? landingPage.colorTheme as unknown as ColorThemeJson 
+    : null;
+
   if (
     typeof aiContent === "object" &&
     aiContent !== null &&
@@ -68,6 +75,7 @@ async function getLandingPageData(slug: string) {
     aiContent: aiContent,
     testimonials: testimonials,
     socialLinks: socialLinks,
+    colorTheme: colorThemeTyped, // Return the correctly typed colorTheme
   };
 }
 
