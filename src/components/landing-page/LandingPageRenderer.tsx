@@ -15,7 +15,6 @@ interface LandingPageRendererProps {
 
 export function LandingPageRenderer({
   data,
-  images = [],
   namaUsaha,
   colorTheme: theme,
 }: LandingPageRendererProps) {
@@ -68,31 +67,6 @@ export function LandingPageRenderer({
           {subheadline || "Solusi terbaik untuk kebutuhan Anda"}
         </motion.p>
       </motion.div>
-
-      {/* Images Section */}
-      {images.length > 0 && (
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          {images.map((imageUrl, index) => (
-            <motion.div
-              key={index}
-              className="relative aspect-[4/3] overflow-hidden rounded-lg shadow-lg"
-              variants={itemVariants}
-            >
-              <img
-                src={imageUrl}
-                alt={`${namaUsaha} - Gambar ${index + 1}`}
-                className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
-              />
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
 
       {/* Description Section - Tambah hover effect */}
       <motion.div
