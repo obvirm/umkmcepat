@@ -5,7 +5,8 @@ import { generateLandingPageContent } from '@/lib/ai';
 import { fileToBuffer, uploadImageToCloudinary } from '@/lib/cloudinary';
 import { checkRateLimit } from '@/lib/rate-limit'; // Import rate limit checker
 import { generateRandomString, slugify } from '@/lib/utils';
-import { baseLandingPageSchemaForOmit as landingPageSchema } from '@/lib/zod-schemas';
+// Import the base schema to apply refinement after omit
+import { baseLandingPageSchemaForOmit } from '@/lib/zod-schemas';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
@@ -28,8 +29,21 @@ export async function POST(request: Request) {
       // We will handle images separately
     };
 
-    // Validate text fields first using Zod (without images)
-    const validationResult = landingPageSchema.omit({ images: true }).safeParse(rawData);
+    // Validate text fields: Omit images from the base schema, then apply refinement
+    const validationSchemaForText = baseLandingPageSchemaForOmit
+      .omit({ images: true })
+      .refine((data) => {
+        // Re-apply the same refinement logic
+        if (data.kategori === 'Lainnya') {
+          return !!data.kategoriLainnya && data.kategoriLainnya.trim().length > 0;
+        }
+        return true;
+      }, {
+        message: 'Nama kategori harus diisi jika memilih \'Lainnya\'',
+        path: ['kategoriLainnya'],
+      });
+
+    const validationResult = validationSchemaForText.safeParse(rawData);
 
     if (!validationResult.success) {
       console.error("Validation Errors:", validationResult.error.flatten());

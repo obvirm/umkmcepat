@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Phone, Send } from 'lucide-react'; // Or WhatsApp icon
+import { MessageCircle, Send } from 'lucide-react'; // Ganti Phone ke MessageCircle
 
 interface StickyCTAProps {
   ctaText?: string;
@@ -23,8 +23,15 @@ export function StickyCTA({
         ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}` 
         : '#';
 
+    // Tentukan warna dan ikon berdasarkan whatsappCTA
+    const isWhatsApp = whatsappCTA && whatsappNumber;
+    const buttonColor = isWhatsApp ? '#25D366' : primaryColor;
+    const ButtonIcon = isWhatsApp ? MessageCircle : Send; 
+
     const buttonStyle = {
-        backgroundColor: primaryColor,
+        backgroundColor: buttonColor,
+        // Pastikan warna teks kontras (opsional, bisa diatur via className)
+        // color: isWhatsApp ? 'white' : '#auto-contrast' 
     };
 
     const CTAContent = () => (
@@ -33,7 +40,7 @@ export function StickyCTA({
             size="lg" 
             className="w-full sm:w-auto text-lg font-semibold shadow-lg hover:opacity-90 transition-opacity"
         >
-            {whatsappCTA ? <Phone className="mr-2 h-5 w-5"/> : <Send className="mr-2 h-5 w-5"/>}
+            <ButtonIcon className="mr-2 h-5 w-5"/>
             {ctaText}
         </Button>
     );

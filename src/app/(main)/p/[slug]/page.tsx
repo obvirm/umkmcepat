@@ -5,11 +5,25 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { LandingPageClientContent } from "./LandingPageClientContent";
 import { Separator } from "@/components/ui/separator"; // Corrected import path
-import { Instagram, Facebook, Linkedin, Youtube, Twitter, Globe, Send, Phone, MapPin, MessageCircle, Quote, Link as LinkIcon, ExternalLink } from "lucide-react"; // Removed Pinterest
+import {
+  Instagram,
+  Facebook,
+  Linkedin,
+  Youtube,
+  Twitter,
+  Globe,
+  Send,
+  Phone,
+  MapPin,
+  MessageCircle,
+  Quote,
+  Link as LinkIcon,
+  ExternalLink,
+} from "lucide-react"; // Removed Pinterest
 import type { Metadata } from "next"; // Keep metadata import
 import Image from "next/image"; // Import Next Image for Gallery
 import { notFound } from "next/navigation";
-import Link from 'next/link'; // Import Link
+import Link from "next/link"; // Import Link
 import { Button } from "@/components/ui/button"; // Import Button
 
 // Gunakan tipe standar 'Props'
@@ -53,8 +67,18 @@ async function getLandingPageData(slug: string) {
     {}) as unknown as AiGeneratedContent;
 
   // Parse optional JSON fields with type safety
-  const testimonials = landingPage.testimonials ? JSON.parse(JSON.stringify(landingPage.testimonials)) as { name: string; comment: string }[] : [];
-  const socialLinks = landingPage.socialLinks ? JSON.parse(JSON.stringify(landingPage.socialLinks)) as { platform: string; url: string }[] : [];
+  const testimonials = landingPage.testimonials
+    ? (JSON.parse(JSON.stringify(landingPage.testimonials)) as {
+        name: string;
+        comment: string;
+      }[])
+    : [];
+  const socialLinks = landingPage.socialLinks
+    ? (JSON.parse(JSON.stringify(landingPage.socialLinks)) as {
+        platform: string;
+        url: string;
+      }[])
+    : [];
 
   // Add whatsappNumber to aiContent if applicable (needed by renderer/CTA)
   // We need to check the type more carefully here after casting
@@ -78,18 +102,45 @@ async function getLandingPageData(slug: string) {
 // type PageData = Awaited<ReturnType<typeof getLandingPageData>>; // Removed manual type
 
 // Helper function to get icon based on platform
-const SocialIcon = ({ platform, className }: { platform: string, className?: string }) => {
+const SocialIcon = ({
+  platform,
+  className,
+}: {
+  platform: string;
+  className?: string;
+}) => {
   switch (platform.toLowerCase()) {
-    case 'instagram': return <Instagram className={className} />;
-    case 'facebook': return <Facebook className={className} />;
-    case 'tiktok': return <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M448 209.91a210.06 210.06 0 0 1 -122.77 39.25V62.02a210.06 210.06 0 0 1 122.77 39.25zM122.4 184.74a210.36 210.36 0 0 1 -35.12 12.08V1.25A210.52 210.52 0 0 1 122.4 184.74zM122.4 407.49a210.36 210.36 0 0 1 -35.12 12.08V226.5A210.36 210.36 0 0 1 122.4 407.49zM224.49 304.37a210.36 210.36 0 0 1 -102.09 -12.08V197.2a210.36 210.36 0 0 1 102.09 -12.08zm101.86 -122.77a210.36 210.36 0 0 1 12.08 35.12H226.5a210.36 210.36 0 0 1 41.16 -35.12z"/></svg>; // Simple TikTok icon
-    case 'youtube': return <Youtube className={className} />;
-    case 'twitter (x)': return <Twitter className={className} />;
-    case 'linkedin': return <Linkedin className={className} />;
-    case 'website': return <Globe className={className} />;
-    case 'whatsapp': return <Phone className={className} />;
-    case 'telegram': return <Send className={className} />;
-    default: return <LinkIcon className={className} />;
+    case "instagram":
+      return <Instagram className={className} />;
+    case "facebook":
+      return <Facebook className={className} />;
+    case "tiktok":
+      return (
+        <svg
+          className={className}
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 448 512"
+        >
+          <path
+            fill="currentColor"
+            d="M448 209.91a210.06 210.06 0 0 1 -122.77 39.25V62.02a210.06 210.06 0 0 1 122.77 39.25zM122.4 184.74a210.36 210.36 0 0 1 -35.12 12.08V1.25A210.52 210.52 0 0 1 122.4 184.74zM122.4 407.49a210.36 210.36 0 0 1 -35.12 12.08V226.5A210.36 210.36 0 0 1 122.4 407.49zM224.49 304.37a210.36 210.36 0 0 1 -102.09 -12.08V197.2a210.36 210.36 0 0 1 102.09 -12.08zm101.86 -122.77a210.36 210.36 0 0 1 12.08 35.12H226.5a210.36 210.36 0 0 1 41.16 -35.12z"
+          />
+        </svg>
+      ); // Simple TikTok icon
+    case "youtube":
+      return <Youtube className={className} />;
+    case "twitter (x)":
+      return <Twitter className={className} />;
+    case "linkedin":
+      return <Linkedin className={className} />;
+    case "website":
+      return <Globe className={className} />;
+    case "whatsapp":
+      return <Phone className={className} />;
+    case "telegram":
+      return <Send className={className} />;
+    default:
+      return <LinkIcon className={className} />;
   }
 };
 
@@ -107,12 +158,12 @@ export default async function PublicLandingPage({ params }: Props) {
     <div className="relative bg-background text-foreground">
       {/* Client Content (Claim/Tweak Buttons) - Moved to top */}
       <div className="container mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-8">
-        <LandingPageClientContent pageData={pageData} session={session} /> {/* Type now inferred */}
+        <LandingPageClientContent pageData={pageData} session={session} />{" "}
+        {/* Type now inferred */}
       </div>
 
       {/* Main Content Area */}
       <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-
         {/* --- Hero Section (From AI Renderer) --- */}
         <LandingPageRenderer
           data={pageData.aiContent}
@@ -126,7 +177,10 @@ export default async function PublicLandingPage({ params }: Props) {
             <h2 className="text-2xl font-semibold mb-6 text-center">Galeri</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {pageData.images.map((imgUrl, index) => (
-                <div key={index} className="relative aspect-[4/3] w-full overflow-hidden rounded-lg shadow-md">
+                <div
+                  key={index}
+                  className="relative aspect-[4/3] w-full overflow-hidden rounded-lg shadow-md"
+                >
                   <Image
                     src={imgUrl}
                     alt={`${pageData.namaUsaha} - Gambar ${index + 1}`}
@@ -145,13 +199,25 @@ export default async function PublicLandingPage({ params }: Props) {
         {/* --- Testimonials Section --- */}
         {testimonials && testimonials.length > 0 && (
           <section className="my-12 md:my-16 text-center">
-            <h2 className="text-2xl lg:text-3xl font-semibold mb-8">Apa Kata Pelanggan Kami?</h2>
+            <h2 className="text-2xl lg:text-3xl font-semibold mb-8">
+              Apa Kata Pelanggan Kami?
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {testimonials.map((testimonial, index) => (
-                <blockquote key={index} className="p-6 bg-muted/50 border-l-4 border-primary rounded-r-lg text-left shadow-sm">
-                  <Quote className="h-5 w-5 text-primary mb-2 opacity-80" aria-hidden="true" />
-                  <p className="text-muted-foreground italic leading-relaxed mb-3">{testimonial.comment}</p>
-                  <footer className="text-sm font-medium text-foreground">- {testimonial.name}</footer>
+                <blockquote
+                  key={index}
+                  className="p-6 bg-muted/50 border-l-4 border-primary rounded-r-lg text-left shadow-sm"
+                >
+                  <Quote
+                    className="h-5 w-5 text-primary mb-2 opacity-80"
+                    aria-hidden="true"
+                  />
+                  <p className="text-muted-foreground italic leading-relaxed mb-3">
+                    {testimonial.comment}
+                  </p>
+                  <footer className="text-sm font-medium text-foreground">
+                    - {testimonial.name}
+                  </footer>
                 </blockquote>
               ))}
             </div>
@@ -159,7 +225,7 @@ export default async function PublicLandingPage({ params }: Props) {
         )}
 
         {/* --- Contact/Location Section --- */}
-        {(address || (socialLinks && socialLinks.length > 0) || pageData.whatsapp) && (
+        {(address || (socialLinks && socialLinks.length > 0)) && (
           <>
             <Separator className="my-12 md:my-16" />
             <section className="my-12 md:my-16 text-center">
@@ -171,23 +237,20 @@ export default async function PublicLandingPage({ params }: Props) {
                     <span>{address}</span>
                   </div>
                 )}
-                {pageData.whatsapp && (
-                  <Button asChild className="bg-green-600 hover:bg-green-700 text-white px-6 py-3">
-                    <Link
-                      href={`https://wa.me/${pageData.whatsapp.replace(/\D/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" /> Chat di WhatsApp
-                    </Link>
-                  </Button>
-                )}
                 {socialLinks && socialLinks.length > 0 && (
                   <div className="flex flex-wrap items-center justify-center gap-4 mt-3">
                     {socialLinks.map((link, index) => (
                       <Button key={index} variant="outline" size="sm" asChild>
-                        <Link href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.platform}>
-                          <SocialIcon platform={link.platform} className="w-4 h-4 mr-2" />
+                        <Link
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={link.platform}
+                        >
+                          <SocialIcon
+                            platform={link.platform}
+                            className="w-4 h-4 mr-2"
+                          />
                           {link.platform}
                           <ExternalLink className="w-3 h-3 ml-1.5 text-muted-foreground/80" />
                         </Link>

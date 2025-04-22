@@ -27,7 +27,7 @@ const baseLandingPageSchema = z.object({
     ...KATEGORI_USAHA,
     'Lainnya'
   ], { errorMap: () => ({ message: 'Pilih kategori usaha yang valid' }) }),
-  kategoriLainnya: z.string().optional(),
+  kategoriLainnya: z.string().nullish(), // Allow string, null, or undefined
   deskripsi_user: z.string().max(500, { message: 'Deskripsi maksimal 500 karakter' }).optional(),
   images: z
     .custom<FileList | undefined>() // Allow undefined initially

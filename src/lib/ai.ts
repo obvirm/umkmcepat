@@ -44,11 +44,11 @@ export async function generateLandingPageContent(
     - description: Persuasive, highlighting benefits (3-5 sentences).
     - features: 3-5 bullet points of key features/benefits (string array).
     - primaryColor: Choose an attractive hex color code suitable for the business category (e.g., food=orange/red, tech=blue, beauty=pink/purple).
-    - ctaText: Strong call to action (e.g., "Pesan Sekarang", "Hubungi Kami", "Daftar Gratis").
+    - ctaText: Generate a strong Call to Action text specifically inviting users to contact via WhatsApp (e.g., "Hubungi via WhatsApp", "Chat Sekarang di WA", "Kontak via WhatsApp"). Avoid generic phrases like "Pesan Sekarang" unless the context *only* makes sense for ordering (like food). If the user didn't provide a WhatsApp number, generate a relevant non-WhatsApp CTA (e.g., "Lihat Produk", "Pelajari Lebih Lanjut").
     - layoutStyle: Suggest 'standard' or 'minimal'.
     - tone: Suggest 'professional', 'friendly', or 'persuasive'.
     - font: Suggest 'Inter' (preferred) or 'Poppins'.
-    - whatsappCTA: Set to true ONLY if the user provided a WhatsApp number, otherwise false.
+    - whatsappCTA: Set to true ONLY if the user provided a WhatsApp number (indicated by 'Has WhatsApp Number: Yes' in the user message), otherwise false.
     - whatsappNumber: Include the user's provided number ONLY if whatsappCTA is true, otherwise omit this field.
     Be creative and tailor the content to the Indonesian market and the business category.
   `;
