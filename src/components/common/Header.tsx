@@ -33,16 +33,16 @@ export function Header() {
           <Button
             size="sm"
             asChild
-            className="bg-slate-700 hover:bg-slate-800 text-primary-foreground"
+            className="bg-black hover:bg-black/80 text-primary-foreground"
           >
             <Link
               href="http://support.tokko.online/"
               target="_blank"
               rel="noopener noreferrer"
+              className="flex items-center"
             >
-              <Coffee className="h-4 w-4 mr-1.5" />
-              <span className="hidden sm:inline">Support Developer</span>{" "}
-              {/* Sembunyikan teks di mobile */}
+              <Coffee className="h-4 w-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Support Developer</span>
             </Link>
           </Button>
           <AuthButton />
