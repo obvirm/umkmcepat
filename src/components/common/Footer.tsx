@@ -14,17 +14,6 @@ export function Footer() {
               Cintara Surya Elidanto
             </a>
           </span>
-          <span className="hidden sm:inline">|</span>
-          <span className="inline-block">
-            <a
-              href="http://support.tokko.online/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium underline underline-offset-4 hover:text-foreground"
-            >
-              Bantu tokko.online supaya tetap gratis di sini &#9749;
-            </a>
-          </span>
         </p>
       </div>
     </footer>

@@ -1,4 +1,6 @@
 import { AuthButton } from "@/components/auth/AuthComponents";
+import { Button } from "@/components/ui/button";
+import { Coffee } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -9,8 +11,10 @@ export function Header() {
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image src="/logo.svg" alt="Tokko Logo" width={24} height={24} />
-            {/* Replace with Logo if you have one */}
-            <span className="font-bold sm:inline-block">tokko.online</span>
+            {/* Sembunyikan teks di layar kecil */}
+            <span className="font-bold hidden sm:inline-block">
+              tokko.online
+            </span>
           </Link>
           {/* Optional: Add navigation links here */}
           {/* <nav className="flex items-center gap-6 text-sm">
@@ -22,7 +26,25 @@ export function Header() {
             </Link>
           </nav> */}
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
+          {" "}
+          {/* Adjust spacing */}
+          {/* Ubah variant tombol support */}
+          <Button
+            size="sm"
+            asChild
+            className="bg-slate-700 hover:bg-slate-800 text-primary-foreground"
+          >
+            <Link
+              href="http://support.tokko.online/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Coffee className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Support Developer</span>{" "}
+              {/* Sembunyikan teks di mobile */}
+            </Link>
+          </Button>
           <AuthButton />
         </div>
       </div>
