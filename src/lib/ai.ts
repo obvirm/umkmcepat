@@ -172,4 +172,49 @@ export async function tweakLandingPageContent(
       console.error("Error tweaking landing page content:", error);
       throw new Error("Gagal melakukan tweak AI. Coba lagi nanti.");
   }
+}
+
+// === NEW FUNCTION for Generating Description ===
+export async function generateBusinessDescription(
+  namaUsaha: string,
+  kategori: string
+): Promise<string> {
+  const systemPrompt = `
+    Anda adalah copywriter AI yang ahli membuat deskripsi singkat (maksimal 3-4 kalimat atau sekitar 400 karakter) untuk landing page UMKM Indonesia.
+    Fokus pada manfaat utama bagi calon pelanggan dan gunakan gaya bahasa yang persuasif namun profesional.
+    Hindari penggunaan list/bullet point.
+    Output HANYA teks deskripsi saja, tanpa kalimat pembuka/penutup atau format tambahan.
+  `;
+
+  const userMessage = `
+    Nama Usaha: ${namaUsaha}
+    Kategori Usaha: ${kategori}
+    Buatkan deskripsi landing page yang menarik.
+  `;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage },
+      ],
+      temperature: 0.8, // Slightly higher temp for more creative descriptions
+      max_tokens: 150, // Limit output length
+      // No response_format needed as we expect plain text
+    });
+
+    const description = response.choices[0]?.message?.content?.trim();
+
+    if (!description) {
+      throw new Error("OpenAI response for description is empty.");
+    }
+
+    console.log("AI Generated Description:", description);
+    return description;
+
+  } catch (error) {
+    console.error("Error generating business description:", error);
+    throw new Error("Gagal menghasilkan deskripsi AI.");
+  }
 } 

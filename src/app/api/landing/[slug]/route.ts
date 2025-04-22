@@ -80,8 +80,8 @@ export async function PUT(request: Request, { params }: { params: { slug: string
       }
     } else {
       // No new images uploaded, keep existing ones
-      updatedImageData = landingPage.images.map((url, index) => ({ 
-        url: url, 
+      updatedImageData = landingPage.images.map((url, index) => ({
+        url: url,
         publicId: landingPage.imagePublicIds?.[index] || '' // Try to map existing public IDs
       }));
     }
@@ -100,6 +100,22 @@ export async function PUT(request: Request, { params }: { params: { slug: string
       delete aiContent.whatsappNumber;
     }
 
+    // === Get Optional Fields ===
+    const address = formData.get('address') as string | null;
+    const testimonialsString = formData.get('testimonials') as string | null;
+    const socialLinksString = formData.get('socialLinks') as string | null;
+
+    // Parse JSON strings into arrays
+    let testimonials = [];
+    try {
+      testimonials = testimonialsString ? JSON.parse(testimonialsString) : [];
+    } catch (e) { console.error("Failed to parse testimonials JSON:", e); }
+
+    let socialLinks = [];
+    try {
+      socialLinks = socialLinksString ? JSON.parse(socialLinksString) : [];
+    } catch (e) { console.error("Failed to parse socialLinks JSON:", e); }
+
     // 6. Update Database
     await prisma.landingPage.update({
       where: { id: landingPage.id },
@@ -111,6 +127,12 @@ export async function PUT(request: Request, { params }: { params: { slug: string
         aiContent: aiContent as any,
         images: updatedImageData.map(img => img.url),
         imagePublicIds: updatedImageData.map(img => img.publicId),
+        // Update optional fields (use null to clear if empty string/not provided)
+        address: address || null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        testimonials: testimonials.length > 0 ? testimonials as any : null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        socialLinks: socialLinks.length > 0 ? socialLinks as any : null,
       },
     });
 
@@ -133,14 +155,14 @@ export async function PUT(request: Request, { params }: { params: { slug: string
   } catch (error) {
     console.error(`Error updating landing page [${params.slug}]:`, error);
     let message = 'Terjadi kesalahan saat menyimpan perubahan.';
-     if (error instanceof Error) {
-        // Don't expose sensitive internal messages directly
-        if (error.message.includes("Cloudinary")) {
-            message = "Gagal mengupload gambar baru. Coba lagi.";
-        } else if (error.message.includes("OpenAI") || error.message.includes("konten AI")) {
-            message = "Gagal memperbarui konten AI. Coba lagi nanti.";
-        } // Add other specific checks if needed
-        // Log full error server-side
+    if (error instanceof Error) {
+      // Don't expose sensitive internal messages directly
+      if (error.message.includes("Cloudinary")) {
+        message = "Gagal mengupload gambar baru. Coba lagi.";
+      } else if (error.message.includes("OpenAI") || error.message.includes("konten AI")) {
+        message = "Gagal memperbarui konten AI. Coba lagi nanti.";
+      } // Add other specific checks if needed
+      // Log full error server-side
     }
     return NextResponse.json({ message }, { status: 500 });
   }

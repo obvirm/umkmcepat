@@ -1,58 +1,39 @@
-import { LandingPageCreationForm } from "@/components/landing-page/LandingPageCreationForm";
-import { CheckCircle } from "lucide-react";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Zap } from 'lucide-react';
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="container mx-auto px-4 py-16 md:py-24 max-w-4xl">
-      <section className="text-center mb-16 md:mb-20">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-4 text-foreground">
-          Buat Landing Page Profesional dengan AI
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Hanya butuh beberapa detik! Cukup masukkan info usaha Anda, dan biarkan AI kami merancang landing page yang menarik dan efektif untuk promosi Anda.
-        </p>
-      </section>
+    <div className="container mx-auto flex max-w-3xl flex-col items-center justify-center px-4 py-16 text-center sm:py-24">
+      <img src="/logo.svg" alt="Tokko Logo" className="mb-6 h-12 w-12" />
+      <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+        Buat Landing Page Profesional{' '}
+        <span className="text-primary">Instan</span> dengan AI
+      </h1>
+      <p className="mt-6 text-lg leading-8 text-slate-600">
+        tokko.online membantu UMKM dan siapa saja membuat halaman promosi produk/jasa
+        yang efektif dalam hitungan detik. Tanpa login, tanpa ribet, cukup
+        jelaskan usahamu.
+      </p>
+      <div className="mt-10 flex items-center justify-center gap-x-6">
+        <Button asChild size="lg">
+          <Link href="/create">
+            Buat Landing Page Gratis Sekarang <ArrowRight className="ml-2 h-5 w-5" />
+          </Link>
+        </Button>
+        {/* Optional: Link to examples or GitHub */}
+        {/* <Button variant="outline" asChild size="lg">
+          <Link href="#examples">
+            Lihat Contoh
+          </Link>
+        </Button> */}
+      </div>
 
-      <section className="mb-24 flex justify-center">
-        {/* Render the creation form component */}
-        <LandingPageCreationForm />
-      </section>
-
-      <section className="text-center">
-        <h2 className="text-3xl font-semibold mb-10">Kenapa Pilih tokko.online?</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-          {/* Feature 1 */}
-          <div className="flex flex-col items-center text-center p-4">
-            <CheckCircle className="w-8 h-8 text-primary mb-3" />
-            <h3 className="text-lg font-medium mb-1 text-foreground">Konten Cerdas AI</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Dapatkan teks headline, deskripsi, dan call-to-action yang persuasif secara otomatis.
-            </p>
-          </div>
-          {/* Feature 2 */}
-          <div className="flex flex-col items-center text-center p-4">
-            <CheckCircle className="w-8 h-8 text-primary mb-3" />
-            <h3 className="text-lg font-medium mb-1 text-foreground">Mudah & Cepat</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Tidak perlu skill desain atau coding. Langsung jadi dalam hitungan detik.
-            </p>
-          </div>
-          {/* Feature 3 */}
-          <div className="flex flex-col items-center text-center p-4">
-            <CheckCircle className="w-8 h-8 text-primary mb-3" />
-            <h3 className="text-lg font-medium mb-1 text-foreground">Klaim & Kustomisasi</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Klaim halaman Anda, lalu sesuaikan lebih lanjut dengan fitur Tweak AI kami.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer (Optional - can be added to layout.tsx instead) */}
-      <footer className="text-center mt-24 text-sm text-muted-foreground">
-        © {new Date().getFullYear()} tokko.online - Buat landing page cepat pakai AI.
-        {/* Add links to privacy/terms if needed here or in main layout */}
-      </footer>
-    </main>
+      {/* Optional: Add sections for How it Works, Features, Examples */}
+      {/* <div className="mt-20 w-full">
+        <h2 className="text-2xl font-semibold">Cara Kerja</h2>
+        {/* ... How it works steps ... */}
+      {/* </div> */}
+    </div>
   );
-}
+} 

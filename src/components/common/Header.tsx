@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { AuthButton } from '@/components/auth/AuthComponents';
-import { Zap } from 'lucide-react'; // Or your logo component
+import Link from "next/link";
+import { AuthButton } from "@/components/auth/AuthComponents";
+import { Zap } from "lucide-react"; // Or your logo component
 
 export function Header() {
   return (
@@ -8,7 +8,8 @@ export function Header() {
       <div className="container flex h-14 max-w-screen-2xl items-center mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-             <Zap className="h-6 w-6 text-primary" /> {/* Replace with Logo if you have one */}
+            <img src="/logo.svg" alt="Tokko Logo" className="h-6 w-6" />
+            {/* Replace with Logo if you have one */}
             <span className="font-bold sm:inline-block">tokko.online</span>
           </Link>
           {/* Optional: Add navigation links here */}
@@ -27,4 +28,4 @@ export function Header() {
       </div>
     </header>
   );
-} 
+}

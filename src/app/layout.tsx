@@ -6,7 +6,7 @@ import { Footer } from "@/components/common/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { SessionProvider } from "next-auth/react";
-import { Header } from '@/components/common/Header';
+import { Header } from "@/components/common/Header";
 // import { auth } from "@/lib/auth";
 // import QueryProvider from "@/components/providers/QueryProvider";
 
@@ -14,7 +14,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "tokko.online - AI Landing Page Generator untuk UMKM",
-  description: "Buat landing page promosi instan dengan AI. Mudah, cepat, tanpa login.",
+  description:
+    "Buat landing page promosi instan dengan AI. Mudah, cepat, tanpa login.",
 };
 
 export default function RootLayout({
@@ -28,6 +29,14 @@ export default function RootLayout({
     <SessionProvider>
       <QueryProvider>
         <html lang="en" suppressHydrationWarning>
+          <head>
+            <link
+              rel="icon"
+              href="/logo.svg"
+              type="image/svg+xml"
+              sizes="any"
+            />
+          </head>
           <body
             className={cn(
               "min-h-screen bg-background font-sans antialiased",

@@ -1,26 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Session } from 'next-auth'; // Import Session type
-import { LandingPage } from '@prisma/client'; // Import Prisma type
-import { AiGeneratedContent } from '@/lib/ai';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Lock, Edit, Bot, Info, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import { signIn } from 'next-auth/react';
-import { toast } from 'sonner';
 import { TweakDialog } from '@/components/landing-page/TweakDialog'; // Correct import path
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Bot, Edit, Info, Loader2, Lock } from 'lucide-react';
+import { Session } from 'next-auth'; // Import Session type
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-// Define a more specific type for the data passed from server
-// Note: aiContent is already parsed in the server component
-type PageData = Omit<LandingPage, 'aiContent' | 'editToken'> & {
-    aiContent: AiGeneratedContent;
-};
-
-interface LandingPageClientContentProps {
-    pageData: PageData;
+interface LandingPageClientContentProps<TPageData> {
+    pageData: TPageData;
     session: Session | null; // Pass session from server
 }
 
@@ -45,21 +37,11 @@ const claimPage = async (slug: string): Promise<{ message: string }> => {
     return data;
 };
 
-export function LandingPageClientContent({ pageData: initialPageData, session }: LandingPageClientContentProps) {
+export function LandingPageClientContent<TPageData extends { slug: string; isClaimed: boolean; userId?: string | null; tweaksLeft?: number | null }>({ pageData: initialPageData, session }: LandingPageClientContentProps<TPageData>) {
     const queryClient = useQueryClient();
     const slug = initialPageData.slug;
     const queryKey = ['landingPage', slug];
     const [retrievedEditToken, setRetrievedEditToken] = useState<string | null>(null);
-
-    // Use TanStack Query to manage page data state, initialized from server props
-    // This allows client-side updates after mutations (claim, tweak)
-    const { data: pageData } = useQuery({
-        queryKey: queryKey,
-        queryFn: async () => initialPageData, // Provide a minimal queryFn using initial data
-        initialData: initialPageData,
-        refetchOnWindowFocus: false, // Keep server data initially
-        staleTime: Infinity, // Data from server is considered fresh initially
-    });
 
     const claimMutation = useMutation({
         mutationFn: claimPage,
@@ -99,9 +81,9 @@ export function LandingPageClientContent({ pageData: initialPageData, session }:
 
     // Determine user/ownership status
     const isLoggedIn = !!session;
-    const isOwner = isLoggedIn && session?.user?.id === pageData?.userId;
-    const isPageClaimed = pageData?.isClaimed ?? false;
-    const canTweak = isOwner && (pageData?.tweaksLeft ?? 0) > 0;
+    const isOwner = isLoggedIn && session?.user?.id === initialPageData?.userId;
+    const isPageClaimed = initialPageData?.isClaimed ?? false;
+    const canTweak = isOwner && (initialPageData?.tweaksLeft ?? 0) > 0;
 
     // Show loading skeleton or spinner if needed
     // if (isQueryLoading && !pageData) return <div className="container mx-auto p-4">Memuat data halaman...</div>;
@@ -147,7 +129,7 @@ export function LandingPageClientContent({ pageData: initialPageData, session }:
                 )}
 
                 {isPageClaimed && isOwner && (
-                    <TweakDialog slug={slug} tweaksLeft={pageData.tweaksLeft}>
+                    <TweakDialog slug={slug} tweaksLeft={initialPageData.tweaksLeft ?? 0}>
                         <Button
                             variant="outline"
                             size="sm"
@@ -155,7 +137,7 @@ export function LandingPageClientContent({ pageData: initialPageData, session }:
                             aria-label="Tweak Konten"
                         >
                             <Bot className="mr-2 h-4 w-4" />
-                            Tweak Konten (Sisa {pageData.tweaksLeft}x)
+                            Tweak Konten (Sisa {initialPageData.tweaksLeft}x)
                         </Button>
                     </TweakDialog>
                 )}

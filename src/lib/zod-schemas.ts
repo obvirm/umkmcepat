@@ -14,17 +14,23 @@ export const KATEGORI_USAHA = [
     // 'Lainnya' is handled separately in the form/enum logic usually
 ] as const; // Use 'as const' for stricter typing
 
+// Define social platforms
+export const SOCIAL_PLATFORMS = [
+    'Instagram', 'Facebook', 'TikTok', 'YouTube', 'Twitter (X)',
+    'LinkedIn', 'Pinterest', 'Website', 'WhatsApp', 'Telegram'
+] as const;
+
 // Base schema without refinement
 const baseLandingPageSchema = z.object({
   namaUsaha: z.string().min(3, { message: 'Nama usaha minimal 3 karakter' }).max(50, { message: 'Nama usaha maksimal 50 karakter' }),
   kategori: z.enum([
     ...KATEGORI_USAHA,
-    'Lainnya' // Add 'Lainnya' explicitly here
-  ], { errorMap: () => ({ message: 'Pilih kategori usaha yang valid' }) }), // Use the constant here
+    'Lainnya'
+  ], { errorMap: () => ({ message: 'Pilih kategori usaha yang valid' }) }),
   kategoriLainnya: z.string().optional(),
   deskripsi_user: z.string().max(500, { message: 'Deskripsi maksimal 500 karakter' }).optional(),
   images: z
-    .custom<FileList>()
+    .custom<FileList | undefined>() // Allow undefined initially
     .refine((files) => files === undefined || files.length === 0 || files.length <= 3, 'Maksimal 3 gambar.')
     .refine(
       (files) =>
@@ -45,6 +51,19 @@ const baseLandingPageSchema = z.object({
     .regex(/^(\+62|62|0)8[1-9][0-9]{7,11}$/, { message: 'Format nomor WhatsApp tidak valid (contoh: 62812...) ' })
     .optional()
     .or(z.literal('')), // Allow empty string
+
+  // === UPDATED OPTIONAL FIELDS ===
+  testimonials: z.array(z.object({
+    name: z.string().min(1, { message: 'Nama tidak boleh kosong' }).max(50, { message: 'Nama maksimal 50 karakter' }),
+    comment: z.string().min(5, { message: 'Komentar minimal 5 karakter' }).max(200, { message: 'Komentar maksimal 200 karakter' }),
+  })).max(3, { message: 'Maksimal 3 testimoni' }).optional(),
+
+  address: z.string().max(200, { message: 'Alamat maksimal 200 karakter' }).optional(),
+
+  socialLinks: z.array(z.object({
+    platform: z.enum(SOCIAL_PLATFORMS, { errorMap: () => ({ message: 'Pilih platform yang valid' }) }),
+    url: z.string().url({ message: 'URL tidak valid' }).min(5, { message: 'URL minimal 5 karakter' }),
+  })).max(3, { message: 'Maksimal 3 link sosial media' }).optional(),
 });
 
 // Apply refinement to the base schema

@@ -47,24 +47,24 @@ export async function POST(request: Request) {
     const uploadedImageData: { url: string; publicId: string }[] = [];
 
     if (imageFiles && imageFiles.length > 0 && imageFiles[0].size > 0) {
-        // Validate image count/type/size again on the server (optional but recommended)
-        if (imageFiles.length > 3) {
-            return NextResponse.json({ message: 'Maksimal 3 gambar' }, { status: 400 });
-        }
-        // Add more server-side validation if needed (size, type)
+      // Validate image count/type/size again on the server (optional but recommended)
+      if (imageFiles.length > 3) {
+        return NextResponse.json({ message: 'Maksimal 3 gambar' }, { status: 400 });
+      }
+      // Add more server-side validation if needed (size, type)
 
-        for (const file of imageFiles) {
-            try {
-                const buffer = await fileToBuffer(file);
-                const uniqueFileName = `${slugify(namaUsaha)}-${generateRandomString(4)}-${Date.now()}`;
-                // Get both url and publicId
-                const { secure_url, public_id } = await uploadImageToCloudinary(buffer, uniqueFileName);
-                uploadedImageData.push({ url: secure_url, publicId: public_id });
-            } catch (uploadError) {
-                console.error("Image upload failed:", uploadError);
-                return NextResponse.json({ message: 'Gagal mengupload salah satu gambar.' }, { status: 500 });
-            }
+      for (const file of imageFiles) {
+        try {
+          const buffer = await fileToBuffer(file);
+          const uniqueFileName = `${slugify(namaUsaha)}-${generateRandomString(4)}-${Date.now()}`;
+          // Get both url and publicId
+          const { secure_url, public_id } = await uploadImageToCloudinary(buffer, uniqueFileName);
+          uploadedImageData.push({ url: secure_url, publicId: public_id });
+        } catch (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          return NextResponse.json({ message: 'Gagal mengupload salah satu gambar.' }, { status: 500 });
         }
+      }
     }
 
     // Generate unique slug
@@ -96,14 +96,35 @@ export async function POST(request: Request) {
 
     // If AI provides whatsappNumber, ensure it matches user input if CTA is true
     if (aiContent.whatsappCTA && hasWhatsApp) {
-        aiContent.whatsappNumber = whatsapp; // Use user-provided number
+      aiContent.whatsappNumber = whatsapp; // Use user-provided number
     } else if (aiContent.whatsappCTA && !hasWhatsApp) {
-        aiContent.whatsappCTA = false; // Correct AI if it hallucinated WA CTA
-        delete aiContent.whatsappNumber;
+      aiContent.whatsappCTA = false; // Correct AI if it hallucinated WA CTA
+      delete aiContent.whatsappNumber;
     } else {
-        delete aiContent.whatsappNumber; // Remove if CTA is false
+      delete aiContent.whatsappNumber; // Remove if CTA is false
     }
 
+    // === Get Optional Fields ===
+    const testimonialsString = formData.get('testimonials') as string | null;
+    const address = formData.get('address') as string | null;
+    const socialLinksString = formData.get('socialLinks') as string | null;
+
+    // Parse JSON strings into arrays
+    let testimonials = [];
+    try {
+      testimonials = testimonialsString ? JSON.parse(testimonialsString) : [];
+    } catch (e) {
+      console.error("Failed to parse testimonials JSON:", e);
+      // Handle error, maybe return bad request?
+    }
+
+    let socialLinks = [];
+    try {
+      socialLinks = socialLinksString ? JSON.parse(socialLinksString) : [];
+    } catch (e) {
+      console.error("Failed to parse socialLinks JSON:", e);
+      // Handle error
+    }
 
     // Save to Database
     const newLandingPage = await prisma.landingPage.create({
@@ -113,12 +134,18 @@ export async function POST(request: Request) {
         kategori: finalKategori,
         whatsapp: whatsapp || null,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        aiContent: aiContent as any, // Reverted to any, Prisma JSON type issue
-        images: uploadedImageData.map(img => img.url), // Store only URLs
-        imagePublicIds: uploadedImageData.map(img => img.publicId), // Store publicIds
+        aiContent: aiContent as any, // Prisma JSON type issue
+        images: uploadedImageData.map(img => img.url),
+        imagePublicIds: uploadedImageData.map(img => img.publicId),
         editToken: hashedEditToken,
         isClaimed: false,
         tweaksLeft: 5,
+        // Add new optional fields (parsed arrays)
+        address: address || null, // Ensure address is passed correctly
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        testimonials: testimonials.length > 0 ? testimonials as any : undefined, // Pass array or undefined
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        socialLinks: socialLinks.length > 0 ? socialLinks as any : undefined,    // Pass array or undefined
       },
     });
 
@@ -126,23 +153,23 @@ export async function POST(request: Request) {
 
     // Return slug and original edit token to the client
     return NextResponse.json(
-        { slug: pageSlug, editToken: editToken, message: 'Landing page berhasil dibuat!' },
-        { status: 201 }
+      { slug: pageSlug, editToken: editToken, message: 'Landing page berhasil dibuat!' },
+      { status: 201 }
     );
 
   } catch (error) {
     console.error("Error creating landing page:", error);
     let message = 'Terjadi kesalahan saat membuat halaman.';
     if (error instanceof Error) {
-        // Don't expose sensitive internal messages directly
-        if (error.message.includes("Cloudinary")) {
-            message = "Gagal mengupload gambar. Coba lagi.";
-        } else if (error.message.includes("OpenAI") || error.message.includes("konten AI")) {
-            message = "Gagal menghasilkan konten AI. Coba lagi nanti.";
-        } else if (error.message.includes("slug unik")) {
-            message = "Gagal membuat alamat unik untuk halaman Anda. Coba nama usaha yang sedikit berbeda.";
-        }
-        // Log full error server-side for debugging
+      // Don't expose sensitive internal messages directly
+      if (error.message.includes("Cloudinary")) {
+        message = "Gagal mengupload gambar. Coba lagi.";
+      } else if (error.message.includes("OpenAI") || error.message.includes("konten AI")) {
+        message = "Gagal menghasilkan konten AI. Coba lagi nanti.";
+      } else if (error.message.includes("slug unik")) {
+        message = "Gagal membuat alamat unik untuk halaman Anda. Coba nama usaha yang sedikit berbeda.";
+      }
+      // Log full error server-side for debugging
     }
     return NextResponse.json({ message }, { status: 500 });
   }

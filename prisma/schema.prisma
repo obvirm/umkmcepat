@@ -8,39 +8,27 @@ generator client {
 }
 
 model LandingPage {
-  id           String    @id @default(uuid())
-  slug         String    @unique
-  namaUsaha    String
-  kategori     String
-  // AI Generated Content (stored as JSON string for flexibility initially, or separate fields)
-  // Option 1: JSON String
-  aiContent    Json?
-  // Option 2: Separate Fields (match the expected AI output)
-  // headline     String?
-  // subheadline  String?
-  // description  String?
-  // features     Json? // Array of strings or objects
-  // primaryColor String? // Hex code like #RRGGBB
-  // ctaText      String?
-  // layoutStyle  String? // e.g., 'standard', 'minimal'
-  // tone         String? // e.g., 'professional', 'friendly'
-  // font         String? // e.g., 'Inter', 'Poppins' (Consider storing class name)
-  // whatsappCTA  Boolean? @default(false)
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  namaUsaha      String
+  kategori       String
+  aiContent      Json? // Store structured AI content (headline, body, cta, colors, etc.)
+  harga          String? // TODO: Consider removing if replaced by pricingInfo
+  whatsapp       String? // Store formatted WhatsApp number
+  images         String[] // Array of image URLs from Cloudinary
+  imagePublicIds String[] // Array of Cloudinary public IDs corresponding to images
+  userId         String? // Foreign key to User model if claimed
+  User           User?    @relation(fields: [userId], references: [id])
+  editToken      String? // Hashed token for editing before claim
+  isClaimed      Boolean  @default(false)
+  tweaksLeft     Int      @default(5) // Number of AI tweaks remaining
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  harga        String?   // Optional, future feature
-  whatsapp     String?   // User-provided WhatsApp number
-  images       String[]  // Array of Cloudinary secure_urls
-  imagePublicIds String[] @default([]) // Array of Cloudinary public_ids
-  userId       String?   // User ID from Auth.js if claimed
-  editToken    String?   // Hashed bcrypt token (nullable after claim)
-  isClaimed    Boolean   @default(false)
-  tweaksLeft   Int       @default(5) // Number of AI tweaks remaining
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade) // Optional relation
-
-  @@index([userId]) // Index for faster lookups of user's pages
+  // === NEW OPTIONAL FIELDS ===
+  testimonials Json?    // Changed to Json to store array of objects
+  address      String? @db.VarChar(255) // Limit address length
+  socialLinks  Json?    // Store social links as JSON
 }
 
 // NextAuth.js (Auth.js v5) Models
@@ -75,9 +63,9 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
@@ -91,4 +79,4 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-} 
+}
