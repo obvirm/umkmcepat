@@ -28,6 +28,7 @@ import { toast } from "sonner"; // For notifications
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { LandingPageClientContent } from "./LandingPageClientContent";
+import { ShareButtons } from "@/components/common/ShareButtons"; // Import ShareButtons
 
 // Type for the fetched page data
 type PageData = {
@@ -321,6 +322,11 @@ export function LandingPageDisplay({
   const testimonialsTitle = pageData.aiContent?.testimonialsTitle || "Apa Kata Pelanggan Kami?";
   const contactTitle = pageData.aiContent?.contactTitle || "Hubungi Kami";
 
+  // --- Construct Share URL ---
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://tokko.online'; // Get base URL
+  const pageUrl = `${baseUrl}/p/${pageData.slug}`;
+  const pageTitle = pageData.aiContent?.headline || pageData.namaUsaha;
+
   return (
     <div className="relative overflow-x-hidden" style={themeStyle}>
       {/* Client Content (Claim/Tweak Buttons) */}
@@ -338,6 +344,12 @@ export function LandingPageDisplay({
           isOwner={isOwner} 
           handleSaveContent={handleSaveContent}
         />
+
+        {/* --- Share Buttons Section --- */}
+        <div className="my-10 md:my-12">
+          <Separator className="mb-6" />
+          <ShareButtons url={pageUrl} title={pageTitle} />
+        </div>
 
         {/* --- Gallery Section --- */}
         {pageData.images && pageData.images.length > 0 && (
