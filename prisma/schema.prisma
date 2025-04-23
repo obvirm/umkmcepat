@@ -31,7 +31,6 @@ model LandingPage {
 
   // === NEW COLOR THEME FIELD ===
   colorTheme   Json?    // Store generated color theme JSON
-  generationStatus String @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
 
   @@index([userId])
   @@index([slug])
@@ -53,7 +52,7 @@ model Account {
   access_token      String? @db.Text
   expires_at        Int?
   token_type        String? @db.VarChar(50)
-  scope             String? @db.Text
+  scope             String? @db.VarChar(100)
   id_token          String? @db.Text
   session_state     String? @db.VarChar(100)
 

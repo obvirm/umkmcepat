@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 // Import the base schema for omit
-// import { generateLandingPageContent } from '@/lib/ai'; // Removed
+import { generateLandingPageContent } from '@/lib/ai';
 import { fileToBuffer, uploadImageToCloudinary } from '@/lib/cloudinary';
 import { checkRateLimit } from '@/lib/rate-limit'; // Import rate limit checker
 import { generateRandomString, slugify } from '@/lib/utils';
@@ -9,7 +9,6 @@ import { generateRandomString, slugify } from '@/lib/utils';
 import type { ColorThemeJson } from '@/lib/ai'; // Import types
 import { auth } from '@/lib/auth'; // Import auth untuk cek sesi
 import { baseLandingPageSchemaForOmit } from '@/lib/zod-schemas';
-import { Client } from "@upstash/qstash"; // Correct import
 
 // Define types for testimonials and social links
 type Testimonial = {
@@ -54,15 +53,6 @@ const defaultColorTheme: ColorThemeJson = {
   card_foreground: "hsl(222.2 47.4% 11.2%)",
   popover_foreground: "hsl(222.2 47.4% 11.2%)",
 };
-
-// Inisialisasi QStash Client (pindahkan ke sini, sebelum export)
-if (!process.env.QSTASH_TOKEN) {
-  console.error("Missing QStash Token in environment variables");
-  throw new Error("QStash Token is required");
-}
-const qstash = new Client({
-  token: process.env.QSTASH_TOKEN,
-});
 
 // POST /api/landing - Create a new landing page
 export async function POST(request: Request) {
@@ -168,6 +158,27 @@ export async function POST(request: Request) {
       throw new Error("Gagal membuat slug unik setelah beberapa percobaan.");
     }
 
+    // Generate AI Content
+    console.time("AI Generation"); // Start timing AI
+    const hasWhatsApp = !!whatsapp && whatsapp.length > 5;
+    const aiContent = await generateLandingPageContent(
+      namaUsaha,
+      finalKategori,
+      deskripsi_user || undefined,
+      hasWhatsApp
+    );
+    console.timeEnd("AI Generation"); // End timing AI
+
+    // If AI provides whatsappNumber, ensure it matches user input if CTA is true
+    if (aiContent.whatsappCTA && hasWhatsApp) {
+      aiContent.whatsappNumber = whatsapp; // Use user-provided number
+    } else if (aiContent.whatsappCTA && !hasWhatsApp) {
+      aiContent.whatsappCTA = false; // Correct AI if it hallucinated WA CTA
+      delete aiContent.whatsappNumber;
+    } else {
+      delete aiContent.whatsappNumber; // Remove if CTA is false
+    }
+
     // === Get Optional Fields ===
     const testimonialsString = formData.get('testimonials') as string | null;
     const address = formData.get('address') as string | null;
@@ -193,14 +204,16 @@ export async function POST(request: Request) {
     // Add logging to check the userId value before saving
     console.log(`Attempting to create LandingPage with userId: ${userId ?? 'null'}`);
 
-    // Save INITIAL Data to Database
-    console.time("Initial Database Write");
+    // Save to Database
+    console.time("Database Write"); // Start timing DB write
     const newLandingPage = await prisma.landingPage.create({
       data: {
         slug: pageSlug,
         namaUsaha: namaUsaha,
         kategori: finalKategori,
         whatsapp: whatsapp || null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        aiContent: aiContent as any,
         images: uploadedImageData.map(img => img.url),
         imagePublicIds: uploadedImageData.map(img => img.publicId),
         userId: userId,
@@ -215,42 +228,14 @@ export async function POST(request: Request) {
         colorTheme: resolvedTheme as any,
       },
     });
-    console.timeEnd("Initial Database Write");
+    console.timeEnd("Database Write"); // End timing DB write
 
     console.log("New Landing Page Created:", newLandingPage.id, "Slug:", pageSlug, "UserID:", userId);
 
-    // Kirim job ke QStash untuk generate AI content
-
-    // Construct the target URL robustly
-    let targetBaseUrl = process.env.NEXT_PUBLIC_APP_URL;
-    if (!targetBaseUrl && process.env.VERCEL_URL) {
-      // VERCEL_URL does not include the protocol, add it
-      targetBaseUrl = `https://${process.env.VERCEL_URL}`;
-    }
-    if (!targetBaseUrl) {
-        console.error("Cannot determine base URL for QStash handler. Set NEXT_PUBLIC_APP_URL or ensure VERCEL_URL is available.");
-        // Return error because we cannot proceed without a valid handler URL
-        return NextResponse.json({ message: 'Konfigurasi server tidak lengkap untuk memproses permintaan.' }, { status: 500 });
-    }
-    const qstashUrl = `${targetBaseUrl}/api/queues/generate-ai-content`;
-
-    console.log(`Publishing job to QStash: ${qstashUrl} for pageId: ${newLandingPage.id}`);
-    try {
-      // Gunakan objek qstash yang sudah diinisialisasi
-      await qstash.publishJSON({ url: qstashUrl, /* ... body ... */ });
-      console.log(`Successfully published job to QStash for pageId: ${newLandingPage.id}`);
-    } catch (qstashError) {
-      // ... (existing QStash error handling: log, mark FAILED, return 500)
-      console.error("Failed to publish job to QStash:", qstashError);
-      await prisma.landingPage.update({ where: { id: newLandingPage.id }, data: { generationStatus: 'FAILED' } })
-          .catch(err => console.error("Failed to mark page as FAILED after QStash publish error", err));
-      return NextResponse.json({ message: 'Gagal memulai proses pembuatan konten AI.' }, { status: 500 });
-    }
-
-    // Return response ke user bahwa proses sedang berjalan
+    // Return slug ONLY (tanpa edit token)
     return NextResponse.json(
-      { slug: pageSlug, message: 'Landing page sedang dibuat...', status: 'PROCESSING' },
-      { status: 202 }
+      { slug: pageSlug, message: 'Landing page berhasil dibuat!' },
+      { status: 201 }
     );
 
   } catch (error) {
