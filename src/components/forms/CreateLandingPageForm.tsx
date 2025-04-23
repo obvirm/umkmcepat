@@ -479,14 +479,9 @@ export function CreateLandingPageForm({
           </div>
 
           {/* Kategori & Kategori Lainnya (Grid) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
+          <div className="grid grid-cols-1 gap-y-6">
             {/* Pembungkus Select Kategori */}
-            <div
-              className={cn(
-                // Jika Lainnya dipilih, hanya 1 kolom, jika tidak, 2 kolom
-                selectedKategori === "Lainnya" ? "sm:col-span-1" : "sm:col-span-2"
-              )}
-            >
+            <div className="w-full">
               <Label htmlFor="kategori">Kategori Usaha</Label>
               <Select
                 onValueChange={(value: string) => {
@@ -499,7 +494,7 @@ export function CreateLandingPageForm({
                 defaultValue={form.getValues("kategori")}
                 disabled={isPending || isBackgroundProcessing}
               >
-                <SelectTrigger id="kategori" className="mt-1.5">
+                <SelectTrigger id="kategori" className="mt-1.5 w-full">
                   <SelectValue placeholder="Pilih kategori" />
                 </SelectTrigger>
                 <SelectContent>
