@@ -5,7 +5,7 @@ import { AiGeneratedContent } from "@/lib/ai"; // Keep AiGeneratedContent
 import { cn } from "@/lib/utils";
 // import { useQueryClient } from "@tanstack/react-query"; // Removed
 import { motion } from "framer-motion"; // Import motion
-import { Edit } from "lucide-react";
+import { Check, Edit } from "lucide-react";
 import React from "react";
 import { InlineEditText } from "./InlineEditText"; // Import the new component
 
@@ -98,8 +98,13 @@ export function LandingPageRenderer({
   const {
     headline = `Selamat Datang di ${namaUsaha}`,
     subheadline = `Temukan penawaran terbaik dari ${namaUsaha}`,
-    heroDescription = "Kami menyediakan produk/layanan berkualitas untuk Anda.",
-    sections = [],
+    description = "Kami menyediakan produk/layanan berkualitas untuk Anda.",
+    featuresTitle = "Fitur Utama", // Use default if not in data
+    features = [
+      "Fitur Unggulan 1",
+      "Fitur Unggulan 2",
+      "Fitur Unggulan 3",
+    ],
     ctaText = "Hubungi Kami",
     whatsappCTA = false,
     whatsappNumber,
@@ -174,9 +179,9 @@ export function LandingPageRenderer({
       <motion.section className="mb-12 md:mb-16 text-lg leading-relaxed text-foreground" variants={itemVariants}>
          <InlineEditText
             as="textarea"
-            initialValue={heroDescription}
+            initialValue={description}
             isOwner={isOwner}
-            fieldKey="heroDescription"
+            fieldKey="description"
             onSave={handleSaveContent} // Use passed prop
             className="w-full"
             inputClassName="text-lg leading-relaxed"
@@ -185,18 +190,40 @@ export function LandingPageRenderer({
       </motion.section>
 
       {/* Features Section */}
-      {sections && sections.length > 0 && (
-        <motion.div className="mt-10 md:mt-12" variants={itemVariants}>
-            {sections.map((section) => (
-                 <div key={section.id} className="mb-8">
-                    <h3 className="text-xl font-semibold mb-4">{section.title}</h3>
-                     {/* Render section content - needs helper similar to LandingPageDisplay */}
-                     <div className="prose prose-base">
-                         {section.content.split('\n').map((item, idx) => <p key={idx}>{item}</p>)}
-                     </div>
+      {features && features.length > 0 && (
+        <motion.section className="mb-12 md:mb-16" variants={itemVariants}>
+            <InlineEditText
+              as="h2"
+              initialValue={featuresTitle} // Use destructured value with default
+              isOwner={isOwner}
+              fieldKey="featuresTitle" // Use the new field key
+              onSave={handleSaveContent} // Use passed prop
+              className="text-2xl md:text-3xl font-semibold mb-6 md:mb-8 text-foreground"
+              inputClassName="text-2xl md:text-3xl font-semibold"
+              placeholder="Judul Bagian Fitur"
+            />
+           {/* <h2 className="text-2xl md:text-3xl font-semibold mb-6 md:mb-8 text-foreground">Fitur Utama</h2> */}
+
+          <ul className="space-y-4">
+            {features.map((feature, index) => (
+              <li key={index} className="flex items-start">
+                <div className="flex-shrink-0">
+                  <Check className="h-6 w-6 text-primary mr-3 mt-1" />
                 </div>
+                 <InlineEditText
+                    as="span"
+                    initialValue={feature}
+                    isOwner={isOwner}
+                    fieldKey={`features[${index}]`}
+                    onSave={handleSaveContent} // Use passed prop
+                    className="flex-grow text-foreground"
+                    inputClassName="text-base"
+                    placeholder="Deskripsi fitur..."
+                  />
+              </li>
             ))}
-        </motion.div>
+          </ul>
+        </motion.section>
       )}
 
       {/* Call to Action Section - Using the helper component */}
