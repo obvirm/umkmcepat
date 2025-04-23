@@ -480,16 +480,22 @@ export function CreateLandingPageForm({
 
           {/* Kategori & Kategori Lainnya (Grid) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
-            <div>
+            {/* Pembungkus Select Kategori */}
+            <div
+              className={cn(
+                // Jika Lainnya dipilih, hanya 1 kolom, jika tidak, 2 kolom
+                selectedKategori === "Lainnya" ? "sm:col-span-1" : "sm:col-span-2"
+              )}
+            >
               <Label htmlFor="kategori">Kategori Usaha</Label>
               <Select
-                onValueChange={(value: string) =>
-                  form.setValue(
-                    "kategori",
-                    value as LandingPageSchema["kategori"],
-                    { shouldValidate: true }
-                  )
-                }
+                onValueChange={(value: string) => {
+                  form.setValue("kategori", value as LandingPageSchema["kategori"], { shouldValidate: true });
+                  // Jika memilih selain Lainnya, kosongkan field kategoriLainnya
+                  if (value !== "Lainnya") {
+                     form.setValue("kategoriLainnya", "", { shouldValidate: false }); // Tidak perlu validate saat clear
+                  }
+                }}
                 defaultValue={form.getValues("kategori")}
                 disabled={isPending || isBackgroundProcessing}
               >
@@ -511,8 +517,9 @@ export function CreateLandingPageForm({
               )}
             </div>
 
+            {/* Input Kategori Lainnya (kondisional) - akan otomatis di kolom kedua jika Select di kolom pertama */}
             {selectedKategori === "Lainnya" && (
-              <div>
+              <div className="sm:col-span-1"> {/* Pastikan ini juga 1 kolom */} 
                 <Label htmlFor="kategoriLainnya">Nama Kategori Lainnya</Label>
                 <Input
                   id="kategoriLainnya"
