@@ -159,6 +159,7 @@ export async function POST(request: Request) {
     }
 
     // Generate AI Content
+    console.time("AI Generation"); // Start timing AI
     const hasWhatsApp = !!whatsapp && whatsapp.length > 5;
     const aiContent = await generateLandingPageContent(
       namaUsaha,
@@ -166,6 +167,7 @@ export async function POST(request: Request) {
       deskripsi_user || undefined,
       hasWhatsApp
     );
+    console.timeEnd("AI Generation"); // End timing AI
 
     // If AI provides whatsappNumber, ensure it matches user input if CTA is true
     if (aiContent.whatsappCTA && hasWhatsApp) {
@@ -200,9 +202,10 @@ export async function POST(request: Request) {
     }
 
     // Add logging to check the userId value before saving
-    console.log(`Attempting to create LandingPage with userId: ${userId ?? 'null'}`); // Log null if userId is undefined
+    console.log(`Attempting to create LandingPage with userId: ${userId ?? 'null'}`);
 
     // Save to Database
+    console.time("Database Write"); // Start timing DB write
     const newLandingPage = await prisma.landingPage.create({
       data: {
         slug: pageSlug,
@@ -225,6 +228,7 @@ export async function POST(request: Request) {
         colorTheme: resolvedTheme as any,
       },
     });
+    console.timeEnd("Database Write"); // End timing DB write
 
     console.log("New Landing Page Created:", newLandingPage.id, "Slug:", pageSlug, "UserID:", userId);
 
