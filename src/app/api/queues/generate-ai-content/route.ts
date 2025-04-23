@@ -1,55 +1,57 @@
 import { generateLandingPageContent } from '@/lib/ai';
 import { prisma } from '@/lib/prisma';
-// Impor wrapper verifikasi untuk App Router
+// Impor wrapper verifikasi untuk App Router (sesuai hint IDE)
 import { verifySignatureAppRouter } from "@upstash/qstash/nextjs";
 import { NextResponse } from 'next/server';
 
-// Definisikan tipe data yang diharapkan dari QStash message body
+// Definisikan tipe data payload
 interface QstashPayload {
     pageId: string;
     namaUsaha: string;
     finalKategori: string;
     deskripsi_user?: string;
     hasWhatsApp: boolean;
-    whatsapp?: string | null; // Kirim juga nomor WA untuk koreksi AI
+    whatsapp?: string | null;
 }
 
 // Fungsi handler asli
 async function handler(request: Request) {
-    try {
-        // Tidak perlu verifikasi manual di sini, sudah ditangani wrapper
+    let pageIdForErrorHandling: string | undefined;
 
-        // Langsung parse body
-        // NOTE: Wrapper MUNGKIN sudah mem-parse body, cek dokumentasi/contoh QStash jika ini error
-        // Untuk amannya, kita coba parse lagi dari teks mentah
-        const bodyText = await request.text();
-        const body = JSON.parse(bodyText) as QstashPayload;
+    try {
+        // ASUMSI: Wrapper sudah melakukan verifikasi.
+        // Coba dapatkan body JSON langsung dari request.
+        const body = await request.json() as QstashPayload;
+        pageIdForErrorHandling = body.pageId; // Simpan pageId segera
+
         const { pageId, namaUsaha, finalKategori, deskripsi_user, hasWhatsApp, whatsapp } = body;
 
-        if (!pageId || !namaUsaha || !finalKategori) {
+        // Validasi Payload
+        if (!pageIdForErrorHandling || !namaUsaha || !finalKategori) {
             console.error("QStash Handler: Missing required fields in payload", body);
-            return NextResponse.json({ message: "Bad Request: Missing required fields" }, { status: 400 });
+            if (pageIdForErrorHandling) {
+                 await prisma.landingPage.update({ where: { id: pageIdForErrorHandling }, data: { generationStatus: 'FAILED' } });
+                 console.error(`QStash Handler: Marked pageId ${pageIdForErrorHandling} as FAILED due to missing fields.`);
+            } else { 
+                 console.error("QStash Handler: Cannot mark page as FAILED (missing fields, pageId unknown).");
+             }
+            return NextResponse.json({ message: "Job failed due to missing fields" }, { status: 200 });
         }
 
-        console.log(`QStash Handler: Received job for pageId: ${pageId}`);
+        console.log(`QStash Handler: Received job for pageId: ${pageIdForErrorHandling}`);
 
-        // Update status ke PROCESSING
-        await prisma.landingPage.update({
-            where: { id: pageId },
-            data: { generationStatus: 'PROCESSING' },
-        });
-
-        // Panggil fungsi AI generation
-        console.time(`AI Generation Job ${pageId}`);
+        // --- Mulai logika bisnis ---
+        await prisma.landingPage.update({ where: { id: pageIdForErrorHandling }, data: { generationStatus: 'PROCESSING' }});
+        console.time(`AI Generation Job ${pageIdForErrorHandling}`);
         const aiContent = await generateLandingPageContent(
             namaUsaha,
             finalKategori,
             deskripsi_user,
             hasWhatsApp
         );
-        console.timeEnd(`AI Generation Job ${pageId}`);
+        console.timeEnd(`AI Generation Job ${pageIdForErrorHandling}`);
 
-        // Koreksi nomor WhatsApp jika perlu
+        // Koreksi WA
         if (aiContent.whatsappCTA && hasWhatsApp && whatsapp) {
             aiContent.whatsappNumber = whatsapp;
         } else if (aiContent.whatsappCTA && !hasWhatsApp) {
@@ -59,37 +61,30 @@ async function handler(request: Request) {
             delete aiContent.whatsappNumber;
         }
 
-        // Update database dengan hasil AI dan status COMPLETED
-        await prisma.landingPage.update({
-            where: { id: pageId },
-            data: {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                aiContent: aiContent as any,
-                generationStatus: 'COMPLETED',
-            },
-        });
+        await prisma.landingPage.update({ where: { id: pageIdForErrorHandling }, data: { aiContent: aiContent as any, generationStatus: 'COMPLETED' }});
+        // --- Akhir logika bisnis ---
 
-        console.log(`QStash Handler: Successfully processed job for pageId: ${pageId}`);
+        console.log(`QStash Handler: Successfully processed job for pageId: ${pageIdForErrorHandling}`);
         return NextResponse.json({ success: true }, { status: 200 });
 
-    } catch (error) {
-        console.error(`QStash Handler: Error processing job:`, error);
-        try {
-            // Coba dapatkan pageId dari body jika error terjadi setelah parsing
-            const requestClone = request.clone();
-            const body = JSON.parse(await requestClone.text()) as QstashPayload;
-            if (body?.pageId) {
+    } catch (error: unknown) {
+        console.error(`QStash Handler: Error processing job for pageId (${pageIdForErrorHandling ?? 'unknown'}):`, error);
+        if (pageIdForErrorHandling) {
+            try {
                 await prisma.landingPage.update({
-                    where: { id: body.pageId },
+                    where: { id: pageIdForErrorHandling },
                     data: { generationStatus: 'FAILED' },
-                }).catch(updateErr => console.error("QStash Handler: Failed to mark page as FAILED after initial error", updateErr));
-                console.error(`QStash Handler: Marked pageId ${body.pageId} as FAILED`);
-            } else {
-                console.error("QStash Handler: Could not identify pageId in error handler.");
+                });
+                console.error(`QStash Handler: Marked pageId ${pageIdForErrorHandling} as FAILED.`);
+            } catch (updateError) {
+                console.error(`QStash Handler: Failed to mark page ${pageIdForErrorHandling} as FAILED after initial error`, updateError);
             }
-        } catch (parseOrUpdateError) {
-            console.error("QStash Handler: Critical error during error handling (parsing or marking as FAILED)", parseOrUpdateError);
+        } else {
+             // Error kemungkinan terjadi saat request.json(), pageId tidak diketahui
+             console.error("QStash Handler: Error likely during body parsing. Cannot identify pageId.");
         }
+
+        // Return 500 ke QStash agar bisa di-retry
         return NextResponse.json({ message: "Internal Server Error processing job" }, { status: 500 });
     }
 }
