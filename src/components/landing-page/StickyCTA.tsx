@@ -39,7 +39,7 @@ StickyCTAProps) {
         {whatsappCTA && whatsappNumber ? (
           <Button
             size="lg"
-            className="w-full max-w-sm shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+            className="cursor-pointer w-full max-w-sm shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={handleCTAClick}
             // Removed inline style, use shadcn classes
           >

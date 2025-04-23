@@ -25,6 +25,7 @@ import {
   Sparkles,
   Trash2,
   UploadCloud,
+  Info,
 } from "lucide-react";
 import { useRouter } from "next/navigation"; // Use next/navigation for App Router
 import React, { useState, useTransition, useRef, useEffect } from "react";
@@ -40,6 +41,10 @@ import {
 import { Card, CardContent } from "@/components/ui/card"; // Optional: Use Card for better structure
 import { cn } from "@/lib/utils"; // Import cn utility
 import Image from "next/image"; // For image previews
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
+// Import Session type from next-auth
+import type { Session } from "next-auth"; // Or your specific Session type path
 
 // Define type for a single social link item based on Zod schema
 // type SocialLinkItem = { platform: typeof SOCIAL_PLATFORMS[number]; url: string }; // Keep commented out for now
@@ -61,6 +66,7 @@ interface CreateLandingPageFormProps {
   slug?: string; // Needed if editing or updating
   editToken?: string; // Passed from edit page for API verification
   isEditMode?: boolean;
+  session: Session | null; // Add session prop
 }
 
 export function CreateLandingPageForm({
@@ -69,6 +75,7 @@ export function CreateLandingPageForm({
   slug,
   editToken, // Receive editToken
   isEditMode = false,
+  session, // Destructure session prop
 }: CreateLandingPageFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -81,6 +88,8 @@ export function CreateLandingPageForm({
     string | null
   >(null);
   const redirectTimerRef = useRef<NodeJS.Timeout | null>(null); // Ref to store timer ID
+  const [isBackgroundProcessing, setIsBackgroundProcessing] = useState(false);
+  const [processingSlug, setProcessingSlug] = useState<string | null>(null);
 
   // Cleanup timer on component unmount
   useEffect(() => {
@@ -219,8 +228,9 @@ export function CreateLandingPageForm({
   };
 
   const onSubmit = (data: LandingPageSchema) => {
-    // Clear previous toasts if any
     toast.dismiss();
+    setIsBackgroundProcessing(false); // Reset background state on new submit
+    setProcessingSlug(null);
     // Clear any existing redirect timer before starting a new one
     if (redirectTimerRef.current) {
         clearTimeout(redirectTimerRef.current);
@@ -300,8 +310,8 @@ export function CreateLandingPageForm({
           return; // Exit after successful update
         } else if (!isEditMode) {
           // Call the POST API route for creation
-          toast.info("Landing page sedang dibuat...", {
-            description: "AI sedang bekerja... ✨",
+          toast.info("Memulai pembuatan landing page...", {
+            description: "Mohon tunggu sebentar.",
           });
           const response = await fetch("/api/landing", {
             method: "POST",
@@ -310,53 +320,47 @@ export function CreateLandingPageForm({
 
           const result = await response.json();
 
-          if (!response.ok) {
-            console.error("API Error Response:", result);
-            throw new Error(result.message || "Gagal membuat landing page.");
+          // === Handle Background Processing (202) ===
+          if (response.status === 202 && result.status === 'PROCESSING' && result.slug) {
+            setIsBackgroundProcessing(true); // Aktifkan state background
+            setProcessingSlug(result.slug); // Simpan slug untuk ditampilkan
+
+            toast.success("🚀 Pembuatan Dimulai!", {
+               description: "Halaman Anda sedang dibuat di latar belakang. Konten AI akan muncul beberapa saat lagi.",
+               duration: 8000,
+            });
+
+            if (session?.user) {
+              // Redirect logged-in user after a short delay to allow reading the toast
+              setTimeout(() => {
+                 router.push("/dashboard");
+              }, 1500); // Delay 1.5 detik
+            } else {
+              // Non-logged-in user: State isBackgroundProcessing akan menjaga form disabled
+              // dan memunculkan Alert di bawah.
+            }
+            // **TIDAK ADA return di sini**, biarkan isPending/isBackgroundProcessing aktif
+
+          } else if (response.status === 201) { // Handle Immediate Success (Fallback)
+            // ... (logika fallback jika API langsung selesai, jarang terjadi)
+            const newSlug = result.slug;
+            if (!newSlug) { throw new Error("Slug not found in API response."); }
+            const redirectUrl = `/p/${newSlug}`;
+            redirectTimerRef.current = setTimeout(() => { /* ... */ }, 5000);
+            toast.success("🎉 Landing Page Berhasil Dibuat!", {
+              description: "Klik tombol atau tunggu 5 detik...",
+              action: { label: "Lihat Halaman", onClick: () => { /* ... */ } },
+            });
+          } else {
+            // Unexpected response
+            console.warn("Received unexpected success status:", response.status, result);
+            toast.warning("Proses Selesai (Status Tidak Dikenali)");
           }
-
-          // --- Success Handling with Button and Countdown --- 
-          const newSlug = result.slug;
-          if (!newSlug) {
-               console.error("Slug not found in API response after creation.");
-               toast.error("Gagal Mendapatkan Alamat Halaman", {
-                   description: "Tidak dapat memproses hasil pembuatan halaman."
-               });
-               return; // Stop if slug is missing
-          }
-
-          const redirectUrl = `/p/${newSlug}`;
-
-          // Set timeout for automatic redirect
-          redirectTimerRef.current = setTimeout(() => {
-              router.push(redirectUrl);
-              redirectTimerRef.current = null; // Clear ref after execution
-          }, 5000); // 5 seconds
-
-          // Show toast with action button
-          toast.success("🎉 Landing Page Berhasil Dibuat!", {
-              description:
-                "Klik tombol atau tunggu 5 detik untuk melihat halaman.",
-              duration: 5500, // Keep toast visible slightly longer than redirect
-              action: {
-                label: "Lihat Halaman",
-                onClick: () => {
-                  // Clear the automatic redirect timer
-                  if (redirectTimerRef.current) {
-                     clearTimeout(redirectTimerRef.current);
-                     redirectTimerRef.current = null;
-                  }
-                  // Redirect immediately
-                  router.push(redirectUrl);
-                  // Optionally dismiss the toast explicitly if needed
-                  // toast.dismiss(); 
-                },
-              },
-          });
-          // No return here, let the timer run unless button is clicked
         }
 
       } catch (error) {
+        setIsBackgroundProcessing(false); // Matikan state background jika error
+        setProcessingSlug(null);
         // Clear timer on error as well
         if (redirectTimerRef.current) {
             clearTimeout(redirectTimerRef.current);
@@ -426,6 +430,31 @@ export function CreateLandingPageForm({
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      {/* --- Login Warning Alert --- */} 
+      {!session?.user && !isBackgroundProcessing && (
+         <Alert className="bg-yellow-50 border-yellow-200 text-yellow-800">
+           <Terminal className="h-4 w-4 !text-yellow-700" />
+           <AlertTitle className="font-semibold">Saran: Login Terlebih Dahulu</AlertTitle>
+           <AlertDescription>
+             Dengan login (gratis via Google), halaman yang Anda buat akan otomatis tersimpan di dashboard Anda dan tidak akan hilang.
+           </AlertDescription>
+         </Alert>
+      )}
+
+      {/* --- Background Processing Info Alert (Non-Logged-in) --- */} 
+      {isBackgroundProcessing && !session?.user && processingSlug && (
+        <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-800">
+          <Info className="h-4 w-4 !text-blue-700" />
+          <AlertTitle className="font-semibold">Halaman Sedang Diproses</AlertTitle>
+          <AlertDescription>
+            AI sedang bekerja! Karena Anda tidak login, mohon jangan tutup halaman ini atau simpan link berikut untuk memeriksanya nanti:
+            <a href={`/p/${processingSlug}`} target="_blank" rel="noopener noreferrer" className="font-medium underline ml-1 hover:text-blue-900">
+              /p/{processingSlug}
+            </a>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* --- Bagian Utama --- */}
       <Card className="border-none shadow-none p-0">
         {/* <CardHeader className="p-0 mb-6">
@@ -440,7 +469,7 @@ export function CreateLandingPageForm({
               placeholder="Contoh: Kedai Kopi Senja"
               {...form.register("namaUsaha")}
               className="mt-1.5"
-              disabled={isPending}
+              disabled={isPending || isBackgroundProcessing}
             />
             {form.formState.errors.namaUsaha && (
               <p className="text-sm text-red-600">
@@ -462,7 +491,7 @@ export function CreateLandingPageForm({
                   )
                 }
                 defaultValue={form.getValues("kategori")}
-                disabled={isPending}
+                disabled={isPending || isBackgroundProcessing}
               >
                 <SelectTrigger id="kategori" className="mt-1.5">
                   <SelectValue placeholder="Pilih kategori" />
@@ -490,7 +519,7 @@ export function CreateLandingPageForm({
                   placeholder="Contoh: Servis Elektronik"
                   {...form.register("kategoriLainnya")}
                   className="mt-1.5"
-                  disabled={isPending}
+                  disabled={isPending || isBackgroundProcessing}
                 />
                 {form.formState.errors.kategoriLainnya && (
                   <p className="text-sm text-red-600">
@@ -509,7 +538,7 @@ export function CreateLandingPageForm({
               variant="outline"
               size="sm"
               onClick={handleGenerateDescription}
-              disabled={isPending || isGeneratingDesc}
+              disabled={isPending || isGeneratingDesc || isBackgroundProcessing}
               className="text-xs"
             >
               {isGeneratingDesc ? (
@@ -526,7 +555,7 @@ export function CreateLandingPageForm({
             {...form.register("deskripsi_user")}
             className="mt-1.5"
             rows={3}
-            disabled={isPending}
+            disabled={isPending || isBackgroundProcessing}
           />
           <p className="text-xs text-muted-foreground mt-1.5">
             Maks. 500 karakter.
@@ -569,7 +598,7 @@ export function CreateLandingPageForm({
               multiple
               onChange={handleFileChange}
               className="hidden"
-              disabled={isPending}
+              disabled={isPending || isBackgroundProcessing}
             />
           </label>
         </div>
@@ -597,7 +626,7 @@ export function CreateLandingPageForm({
                   size="icon"
                   className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
                   onClick={() => handleRemoveImage(index)}
-                  disabled={isPending}
+                  disabled={isPending || isBackgroundProcessing}
                   aria-label="Hapus gambar"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -621,7 +650,7 @@ export function CreateLandingPageForm({
           {...form.register("whatsapp")}
           className="mt-1.5"
           type="tel"
-          disabled={isPending}
+          disabled={isPending || isBackgroundProcessing}
         />
         <p className="text-xs text-muted-foreground mt-1.5">
           Jika diisi, AI bisa menambahkan tombol chat WA.
@@ -656,7 +685,7 @@ export function CreateLandingPageForm({
                         {...form.register(
                           `testimonials.${index}.name` as const
                         )}
-                        disabled={isPending}
+                        disabled={isPending || isBackgroundProcessing}
                       />
                       {form.formState.errors.testimonials?.[index]?.name && (
                         <p className="text-sm text-red-600">
@@ -672,7 +701,7 @@ export function CreateLandingPageForm({
                           `testimonials.${index}.comment` as const
                         )}
                         rows={2}
-                        disabled={isPending}
+                        disabled={isPending || isBackgroundProcessing}
                       />
                       {form.formState.errors.testimonials?.[index]?.comment && (
                         <p className="text-sm text-red-600">
@@ -688,7 +717,7 @@ export function CreateLandingPageForm({
                       variant="ghost"
                       size="icon"
                       onClick={() => removeTestimonial(index)}
-                      disabled={isPending}
+                      disabled={isPending || isBackgroundProcessing}
                       aria-label="Hapus Testimoni"
                       className="text-muted-foreground hover:text-destructive"
                     >
@@ -701,7 +730,7 @@ export function CreateLandingPageForm({
                   variant="outline"
                   size="sm"
                   onClick={() => appendTestimonial({ name: "", comment: "" })}
-                  disabled={isPending || testimonialFields.length >= 3}
+                  disabled={isPending || testimonialFields.length >= 3 || isBackgroundProcessing}
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Tambah Testimoni
@@ -721,7 +750,7 @@ export function CreateLandingPageForm({
                   placeholder="Contoh: Jl. Merdeka No. 10, Jakarta"
                   {...form.register("address")}
                   className="mt-1.5"
-                  disabled={isPending}
+                  disabled={isPending || isBackgroundProcessing}
                 />
                 {form.formState.errors.address && (
                   <p className="text-sm text-red-600">
@@ -750,7 +779,7 @@ export function CreateLandingPageForm({
                           }
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           defaultValue={(field as any).platform}
-                          disabled={isPending}
+                          disabled={isPending || isBackgroundProcessing}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Platform..." />
@@ -779,7 +808,7 @@ export function CreateLandingPageForm({
                           {...form.register(
                             `socialLinks.${index}.url` as const
                           )}
-                          disabled={isPending}
+                          disabled={isPending || isBackgroundProcessing}
                         />
                         {form.formState.errors.socialLinks?.[index]?.url && (
                           <p className="text-sm text-red-600 mt-1">
@@ -796,7 +825,7 @@ export function CreateLandingPageForm({
                       variant="ghost"
                       size="icon"
                       onClick={() => removeSocialLink(index)}
-                      disabled={isPending}
+                      disabled={isPending || isBackgroundProcessing}
                       aria-label="Hapus Link"
                       className="text-muted-foreground hover:text-destructive"
                     >
@@ -811,7 +840,7 @@ export function CreateLandingPageForm({
                   onClick={() =>
                     appendSocialLink({ platform: SOCIAL_PLATFORMS[0], url: "" })
                   } // Default to first platform
-                  disabled={isPending || socialLinkFields.length >= 3} // Ensure correct limit check
+                  disabled={isPending || socialLinkFields.length >= 3 || isBackgroundProcessing} // Ensure correct limit check
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Tambah Link Media Sosial
@@ -846,7 +875,8 @@ export function CreateLandingPageForm({
                 disabled={
                   isGeneratingColors ||
                   !form.watch("namaUsaha") ||
-                  !form.watch("kategori")
+                  !form.watch("kategori") ||
+                  isBackgroundProcessing
                 }
               >
                 {isGeneratingColors ? (
@@ -878,12 +908,12 @@ export function CreateLandingPageForm({
         type="submit"
         className="w-full !mt-8"
         size="lg"
-        disabled={isPending}
+        disabled={isPending || isBackgroundProcessing}
       >
-        {isPending ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Mohon Tunggu...
-          </>
+        {isBackgroundProcessing ? (
+           <> <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sedang Diproses... </> 
+        ) : isPending ? (
+           <> <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Mohon Tunggu... </> 
         ) : isEditMode ? (
           "Simpan Perubahan"
         ) : (

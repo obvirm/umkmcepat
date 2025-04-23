@@ -73,7 +73,7 @@ export function ShareButtons({
             key={option.name}
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 cursor-pointer"
             onClick={() =>
               window.open(option.url, "_blank", "noopener,noreferrer")
             }
@@ -87,7 +87,7 @@ export function ShareButtons({
       <Button
         variant="outline"
         size="icon"
-        className="h-8 w-8"
+        className="h-8 w-8 cursor-pointer"
         onClick={handleCopy}
         aria-label="Salin Link"
         title="Salin Link"

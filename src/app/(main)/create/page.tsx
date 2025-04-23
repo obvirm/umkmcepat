@@ -6,8 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
 
-export default function BuatPage() {
+export default async function BuatPage() {
+  const session = await auth();
+
   return (
     <div className="container mx-auto max-w-2xl px-4 py-12">
       <Card className="w-full border border-border/60 shadow-none">
@@ -19,7 +22,7 @@ export default function BuatPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <CreateLandingPageForm />
+          <CreateLandingPageForm session={session} />
         </CardContent>
       </Card>
     </div>

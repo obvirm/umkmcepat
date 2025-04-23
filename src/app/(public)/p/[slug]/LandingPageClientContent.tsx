@@ -59,11 +59,11 @@ export function LandingPageClientContent({
               <AlertTitle>Perhatian!</AlertTitle>
               <AlertDescription>
                 Halaman ini belum diklaim dan bisa diedit oleh siapa saja yang
-                punya link khusus.
+                punya link khusus ini.
               </AlertDescription>
             </Alert>
-            <Button onClick={handleClaim} size="sm">
-              <Lock className="mr-2 h-4 w-4" /> Klaim dengan Google
+            <Button onClick={handleClaim} size="sm" className="cursor-pointer">
+              <Lock className="mr-2 h-4 w-4" /> Klaim Halaman dengan Google
             </Button>
           </>
         )}

@@ -61,7 +61,7 @@ const CtaSectionContent: React.FC<{
         return (
             <Button
                 size="lg"
-                className="w-full max-w-xs shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-4 relative group"
+                className="cursor-pointer w-full max-w-xs shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-4 relative group"
                 onClick={!isOwner && whatsappCTA && whatsappNumber ? handleCTAClick : undefined}
             >
                 <span 

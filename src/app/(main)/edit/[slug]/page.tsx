@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { LandingPageSchema } from '@/lib/zod-schemas';
 import { AlertCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import { auth } from "@/lib/auth";
+import type { Metadata } from 'next';
 
 // Gunakan nama standar 'Props' dan buat searchParams opsional
 type Props = {
@@ -77,7 +79,8 @@ async function verifyTokenAndGetData(slug: string, token?: string | string[]) {
 // Gunakan tipe Props di default export
 export default async function EditLandingPage({ params, searchParams }: Props) {
     const { slug } = params;
-    const token = searchParams?.token; // Akses token dengan optional chaining
+    const token = searchParams?.token;
+    const session = await auth();
 
     const verificationResult = await verifyTokenAndGetData(slug, token);
 
@@ -121,6 +124,7 @@ export default async function EditLandingPage({ params, searchParams }: Props) {
                         slug={verificationResult.slug}
                         editToken={verificationResult.token}
                         isEditMode={true}
+                        session={session}
                     />
                 </CardContent>
             </Card>
@@ -128,12 +132,10 @@ export default async function EditLandingPage({ params, searchParams }: Props) {
     );
 }
 
-// Gunakan tipe Props yang sama di generateMetadata
+// Function generateMetadata uses Props which might contain Metadata type
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Edit Halaman ${params.slug} | tokko.online`,
     robots: { index: false, follow: false }, // Prevent indexing of edit pages
   };
 }
-
-import type { Metadata } from 'next'; // Ensure Metadata type is imported 
