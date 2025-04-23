@@ -21,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -33,13 +34,17 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { AlertCircle, Copy, ExternalLink, PlusCircle, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  Copy,
+  ExternalLink,
+  PlusCircle,
+  Trash2,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
 
 // Tipe data yang diharapkan dari API /api/my-pages
 interface MyPageData {
@@ -74,7 +79,7 @@ const deletePage = async (pageId: string): Promise<{ message: string }> => {
 };
 
 export default function MyPagesDashboard() {
-  const { data: session, status: sessionStatus } = useSession();
+  const { status: sessionStatus } = useSession();
   const queryClient = useQueryClient();
 
   // State for managing which page is targeted for deletion
@@ -115,7 +120,8 @@ export default function MyPagesDashboard() {
   const handleCopyLink = (slug: string) => {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://tokko.online";
     const pageUrl = `${baseUrl}/p/${slug}`;
-    navigator.clipboard.writeText(pageUrl)
+    navigator.clipboard
+      .writeText(pageUrl)
       .then(() => {
         toast.success("Link halaman berhasil disalin!");
       })
@@ -246,26 +252,54 @@ export default function MyPagesDashboard() {
                         const pageUrl = `${baseUrl}/p/${page.slug}`;
                         return (
                           <TableRow key={page.id}>
-                            <TableCell className="font-medium">{page.namaUsaha}</TableCell>
+                            <TableCell className="font-medium">
+                              {page.namaUsaha}
+                            </TableCell>
                             <TableCell>
-                              <Link href={pageUrl} target="_blank" className="hover:underline text-blue-600 text-sm break-all">
+                              <Link
+                                href={pageUrl}
+                                target="_blank"
+                                className="hover:underline text-blue-600 text-sm break-all"
+                              >
                                 {pageUrl}
                               </Link>
                             </TableCell>
                             <TableCell>
-                              {format(new Date(page.createdAt), "dd MMMM yyyy, HH:mm", { locale: localeId })}
+                              {format(
+                                new Date(page.createdAt),
+                                "dd MMMM yyyy, HH:mm",
+                                { locale: localeId }
+                              )}
                             </TableCell>
                             <TableCell className="text-right space-x-1">
-                              <Button variant="outline" size="icon" className="h-8 w-8" asChild title="Lihat Halaman">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                asChild
+                                title="Lihat Halaman"
+                              >
                                 <Link href={pageUrl} target="_blank">
                                   <ExternalLink className="h-4 w-4" />
                                 </Link>
                               </Button>
-                              <Button variant="outline" size="icon" className="h-8 w-8" title="Salin Link" onClick={() => handleCopyLink(page.slug)}>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                title="Salin Link"
+                                onClick={() => handleCopyLink(page.slug)}
+                              >
                                 <Copy className="h-4 w-4" />
                               </Button>
                               <AlertDialogTrigger asChild>
-                                <Button variant="destructive" size="icon" className="h-8 w-8" title="Hapus Halaman" onClick={() => setPageToDelete(page)}>
+                                <Button
+                                  variant="destructive"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  title="Hapus Halaman"
+                                  onClick={() => setPageToDelete(page)}
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -281,7 +315,9 @@ export default function MyPagesDashboard() {
 
             {/* Mobile View: Cards */}
             <div className="block md:hidden space-y-4">
-              <h2 className="text-xl font-semibold mb-4">Daftar Landing Page</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                Daftar Landing Page
+              </h2>
               {pages.map((page) => {
                 const pageUrl = `${baseUrl}/p/${page.slug}`;
                 return (
@@ -289,26 +325,53 @@ export default function MyPagesDashboard() {
                     <CardHeader>
                       <CardTitle>{page.namaUsaha}</CardTitle>
                       <CardDescription>
-                        Dibuat: {format(new Date(page.createdAt), "dd MMM yyyy, HH:mm", { locale: localeId })}
+                        Dibuat:{" "}
+                        {format(
+                          new Date(page.createdAt),
+                          "dd MMM yyyy, HH:mm",
+                          { locale: localeId }
+                        )}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Link Publik:</Label>
-                      <Link href={pageUrl} target="_blank" className="block text-sm text-blue-600 hover:underline break-all">
+                      <Label className="text-xs text-muted-foreground">
+                        Link Publik:
+                      </Label>
+                      <Link
+                        href={pageUrl}
+                        target="_blank"
+                        className="block text-sm text-blue-600 hover:underline break-all"
+                      >
                         {pageUrl}
                       </Link>
                     </CardContent>
                     <CardFooter className="flex justify-end space-x-2">
-                      <Button variant="outline" size="sm" asChild title="Lihat Halaman">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        title="Lihat Halaman"
+                      >
                         <Link href={pageUrl} target="_blank">
                           <ExternalLink className="mr-1 h-4 w-4" /> Lihat
                         </Link>
                       </Button>
-                      <Button variant="outline" size="sm" title="Salin Link" onClick={() => handleCopyLink(page.slug)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Salin Link"
+                        onClick={() => handleCopyLink(page.slug)}
+                      >
                         <Copy className="mr-1 h-4 w-4" /> Salin
                       </Button>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="icon" className="h-9 w-9" title="Hapus Halaman" onClick={() => setPageToDelete(page)}>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="h-9 w-9"
+                          title="Hapus Halaman"
+                          onClick={() => setPageToDelete(page)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -320,10 +383,13 @@ export default function MyPagesDashboard() {
           </>
         ) : (
           <div className="text-center py-10 border rounded-lg bg-card">
-            <p className="text-muted-foreground mb-4">Anda belum membuat landing page.</p>
+            <p className="text-muted-foreground mb-4">
+              Anda belum membuat landing page.
+            </p>
             <Button asChild>
               <Link href="/create">
-                <PlusCircle className="mr-2 h-4 w-4" /> Buat Halaman Pertama Anda
+                <PlusCircle className="mr-2 h-4 w-4" /> Buat Halaman Pertama
+                Anda
               </Link>
             </Button>
           </div>
