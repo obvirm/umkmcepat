@@ -57,6 +57,13 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+Developer docs:
+
+- `CONTRIBUTING.md` — contribution workflow, branches, commits, PR checklist
+- `DEV.md` — local development guide and quality checks
+- `AGENTS.md` — rules for AI agents and automated contributors
+- `docs/open-source-readiness.md` — security and open-source readiness notes
+
 ## Quality checks
 
 ```bash
@@ -96,11 +103,24 @@ Default tests avoid paid/live external services. Add unit tests for pure logic a
 
 ## Contributing
 
-1. Create a branch from `main`.
-2. Keep changes focused and documented.
-3. Add or update tests for behavior changes.
-4. Run `npm run verify` before opening a PR.
-5. Do not commit secrets or local-only generated files.
+Please read `CONTRIBUTING.md` before opening a PR.
+
+Quick rules:
+
+1. Create a branch from `dev`.
+2. Use Conventional Commits.
+3. Keep changes focused and documented.
+4. Add or update tests for behavior changes.
+5. Run `npm run verify` before opening a PR.
+6. Do not commit secrets or local-only generated files.
+
+## Support the project
+
+Donation and sponsorship links are coming soon.
+
+Any money received for UMKM Cepat will be reinvested into development, servers, AI credits, documentation, contributor support, and ecosystem growth so the project can keep improving for Indonesian UMKM.
+
+See `SPONSORS.md` for details.
 
 ## License
 
