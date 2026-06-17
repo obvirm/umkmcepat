@@ -1,8 +1,9 @@
+import { NextResponse } from 'next/server';
+
 import { AiGeneratedContent, tweakLandingPageContent } from '@/lib/ai';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { tweakSchema } from '@/lib/zod-schemas';
-import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
     try {

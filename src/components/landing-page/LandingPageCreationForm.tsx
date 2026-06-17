@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, UploadCloud } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
-import { landingPageSchema, KATEGORI_USAHA } from "@/lib/zod-schemas"; // Assuming zod-schemas exports these
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -17,8 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Loader2, UploadCloud } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { landingPageSchema, KATEGORI_USAHA } from "@/lib/zod-schemas"; // Assuming zod-schemas exports these
+
 
 // Define the form schema based on landingPageSchema, excluding AI content etc.
 // We only need the fields the user inputs initially.

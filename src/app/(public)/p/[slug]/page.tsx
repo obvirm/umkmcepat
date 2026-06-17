@@ -1,11 +1,17 @@
 // Impor yang dibutuhkan Server Component
+import { notFound } from "next/navigation";
+
+import { AiGeneratedContent } from "@/lib/ai";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
-import { AiGeneratedContent } from "@/lib/ai";
-import type { ColorThemeJson } from "@/lib/ai";
+
 import { LandingPageDisplay } from "./LandingPageDisplay";
+
+import type { ColorThemeJson } from "@/lib/ai";
+import type { Metadata } from "next";
+
+
+
 
 // Tipe Props tetap sama
 type Props = {

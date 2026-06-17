@@ -1,9 +1,10 @@
+import { NextResponse } from 'next/server';
+
 import { generateLandingPageContent } from '@/lib/ai';
 import { deleteImagesFromCloudinary, fileToBuffer, uploadImageToCloudinary } from '@/lib/cloudinary';
 import { prisma } from '@/lib/prisma';
 import { generateRandomString, slugify } from '@/lib/utils';
 import { baseLandingPageSchemaForOmit as landingPageSchema } from '@/lib/zod-schemas';
-import { NextResponse } from 'next/server';
 
 // PUT /api/landing/[slug] - Update an existing landing page via token
 export async function PUT(request: Request, { params }: { params: Promise<{ slug: string }> }) {

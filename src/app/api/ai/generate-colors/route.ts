@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { generateColorTheme } from '@/lib/ai';
 import { z } from 'zod';
+
+import { generateColorTheme } from '@/lib/ai';
 import { checkRateLimit } from '@/lib/rate-limit'; // Assuming you want rate limiting here too
 
 // Input validation schema
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
   try {
     // Apply rate limiting (Use 'ai' limit for now)
     const rateLimitResponse = await checkRateLimit(request, 'ai');
-    if (rateLimitResponse) return rateLimitResponse;
+    if (rateLimitResponse) {return rateLimitResponse;}
 
     const body = await request.json();
     const validationResult = inputSchema.safeParse(body);

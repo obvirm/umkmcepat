@@ -1,12 +1,13 @@
 "use client";
 
+import { Edit, Loader2, Save, X } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { Edit, Loader2, Save, X } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 interface InlineEditTextProps {
   initialValue: string;

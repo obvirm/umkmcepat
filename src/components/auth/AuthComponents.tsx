@@ -1,5 +1,9 @@
 "use client";
 
+import { LogIn, LogOut, LayoutList } from 'lucide-react';
+import Link from 'next/link';
+import { signIn, signOut, useSession } from 'next-auth/react';
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 import {
@@ -10,9 +14,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogIn, LogOut, LayoutList } from 'lucide-react';
-import { signIn, signOut, useSession } from 'next-auth/react';
-import Link from 'next/link';
+
 
 export function AuthButton() {
     const { data: session, status } = useSession();

@@ -1,21 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  landingPageSchema,
-  LandingPageSchema,
-  SOCIAL_PLATFORMS,
-} from "@/lib/zod-schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ListChecks,
@@ -26,20 +10,39 @@ import {
   Trash2,
   UploadCloud,
 } from "lucide-react";
+import Image from "next/image"; // For image previews
 import { useRouter } from "next/navigation"; // Use next/navigation for App Router
 import React, { useState, useTransition, useRef, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner"; // Use sonner directly
-// import { createLandingPageAction } from '@/app/_actions/landingPageActions'; // Example if using Server Action
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"; // Import Accordion
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card"; // Optional: Use Card for better structure
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils"; // Import cn utility
-import Image from "next/image"; // For image previews
+import {
+  landingPageSchema,
+  LandingPageSchema,
+  SOCIAL_PLATFORMS,
+} from "@/lib/zod-schemas";
+
+// import { createLandingPageAction } from '@/app/_actions/landingPageActions'; // Example if using Server Action
+
 
 // Define type for a single social link item based on Zod schema
 // type SocialLinkItem = { platform: typeof SOCIAL_PLATFORMS[number]; url: string }; // Keep commented out for now
@@ -375,7 +378,7 @@ export function CreateLandingPageForm({
 
   // === Handler for AI Description Generation ===
   const handleGenerateDescription = async () => {
-    if (isGeneratingDesc) return;
+    if (isGeneratingDesc) {return;}
 
     const namaUsaha = form.getValues("namaUsaha");
     const kategori = form.getValues("kategori");

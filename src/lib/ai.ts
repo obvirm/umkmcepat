@@ -396,19 +396,19 @@ export async function generateColorTheme(
       } else {
         // Attempt to fill based on conventions if missing or invalid
         console.warn(`Missing or invalid HSL for key: ${key}. Attempting fallback.`);
-        if (key === 'foreground') finalTheme[key] = finalTheme['on-background'] || '0 0% 8%'; // dark default
-        else if (key === 'primary_foreground') finalTheme[key] = finalTheme['on-primary'] || '0 0% 98%'; // light default
-        else if (key === 'secondary_foreground') finalTheme[key] = finalTheme['on-secondary'] || '0 0% 8%';
-        else if (key === 'card') finalTheme[key] = finalTheme['surface'] || finalTheme['background'] || '0 0% 100%';
-        else if (key === 'on-card' || key === 'card_foreground') finalTheme[key] = finalTheme['on-surface'] || finalTheme['foreground'] || '0 0% 8%';
-        else if (key === 'popover') finalTheme[key] = finalTheme['card'] || '0 0% 100%';
-        else if (key === 'on-popover' || key === 'popover_foreground') finalTheme[key] = finalTheme['on-card'] || '0 0% 8%';
-        else if (key === 'destructive') finalTheme[key] = finalTheme['error'] || '0 84% 60%';
-        else if (key === 'on-destructive' || key === 'destructive_foreground') finalTheme[key] = parsedTheme['on-error'] || finalTheme['on-primary'] || '0 0% 98%';
-        else if (key === 'input') finalTheme[key] = finalTheme['border'] || '214 32% 91%';
-        else if (key === 'ring') finalTheme[key] = finalTheme['primary'] || '215 20% 65%';
-        else if (key === 'accent_foreground') finalTheme[key] = finalTheme['on-primary'] || '0 0% 98%';
-        else if (key === 'muted_foreground') finalTheme[key] = finalTheme['secondary_foreground'] || '215 16% 47%';
+        if (key === 'foreground') {finalTheme[key] = finalTheme['on-background'] || '0 0% 8%';} // dark default
+        else if (key === 'primary_foreground') {finalTheme[key] = finalTheme['on-primary'] || '0 0% 98%';} // light default
+        else if (key === 'secondary_foreground') {finalTheme[key] = finalTheme['on-secondary'] || '0 0% 8%';}
+        else if (key === 'card') {finalTheme[key] = finalTheme['surface'] || finalTheme['background'] || '0 0% 100%';}
+        else if (key === 'on-card' || key === 'card_foreground') {finalTheme[key] = finalTheme['on-surface'] || finalTheme['foreground'] || '0 0% 8%';}
+        else if (key === 'popover') {finalTheme[key] = finalTheme['card'] || '0 0% 100%';}
+        else if (key === 'on-popover' || key === 'popover_foreground') {finalTheme[key] = finalTheme['on-card'] || '0 0% 8%';}
+        else if (key === 'destructive') {finalTheme[key] = finalTheme['error'] || '0 84% 60%';}
+        else if (key === 'on-destructive' || key === 'destructive_foreground') {finalTheme[key] = parsedTheme['on-error'] || finalTheme['on-primary'] || '0 0% 98%';}
+        else if (key === 'input') {finalTheme[key] = finalTheme['border'] || '214 32% 91%';}
+        else if (key === 'ring') {finalTheme[key] = finalTheme['primary'] || '215 20% 65%';}
+        else if (key === 'accent_foreground') {finalTheme[key] = finalTheme['on-primary'] || '0 0% 98%';}
+        else if (key === 'muted_foreground') {finalTheme[key] = finalTheme['secondary_foreground'] || '215 16% 47%';}
         else {
           console.error(`Could not determine fallback for missing/invalid key: ${key}`);
           isValid = false; // Mark as invalid if a required key cannot be filled

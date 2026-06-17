@@ -1,10 +1,11 @@
+import { AlertCircle } from 'lucide-react';
+import { notFound } from 'next/navigation';
+
 import { CreateLandingPageForm } from '@/components/forms/CreateLandingPageForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AiGeneratedContent } from '@/lib/ai';
 import { prisma } from '@/lib/prisma';
 import { LandingPageSchema } from '@/lib/zod-schemas';
-import { AlertCircle } from 'lucide-react';
-import { notFound } from 'next/navigation';
 
 // Gunakan nama standar 'Props' dan buat searchParams opsional
 type Props = {

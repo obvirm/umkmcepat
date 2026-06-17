@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+
 import { generateBusinessDescription } from '@/lib/ai';
 import { checkRateLimit } from '@/lib/rate-limit'; // Import rate limiter
 
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
   try {
      // Apply rate limiting (use 'ai' limit or a new specific one)
      const rateLimitResponse = await checkRateLimit(request, 'ai');
-     if (rateLimitResponse) return rateLimitResponse;
+     if (rateLimitResponse) {return rateLimitResponse;}
 
     const body = await request.json();
     const validation = schema.safeParse(body);

@@ -1,8 +1,9 @@
 "use client"; // Needs to be a client component for potential event handlers
 
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Phone } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 interface StickyCTAProps {
   ctaText: string;

@@ -1,8 +1,9 @@
+import { NextResponse } from 'next/server';
+import { z } from 'zod'; // Import Zod
+
 import { AiGeneratedContent, ColorThemeJson } from '@/lib/ai'; // Import types
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { NextResponse } from 'next/server';
-import { z } from 'zod'; // Import Zod
 
 export async function GET(
   request: Request,

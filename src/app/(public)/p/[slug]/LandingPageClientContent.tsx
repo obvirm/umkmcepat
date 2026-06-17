@@ -1,11 +1,12 @@
 "use client";
 
 // import { TweakDialog } from "@/components/landing-page/TweakDialog"; // Remove this import
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { /* Bot, */ Info, Lock } from "lucide-react"; // Remove Bot import
 import { Session } from "next-auth"; // Ensure Session type is imported
 import { signIn } from "next-auth/react"; // Ensure signIn is imported
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 // Define TPageData based on expected props (simplified version)
 interface TPageData {

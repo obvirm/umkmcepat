@@ -1,12 +1,14 @@
 "use client"; // Required for framer-motion
 
+import { motion } from "framer-motion"; // Import motion
+import { Check, Edit } from "lucide-react";
+import React from "react";
+
 import { Button } from "@/components/ui/button"; // Assuming Button uses CSS vars
 import { AiGeneratedContent } from "@/lib/ai"; // Keep AiGeneratedContent
 import { cn } from "@/lib/utils";
 // import { useQueryClient } from "@tanstack/react-query"; // Removed
-import { motion } from "framer-motion"; // Import motion
-import { Check, Edit } from "lucide-react";
-import React from "react";
+
 import { InlineEditText } from "./InlineEditText"; // Import the new component
 
 interface LandingPageRendererProps {

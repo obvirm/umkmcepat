@@ -52,7 +52,7 @@ const baseLandingPageSchema = z.object({
     .nullable()
     .refine((val) => {
         // Allow null, undefined, or empty string
-        if (val === null || val === undefined || val === '') return true;
+        if (val === null || val === undefined || val === '') {return true;}
         // If a non-empty string is provided, validate format
         return /^(\+62|62|0)8[1-9][0-9]{7,11}$/.test(val);
     }, { message: 'Format nomor WhatsApp tidak valid (contoh: 62812...) atau biarkan kosong' }),
@@ -72,7 +72,7 @@ const baseLandingPageSchema = z.object({
 
   // Optional Color Theme (passed as stringified JSON from form)
   colorThemeJson: z.string().optional().nullable().refine((val) => {
-    if (!val) return true; // Optional or null is fine
+    if (!val) {return true;} // Optional or null is fine
     try {
       JSON.parse(val);
       return true;

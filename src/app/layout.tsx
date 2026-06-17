@@ -1,9 +1,11 @@
+import { Inter } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
+
 import QueryProvider from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
+
 import type { Metadata } from "next";
-import { SessionProvider } from "next-auth/react";
-import { Inter } from "next/font/google";
 import "./globals.css";
 // import { auth } from "@/lib/auth";
 // import QueryProvider from "@/components/providers/QueryProvider";

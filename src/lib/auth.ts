@@ -1,6 +1,7 @@
-import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
+import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
+
 import { prisma } from "@/lib/prisma"
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {

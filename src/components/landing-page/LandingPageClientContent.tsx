@@ -1,10 +1,11 @@
 "use client";
 
+import { Bot, Check, Edit } from 'lucide-react';
+import Link from 'next/link';
+
 import { TweakDialog } from '@/components/landing-page/TweakDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bot, Check, Edit } from 'lucide-react';
-import Link from 'next/link';
 
 interface PageData {
   id: string;

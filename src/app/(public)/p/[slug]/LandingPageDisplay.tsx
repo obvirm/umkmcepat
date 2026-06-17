@@ -1,10 +1,7 @@
 "use client";
 
 import { InlineEditText } from "@/components/landing-page/InlineEditText"; // Import InlineEditText
-import { LandingPageRenderer } from "@/components/landing-page/LandingPageRenderer";
-import { StickyCTA } from "@/components/landing-page/StickyCTA";
-import { Separator } from "@/components/ui/separator";
-import type { AiGeneratedContent, ColorThemeJson } from "@/lib/ai"; // Add AiGeneratedContent
+
 import { motion } from "framer-motion";
 import {
   Facebook,
@@ -19,16 +16,23 @@ import {
   Twitter,
   Youtube
 } from "lucide-react";
-import { Session } from "next-auth"; // Import Session type
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation"; // Import for router.refresh
+import { Session } from "next-auth"; // Import Session type
 import React, { useState } from "react"; // Import React
 import { toast } from "sonner"; // For notifications
 import Lightbox from "yet-another-react-lightbox";
+
 import "yet-another-react-lightbox/styles.css";
-import { LandingPageClientContent } from "./LandingPageClientContent";
 import { ShareButtons } from "@/components/common/ShareButtons"; // Import ShareButtons
+import { LandingPageRenderer } from "@/components/landing-page/LandingPageRenderer";
+import { StickyCTA } from "@/components/landing-page/StickyCTA";
+import { Separator } from "@/components/ui/separator";
+
+import { LandingPageClientContent } from "./LandingPageClientContent";
+
+import type { AiGeneratedContent, ColorThemeJson } from "@/lib/ai"; // Add AiGeneratedContent
 
 // Type for the fetched page data
 type PageData = {

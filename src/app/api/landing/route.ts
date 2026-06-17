@@ -1,14 +1,18 @@
-import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-// Import the base schema for omit
+
 import { generateLandingPageContent } from '@/lib/ai';
+import { auth } from '@/lib/auth'; // Import auth untuk cek sesi
 import { fileToBuffer, uploadImageToCloudinary } from '@/lib/cloudinary';
+import { prisma } from '@/lib/prisma';
+// Import the base schema for omit
 import { checkRateLimit } from '@/lib/rate-limit'; // Import rate limit checker
 import { generateRandomString, slugify } from '@/lib/utils';
+
 // Import the base schema to apply refinement after omit
-import type { ColorThemeJson } from '@/lib/ai'; // Import types
-import { auth } from '@/lib/auth'; // Import auth untuk cek sesi
 import { baseLandingPageSchemaForOmit } from '@/lib/zod-schemas';
+
+import type { ColorThemeJson } from '@/lib/ai'; // Import types
+
 
 // Define types for testimonials and social links
 type Testimonial = {
@@ -59,7 +63,7 @@ export async function POST(request: Request) {
   try {
     // Apply rate limiting first
     const rateLimitResponse = await checkRateLimit(request, 'ai');
-    if (rateLimitResponse) return rateLimitResponse;
+    if (rateLimitResponse) {return rateLimitResponse;}
 
     // Cek sesi user (tidak wajib login)
     const session = await auth();

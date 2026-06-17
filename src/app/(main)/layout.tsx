@@ -1,8 +1,9 @@
 "use client"; // Jadikan Client Component
 
 import React from 'react';
-import { Header } from "@/components/common/Header";
+
 import { Footer } from "@/components/common/Footer";
+import { Header } from "@/components/common/Header";
 // import { usePathname } from 'next/navigation'; // Remove pathname
 
 // Layout untuk grup (main) yang SELALU menyertakan Header dan Footer

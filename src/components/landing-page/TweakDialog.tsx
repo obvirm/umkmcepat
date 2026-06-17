@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Bot, Loader2 } from "lucide-react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,12 +17,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { AiGeneratedContent } from "@/lib/ai";
 import { tweakSchema, TweakSchema } from "@/lib/zod-schemas";
-import { toast } from "sonner";
-import { Bot, Loader2 } from "lucide-react";
+
 
 interface TweakDialogProps {
   slug: string;
