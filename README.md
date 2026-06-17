@@ -124,4 +124,4 @@ See `SPONSORS.md` for details.
 
 ## License
 
-License not yet specified. Add a `LICENSE` file before broad public distribution.
+MIT. See `LICENSE`.
