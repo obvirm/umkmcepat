@@ -80,7 +80,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-4 px-4 py-14 sm:px-6 lg:grid-cols-3 lg:px-8">
+      <section id="fitur" className="scroll-mt-24 mx-auto grid max-w-6xl gap-4 px-4 py-14 sm:px-6 lg:grid-cols-3 lg:px-8">
         {benefits.map((benefit) => {
           const Icon = benefit.icon;
           return (
@@ -97,7 +97,7 @@ export default function HomePage() {
         })}
       </section>
 
-      <section className="border-y border-white/10 bg-white/[0.03]">
+      <section id="alur" className="scroll-mt-24 border-y border-white/10 bg-white/[0.03]">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm text-white/70">
@@ -125,7 +125,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+      <section id="open-source" className="scroll-mt-24 mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-8 lg:p-10">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl">
