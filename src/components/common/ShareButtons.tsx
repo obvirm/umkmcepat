@@ -64,7 +64,7 @@ export function ShareButtons({
 
   return (
     <div className={cn("flex items-center gap-2 flex-wrap", className)}>
-      <span className="text-sm font-medium text-muted-foreground mr-2">
+      <span className="text-sm font-medium text-text-secondary mr-2">
         Bagikan:
       </span>
       {shareOptions.map((option) => {

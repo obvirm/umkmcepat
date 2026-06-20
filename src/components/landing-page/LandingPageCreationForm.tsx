@@ -178,7 +178,7 @@ export function LandingPageCreationForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 w-full max-w-2xl bg-card p-8 rounded-lg shadow-md border"
+      className="space-y-6 w-full max-w-2xl bg-surface-warm-white p-spacing-10 rounded-radius-lg lovable-shadow-subtle border"
     >
       <div className="space-y-2">
         <Label htmlFor="businessName">
@@ -194,7 +194,7 @@ export function LandingPageCreationForm() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-spacing-7">
         <div className="space-y-2">
           <Label htmlFor="category">
             Business Category <span className="text-red-500">*</span>
@@ -249,7 +249,7 @@ export function LandingPageCreationForm() {
           {...register("userDescription")}
           rows={3}
         />
-        <p className="text-xs text-muted-foreground">Maksimal 500 karakter.</p>
+        <p className="text-xs text-text-secondary">Maksimal 500 karakter.</p>
         {errors.userDescription && (
           <p className="text-sm text-red-600">
             {errors.userDescription.message}
@@ -265,7 +265,7 @@ export function LandingPageCreationForm() {
           placeholder="Contoh: 6281234567890"
           {...register("whatsappNumber")}
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-text-secondary">
           Awali dengan kode negara (misal: 62). Jika diisi, AI bisa menambahkan
           tombol chat WhatsApp.
         </p>
@@ -279,15 +279,15 @@ export function LandingPageCreationForm() {
         <div className="flex items-center justify-center w-full">
           <label
             htmlFor="images"
-            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80"
+            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-radius-lg cursor-pointer bg-surface-muted hover:bg-surface-muted/80"
           >
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-              <p className="mb-2 text-sm text-muted-foreground">
+              <UploadCloud className="w-8 h-8 mb-4 text-text-secondary" />
+              <p className="mb-2 text-sm text-text-secondary">
                 <span className="font-semibold">Klik untuk upload</span> atau
                 drag and drop
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-text-secondary">
                 PNG, JPG, WEBP (MAX. 2MB per file)
               </p>
               {selectedFiles && (

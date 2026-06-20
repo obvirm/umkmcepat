@@ -71,14 +71,14 @@ export default function Page() {
           align-items: center;
           gap: 16px;
           padding: 16px;
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+          font-family: "Camera Plain Variable", ui-sans-serif, system-ui, sans-serif; background: #eceae4; color: #1c1c1c;
         }
 
         h1 {
           padding: 0px 4px;
-          border-radius: 4px;
-          background-color: rgba(24, 20, 35, 0.03);
-          font-family: monospace;
+          border-radius: 8px;
+          background-color: #fcfbf8;
+          font-family: "Camera Plain Variable", ui-sans-serif, system-ui, sans-serif;
           font-size: 20px;
           line-height: 1.2;
         }
@@ -89,20 +89,20 @@ export default function Page() {
         }
 
         a {
-          color: #6341F0;
+          color: #1c1c1c;
           text-decoration: underline;
           cursor: pointer;
 
           @media (prefers-color-scheme: dark) {
-            color: #B3A1FF;
+            color: #5f5f5d;
           }
         }
 
         button {
           border-radius: 8px;
-          color: white;
+          color: #fcfbf8;
           cursor: pointer;
-          background-color: #553DB8;
+          background-color: #1c1c1c;
           border: none;
           padding: 0;
           margin-top: 4px;
@@ -114,8 +114,8 @@ export default function Page() {
             font-size: 20px;
             font-weight: bold;
             line-height: 1;
-            background-color: #7553FF;
-            border: 1px solid #553DB8;
+            background-color: #1c1c1c;
+            border: 1px solid #1c1c1c;
             transform: translateY(-4px);
           }
 
@@ -130,13 +130,13 @@ export default function Page() {
 
         .description {
           text-align: center;
-          color: #6E6C75;
+          color: #5f5f5d;
           max-width: 500px;
           line-height: 1.5;
           font-size: 20px;
 
           @media (prefers-color-scheme: dark) {
-            color: #A49FB5;
+            color: #5f5f5d;
           }
         }
 
@@ -149,9 +149,9 @@ export default function Page() {
           border-radius: 8px;
           font-size: 20px;
           line-height: 1;
-          background-color: #00F261;
-          border: 1px solid #00BF4D;
-          color: #181423;
+          background-color: #fcfbf8;
+          border: 1px solid #d8d5cc;
+          color: #1c1c1c;
         }
 
         .success_placeholder {

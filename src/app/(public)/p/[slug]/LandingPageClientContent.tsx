@@ -51,7 +51,7 @@ export function LandingPageClientContent({
 
   // Render only the claim section if the page is not claimed
   return (
-    <div className="container mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-spacing-10">
       <div className={`mb-6 flex flex-wrap items-center justify-end gap-2`}>
         {!isPageClaimed && (
           <>

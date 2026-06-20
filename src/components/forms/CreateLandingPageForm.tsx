@@ -433,7 +433,7 @@ export function CreateLandingPageForm({
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
       {/* --- Bagian Utama --- */}
-      <Card className="border-none shadow-none p-0">
+      <Card className="border-none  p-0">
         {/* <CardHeader className="p-0 mb-6">
           <CardTitle>Informasi Utama</CardTitle>
         </CardHeader> */}
@@ -534,7 +534,7 @@ export function CreateLandingPageForm({
             rows={3}
             disabled={isPending}
           />
-          <p className="text-xs text-muted-foreground mt-1.5">
+          <p className="text-xs text-text-secondary mt-1.5">
             Maks. 2000 karakter.
           </p>
           {form.formState.errors.userDescription && (
@@ -551,20 +551,20 @@ export function CreateLandingPageForm({
           <label
             htmlFor="images-input"
             className={cn(
-              "flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-lg cursor-pointer",
-              "bg-muted/50 hover:bg-muted/80 transition-colors",
+              "flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-radius-lg cursor-pointer",
+              "bg-surface-muted/50 hover:bg-surface-muted/80 transition-colors",
               isPending ? "cursor-not-allowed opacity-60" : "",
-              form.formState.errors.images ? "border-red-500" : "border-border"
+              form.formState.errors.images ? "border-red-500" : "border-foreground-primary/10"
             )}
           >
             <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-              <UploadCloud className="w-8 h-8 mb-3 text-muted-foreground" />
-              <p className="mb-1 text-sm text-muted-foreground">
+              <UploadCloud className="w-8 h-8 mb-3 text-text-secondary" />
+              <p className="mb-1 text-sm text-text-secondary">
                 <span className="font-semibold">
                   Klik atau jatuhkan gambar di sini
                 </span>
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-text-secondary">
                 PNG, JPG, WEBP (Maks 3 file, @ 2MB)
               </p>
             </div>
@@ -629,7 +629,7 @@ export function CreateLandingPageForm({
           type="tel"
           disabled={isPending}
         />
-        <p className="text-xs text-muted-foreground mt-1.5">
+        <p className="text-xs text-text-secondary mt-1.5">
           Jika diisi, AI bisa menambahkan tombol chat WA.
         </p>
         {form.formState.errors.whatsappNumber && (
@@ -654,7 +654,7 @@ export function CreateLandingPageForm({
                 {testimonialFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="flex items-start gap-3 p-3 border rounded-md bg-muted/30"
+                    className="flex items-start gap-3 p-3 border rounded-radius-lg bg-surface-muted"
                   >
                     <div className="flex-1 space-y-2">
                       <Input
@@ -696,7 +696,7 @@ export function CreateLandingPageForm({
                       onClick={() => removeTestimonial(index)}
                       disabled={isPending}
                       aria-label="Hapus Testimoni"
-                      className="text-muted-foreground hover:text-destructive"
+                      className="text-text-secondary hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -742,7 +742,7 @@ export function CreateLandingPageForm({
                 {socialLinkFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="flex items-start gap-3 p-3 border rounded-md bg-muted/30"
+                    className="flex items-start gap-3 p-3 border rounded-radius-lg bg-surface-muted"
                   >
                     <div className="flex-1 grid grid-cols-3 gap-3">
                       <div className="col-span-1">
@@ -802,7 +802,7 @@ export function CreateLandingPageForm({
                       onClick={() => removeSocialLink(index)}
                       disabled={isPending}
                       aria-label="Hapus Link"
-                      className="text-muted-foreground hover:text-destructive"
+                      className="text-text-secondary hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -838,11 +838,11 @@ export function CreateLandingPageForm({
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4 space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-text-secondary">
               Biarkan AI memilihkan skema warna terbaik berdasarkan usaha Anda,
               atau kosongkan untuk menggunakan tema default.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-spacing-7">
               <Button
                 type="button"
                 variant="outline"
@@ -863,7 +863,7 @@ export function CreateLandingPageForm({
               {generatedPrimaryColor && (
                 <div className="flex items-center gap-2 text-sm">
                   <span
-                    className="h-5 w-5 rounded border border-border inline-block"
+                    className="h-5 w-5 rounded border border-foreground-primary/10 inline-block"
                     style={{ backgroundColor: generatedPrimaryColor }}
                   ></span>
                   <span>Warna utama: {generatedPrimaryColor}</span>

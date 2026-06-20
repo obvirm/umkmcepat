@@ -30,7 +30,7 @@ StickyCTAProps) {
 
   return (
     <motion.div
-      className="sticky bottom-0 left-0 right-0 z-40 p-4 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="sticky bottom-0 left-0 right-0 z-40 p-4 border-t border-foreground-primary/10 bg-surface-warm-white/95 backdrop-blur supports-[backdrop-filter]:bg-surface-warm-white/60"
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -40,7 +40,7 @@ StickyCTAProps) {
         {whatsappCTA && whatsappNumber ? (
           <Button
             size="lg"
-            className="cursor-pointer w-full max-w-sm shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+            className="cursor-pointer w-full max-w-sm lovable-shadow-subtle bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={handleCTAClick}
             // Removed inline style, use shadcn classes
           >
@@ -50,7 +50,7 @@ StickyCTAProps) {
         ) : (
           <Button
             size="lg"
-            className="w-full max-w-sm shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+            className="w-full max-w-sm lovable-shadow-subtle bg-primary text-primary-foreground hover:bg-primary/90"
             // Use default primary button style if not WhatsApp
           >
             {ctaText || "Lihat Penawaran"} {/* Fallback text */}

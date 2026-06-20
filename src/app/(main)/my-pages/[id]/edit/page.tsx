@@ -157,7 +157,7 @@ export default function EditLandingPage() {
   // Handle session loading
   if (sessionStatus === "loading" || isLoading) {
     return (
-      <div className="container mx-auto p-8">
+      <div className="container mx-auto p-spacing-10">
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -167,7 +167,7 @@ export default function EditLandingPage() {
   if (isError || !pageData) {
     // Explicitly check if pageData is falsy after loading/auth checks
     return (
-      <div className="container mx-auto p-8">
+      <div className="container mx-auto p-spacing-10">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
@@ -197,7 +197,7 @@ export default function EditLandingPage() {
       </div>
 
       <h1 className="text-3xl font-bold mb-2">Ubah Informasi Halaman</h1>
-      <p className="text-muted-foreground mb-6">
+      <p className="text-text-secondary mb-6">
         Ubah detail dasar untuk halaman &ldquo;{pageData.businessName}&rdquo;.
       </p>
 

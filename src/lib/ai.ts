@@ -153,7 +153,7 @@ export async function generateLandingPageContent(
     - subheadline: Supportive, slightly longer (max 20 words).
     - description: Persuasive, highlighting benefits (3-5 sentences).
     - features: 3-5 bullet points of key features/benefits (string array).
-    - primaryColor: Choose an attractive hex color code suitable for the business category.
+    - primaryColor: Use the Lovable-inspired action color #1c1c1c unless there is a strong content reason; keep visual design warm, neutral, and minimal.
     - ctaText: Generate a strong Call to Action text. If WhatsApp is provided, invite contact via WhatsApp. If not, use a non-WhatsApp CTA.
     - layoutStyle: Suggest 'standard' or 'minimal'.
     - tone: Suggest 'professional', 'friendly', or 'persuasive'.
@@ -264,11 +264,11 @@ export async function generateColorTheme(
   category: string
 ): Promise<ColorThemeJson> {
   const systemPrompt = `
-    You are a UI color theme generator specializing in accessible and appealing themes for Indonesian SMEs (UMKM) based on shadcn/ui conventions.
+    You are a UI color theme generator for a Lovable-inspired UMKM builder.
     Output ONLY a valid JSON object matching the ColorThemeJson interface, with no extra text or markdown formatting.
-    All color values MUST be in HSL format as a string: "H S% L%" (e.g., "210 40% 96.1%"). Do NOT use Hex.
+    Use ONLY this warm-neutral palette as CSS color strings: #eceae4, #fcfbf8, #f7f4ed, #1c1c1c, #5f5f5d, #d8d5cc, #9f1d1d.
     Include every required shadcn-compatible key: primary, on-primary, secondary, on-secondary, background, on-background, surface, on-surface, accent, muted, border, success, error, card, on-card, popover, on-popover, destructive, on-destructive, input, ring, foreground, primary_foreground, secondary_foreground, muted_foreground, accent_foreground, destructive_foreground, card_foreground, popover_foreground.
-    Ensure foreground values have accessible contrast. Make colors suitable for the business category.
+    Prefer primary/action #1c1c1c, background #eceae4, card/surface #fcfbf8, muted #f7f4ed, secondary text #5f5f5d, border #d8d5cc. Ensure contrast.
   `;
 
   const userMessage = `
@@ -326,27 +326,23 @@ function normalizeColorTheme(parsedTheme: Partial<ColorThemeJson>): ColorThemeJs
   ];
 
   const finalTheme = {} as ColorThemeJson;
-  const hslRegex = /^\s*(\d{1,3}(\.\d+)?)\s+(\d{1,3}(\.\d+)?)%\s+(\d{1,3}(\.\d+)?)%\s*$/;
+  const colorRegex = /^\s*(#(?:[0-9a-fA-F]{3}){1,2}|\d{1,3}(?:\.\d+)?\s+\d{1,3}(?:\.\d+)?%\s+\d{1,3}(?:\.\d+)?%)\s*$/;
 
   for (const key of requiredKeys) {
     const value = parsedTheme[key];
-    if (typeof value === "string" && hslRegex.test(value)) {
+    if (typeof value === "string" && colorRegex.test(value)) {
       finalTheme[key] = value.trim();
       continue;
     }
 
     finalTheme[key] = getThemeFallback(key, finalTheme, parsedTheme);
-
-    if (!hslRegex.test(finalTheme[key])) {
-      throw new Error(`Invalid fallback HSL value for ${key}.`);
-    }
   }
 
-  if (parsedTheme["on-success"] && hslRegex.test(parsedTheme["on-success"])) {
+  if (parsedTheme["on-success"] && colorRegex.test(parsedTheme["on-success"])) {
     finalTheme["on-success"] = parsedTheme["on-success"].trim();
   }
 
-  if (parsedTheme["on-error"] && hslRegex.test(parsedTheme["on-error"])) {
+  if (parsedTheme["on-error"] && colorRegex.test(parsedTheme["on-error"])) {
     finalTheme["on-error"] = parsedTheme["on-error"].trim();
   }
 
@@ -359,35 +355,35 @@ function getThemeFallback(
   parsedTheme: Partial<ColorThemeJson>
 ): string {
   const fallbacks: Partial<Record<keyof ColorThemeJson, string>> = {
-    primary: "222 47% 11%",
-    "on-primary": "0 0% 100%",
-    secondary: "210 40% 96%",
-    "on-secondary": "222 47% 11%",
-    background: "0 0% 100%",
-    "on-background": "222 47% 11%",
-    surface: finalTheme.background || "0 0% 100%",
-    "on-surface": finalTheme["on-background"] || "222 47% 11%",
-    accent: finalTheme.primary || "217 91% 60%",
-    muted: finalTheme.secondary || "210 40% 96%",
-    border: "214 32% 91%",
-    success: "142 71% 45%",
-    error: "0 84% 60%",
-    card: finalTheme.surface || finalTheme.background || "0 0% 100%",
-    "on-card": finalTheme["on-surface"] || finalTheme["on-background"] || "222 47% 11%",
-    popover: finalTheme.card || "0 0% 100%",
-    "on-popover": finalTheme["on-card"] || "222 47% 11%",
-    destructive: finalTheme.error || "0 84% 60%",
-    "on-destructive": parsedTheme["on-error"] || "0 0% 100%",
-    input: finalTheme.border || "214 32% 91%",
-    ring: finalTheme.primary || "215 20% 65%",
-    foreground: finalTheme["on-background"] || "222 47% 11%",
-    primary_foreground: finalTheme["on-primary"] || "0 0% 100%",
-    secondary_foreground: finalTheme["on-secondary"] || "222 47% 11%",
-    muted_foreground: "215 16% 47%",
-    accent_foreground: finalTheme["on-primary"] || "0 0% 100%",
-    destructive_foreground: parsedTheme["on-error"] || finalTheme["on-destructive"] || "0 0% 100%",
-    card_foreground: finalTheme["on-card"] || "222 47% 11%",
-    popover_foreground: finalTheme["on-popover"] || "222 47% 11%",
+    primary: "#1c1c1c",
+    "on-primary": "#fcfbf8",
+    secondary: "#f7f4ed",
+    "on-secondary": "#1c1c1c",
+    background: "#eceae4",
+    "on-background": "#1c1c1c",
+    surface: finalTheme.background || "#fcfbf8",
+    "on-surface": finalTheme["on-background"] || "#1c1c1c",
+    accent: finalTheme.primary || "#1c1c1c",
+    muted: finalTheme.secondary || "#f7f4ed",
+    border: "#d8d5cc",
+    success: "#1c1c1c",
+    error: "#9f1d1d",
+    card: finalTheme.surface || finalTheme.background || "#fcfbf8",
+    "on-card": finalTheme["on-surface"] || finalTheme["on-background"] || "#1c1c1c",
+    popover: finalTheme.card || "#fcfbf8",
+    "on-popover": finalTheme["on-card"] || "#1c1c1c",
+    destructive: finalTheme.error || "#9f1d1d",
+    "on-destructive": parsedTheme["on-error"] || "#fcfbf8",
+    input: finalTheme.border || "#d8d5cc",
+    ring: finalTheme.primary || "#1c1c1c",
+    foreground: finalTheme["on-background"] || "#1c1c1c",
+    primary_foreground: finalTheme["on-primary"] || "#fcfbf8",
+    secondary_foreground: finalTheme["on-secondary"] || "#1c1c1c",
+    muted_foreground: "#5f5f5d",
+    accent_foreground: finalTheme["on-primary"] || "#fcfbf8",
+    destructive_foreground: parsedTheme["on-error"] || finalTheme["on-destructive"] || "#fcfbf8",
+    card_foreground: finalTheme["on-card"] || "#1c1c1c",
+    popover_foreground: finalTheme["on-popover"] || "#1c1c1c",
   };
 
   const fallback = fallbacks[key];

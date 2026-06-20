@@ -32,7 +32,7 @@ export default function RootLayout({
           </head>
           <body
             suppressHydrationWarning={true}
-            className={cn("min-h-screen bg-background font-sans antialiased")}
+            className={cn("min-h-screen bg-surface-warm-white font-sans antialiased")}
           >
             {/* REMOVED wrapper div, Header, main wrapper, Footer */}
             <AppProviders>{children}</AppProviders>

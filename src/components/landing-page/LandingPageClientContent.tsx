@@ -45,10 +45,10 @@ export function LandingPageClientContent({ pageData, session }: LandingPageClien
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-spacing-7">
           {isOwner ? (
             <>
-              <p className="text-xs text-muted-foreground flex-shrink-0">
+              <p className="text-xs text-text-secondary flex-shrink-0">
                 Anda adalah pemilik halaman ini.
               </p>
               <div className="flex-grow flex justify-end gap-2">
@@ -68,7 +68,7 @@ export function LandingPageClientContent({ pageData, session }: LandingPageClien
             </>
           ) : (
             <>
-              <p className="text-xs text-muted-foreground flex-shrink-0">
+              <p className="text-xs text-text-secondary flex-shrink-0">
                 Klaim halaman ini untuk mengedit dan mengelolanya.
               </p>
               <div className="flex-grow flex justify-end">

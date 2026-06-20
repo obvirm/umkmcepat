@@ -54,7 +54,7 @@ const CtaSectionContent: React.FC<{
                }}
                onCancel={() => setIsEditingCta(false)} 
                className="inline-block text-lg" 
-               inputClassName="text-lg px-2 py-1 border border-primary rounded bg-background text-foreground focus:ring-1 focus:ring-primary"
+               inputClassName="text-lg px-2 py-1 border border-primary rounded bg-surface-warm-white text-foreground focus:ring-1 focus:ring-primary"
                placeholder="Teks Tombol Aksi"
                hideControls={true}
             />
@@ -63,7 +63,7 @@ const CtaSectionContent: React.FC<{
         return (
             <Button
                 size="lg"
-                className="cursor-pointer w-full max-w-xs shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-4 relative group"
+                className="cursor-pointer w-full max-w-xs lovable-shadow-subtle bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-spacing-10 py-spacing-7 relative group"
                 onClick={!isOwner && whatsappCTA && whatsappNumber ? handleCTAClick : undefined}
             >
                 <span 
@@ -148,7 +148,7 @@ export function LandingPageRenderer({
 
   return (
     <motion.div
-      className={cn("container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 md:py-16", fontClass)} // Use cn here
+      className={cn("container mx-auto max-w-4xl px-4 sm:px-6 lg:px-spacing-10 py-12 md:py-16", fontClass)} // Use cn here
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -171,7 +171,7 @@ export function LandingPageRenderer({
            isOwner={isOwner}
            fieldKey="subheadline"
            onSave={handleSaveContent} // Use passed prop
-           className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto"
+           className="text-lg md:text-xl lg:text-2xl text-text-secondary max-w-3xl mx-auto"
            inputClassName="text-lg md:text-xl lg:text-2xl"
            placeholder="Sub-judul atau tagline singkat"
          />
@@ -276,7 +276,7 @@ export function LandingPageRenderer({
 //                }}
 //                onCancel={() => setIsEditingCta(false)}
 //                className="inline-block text-lg"
-//                inputClassName="text-lg px-2 py-1 border border-primary rounded bg-background text-foreground focus:ring-1 focus:ring-primary"
+//                inputClassName="text-lg px-2 py-1 border border-primary rounded bg-surface-warm-white text-foreground focus:ring-1 focus:ring-primary"
 //                placeholder="Teks Tombol Aksi"
 //                hideControls={true}
 //             />
@@ -285,7 +285,7 @@ export function LandingPageRenderer({
 //         return (
 //             <Button
 //                 size="lg"
-//                 className="w-full max-w-xs shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-4 relative group"
+//                 className="w-full max-w-xs lovable-shadow-subtle bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-spacing-10 py-spacing-7 relative group"
 //                 onClick={!isOwner ? handleCTAClick : undefined} // Only trigger main click if not owner
 //             >
 //                 <span

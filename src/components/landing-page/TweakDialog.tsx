@@ -101,7 +101,7 @@ export function TweakDialog({ slug, tweaksLeft, children }: TweakDialogProps) {
             tweak: {tweaksLeft}x.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-spacing-7">
           <div>
             <Label htmlFor="instruction" className="sr-only">
               Instruksi Tweak
