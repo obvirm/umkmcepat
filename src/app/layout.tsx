@@ -1,5 +1,3 @@
-import { Inter } from "next/font/google";
-
 import { AppProviders } from "@/components/providers/AppProviders";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -8,8 +6,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 // import { auth } from "@/lib/auth";
 // import QueryProvider from "@/components/providers/QueryProvider";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "umkmcepat.com - AI Landing Page Generator untuk UMKM",
@@ -36,10 +32,7 @@ export default function RootLayout({
           </head>
           <body
             suppressHydrationWarning={true}
-            className={cn(
-              "min-h-screen bg-background font-sans antialiased",
-              inter.variable
-            )}
+            className={cn("min-h-screen bg-background font-sans antialiased")}
           >
             {/* REMOVED wrapper div, Header, main wrapper, Footer */}
             <AppProviders>{children}</AppProviders>

@@ -29,10 +29,10 @@ Early-stage Next.js SaaS codebase prepared for open-source collaboration. Some l
 
 ```bash
 npm install
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-Fill `.env.local` with local values. Do not commit real secrets.
+Fill `.env` with local values. Do not commit real secrets.
 
 Useful env vars:
 
@@ -71,6 +71,7 @@ Developer docs:
 - `docs/provider-architecture.md` — provider choices, config strategy, and adapter rules
 - `docs/providers.md` — supported provider names and env examples
 - `docs/local-development.md` — Docker Compose local infrastructure setup
+- `docs/docker-deployment.md` — Dockerfile and VPS-style Docker deployment notes
 
 ## Quality checks
 

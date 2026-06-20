@@ -16,6 +16,15 @@ Before editing code, read these files:
 - `.env.example` — required environment variables, placeholders only
 - `package.json` — available scripts and dependency context
 
+## Environment and Docker checks
+
+- Do not assume Docker access method. Check host OS and available Docker CLI first.
+- Windows: check Docker Desktop (`docker version`, `docker context ls`). If unavailable, check WSL Docker (`wsl -l -v`, then run Docker commands inside the active WSL distro when Docker is installed there).
+- Linux: use native Docker/Compose if available (`docker version`, `docker compose version`).
+- macOS: prefer Docker Desktop or compatible local Docker runtime if installed.
+- If Docker is unavailable, report that clearly and avoid inventing container status.
+- For local development, distinguish DB-only Docker Compose from app runtime. `docker-compose.yml` may run only infra; app may run separately via `npm run dev`.
+
 ## Core rules
 
 - Keep changes small, focused, and easy to review.
