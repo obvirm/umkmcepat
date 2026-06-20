@@ -19,6 +19,14 @@ export const metadata: Metadata = {
   title: "UMKM Cepat - AI Landing Page Generator untuk UMKM",
   description:
     "Buat landing page promosi instan dengan AI. Mudah, cepat, tanpa login.",
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -30,14 +38,6 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-          <head>
-            <link
-              rel="icon"
-              href="/logo.svg"
-              type="image/svg+xml"
-              sizes="any"
-            />
-          </head>
           <body
             suppressHydrationWarning={true}
             className={cn(

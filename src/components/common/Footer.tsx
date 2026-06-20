@@ -1,43 +1,33 @@
+import Image from "next/image";
 import Link from "next/link";
-
-const links = [
-  { href: "/#templates", label: "Templates" },
-  { href: "/#cara-kerja", label: "Cara kerja" },
-  { href: "/#open-source", label: "Open source" },
-  { href: "https://github.com/suryaelidanto/umkmcepat", label: "GitHub", external: true },
-];
 
 export function Footer() {
   return (
-    <footer className="border-t border-foreground-primary/10 bg-surface-base text-foreground-primary">
-      <div className="mx-auto flex max-w-7xl flex-col gap-spacing-10 px-4 py-10 sm:px-6 lg:px-spacing-10">
+    <footer className="border-t border-surface-warm-white/10 bg-[#151515] text-surface-warm-white">
+      <div className="mx-auto flex max-w-7xl flex-col gap-spacing-7 px-4 py-spacing-9 sm:px-6 lg:px-spacing-10">
         <div className="flex flex-col gap-spacing-9 md:flex-row md:items-center md:justify-between">
           <div>
-            <Link href="/" className="rounded-radius-lg text-lg font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base">
-              UMKM Cepat
+            <Link href="/" className="inline-flex items-center gap-2 rounded-radius-lg text-lg font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-surface-warm-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#151515]">
+              <Image src="/brand/umkmcepat-logo.svg" alt="Logo UMKM Cepat" width={36} height={36} />
+              <span>UMKM Cepat</span>
             </Link>
-            <p className="mt-2 max-w-md text-sm leading-6 text-text-secondary">
+            <p className="mt-2 max-w-md text-sm leading-6 text-surface-warm-white/62">
               Buat landing page promosi untuk usaha kecil dengan bantuan AI.
             </p>
           </div>
 
-          <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-text-secondary" aria-label="Navigasi footer">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noopener noreferrer" : undefined}
-                className="outline-none transition-colors hover:text-foreground-primary focus-visible:text-foreground-primary"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          <Link
+            href="https://github.com/suryaelidanto/umkmcepat"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-surface-warm-white/62 outline-none transition-colors hover:text-surface-warm-white focus-visible:text-surface-warm-white"
+          >
+            Github
+          </Link>
         </div>
 
-        <p className="border-t border-foreground-primary/10 pt-6 text-sm text-text-secondary">
-          © {new Date().getFullYear()} UMKM Cepat. umkmcepat.com
+        <p className="text-sm text-surface-warm-white/50">
+          © {new Date().getFullYear()} UMKM Cepat
         </p>
       </div>
     </footer>
