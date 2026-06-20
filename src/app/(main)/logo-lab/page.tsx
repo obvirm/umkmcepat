@@ -114,6 +114,21 @@ const logos: LogoSpec[] = [
   { id: 100, name: "Mata Etalase 100", svg: `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 128 128" role="img" aria-label="Mata Etalase 100"><rect x="10" y="10" width="108" height="108" rx="54" fill="#fff7ed"/><rect x="28" y="28" width="72" height="72" rx="24" fill="#431407" fill-opacity=".06"/><g><path d="M31 64c15-24 51-24 66 0-15 24-51 24-66 0Z" fill="#431407"/><circle cx="64" cy="64" r="13" fill="#fff7ed"/><circle cx="64" cy="64" r="6" fill="#fb923c"/><circle cx="24" cy="104" r="6" fill="#fb923c"/></g></svg>` },
 ];
 
+const rankedLogoIds = [
+  1, 6, 4, 8, 5, 7, 3, 9, 2, 10,
+  41, 46, 44, 48, 45, 47, 43, 49, 42, 50,
+  11, 16, 14, 18, 15, 17, 13, 19, 12, 20,
+  51, 56, 54, 58, 55, 57, 53, 59, 52, 60,
+  31, 36, 34, 38, 35, 37, 33, 39, 32, 40,
+  61, 66, 64, 68, 65, 67, 63, 69, 62, 70,
+  21, 26, 24, 28, 25, 27, 23, 29, 22, 30,
+  71, 76, 74, 78, 75, 77, 73, 79, 72, 80,
+  81, 86, 84, 88, 85, 87, 83, 89, 82, 90,
+  91, 96, 94, 98, 95, 97, 93, 99, 92, 100
+];
+
+const rankedLogos = rankedLogoIds.map((id) => logos.find((logo) => logo.id === id)).filter((logo): logo is LogoSpec => Boolean(logo));
+
 function dataUri(svg: string) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
@@ -125,15 +140,15 @@ export default function LogoLabPage() {
         <div className="rounded-radius-3xl border border-foreground-primary/10 bg-surface-warm-white p-spacing-9 lovable-shadow-subtle sm:p-spacing-10">
           <p className="text-sm font-medium uppercase tracking-[0.24em] text-text-secondary">Logo Lab</p>
           <h1 className="mt-3 max-w-4xl text-balance text-4xl font-semibold tracking-[-0.055em] sm:text-6xl">
-            100 kandidat SVG logo untuk UMKM Cepat
+            100 kandidat SVG logo untuk UMKM Cepat, sudah diranking
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-text-secondary sm:text-lg">
-            Arah visual: cepat, lokal, ramah, digital, etalase usaha. Semua file SVG siap download, cocok jadi logo/favikon awal.
+            Arah visual: cepat, lokal, ramah, digital, etalase usaha. Urutan sudah dari kandidat terbaik sampai terlemah. Semua file SVG siap download, cocok jadi logo/favikon awal.
           </p>
         </div>
 
         <div className="mt-8 grid gap-spacing-7 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-          {logos.map((logo) => (
+          {rankedLogos.map((logo, index) => (
             <article key={logo.id} className="rounded-radius-3xl border border-foreground-primary/10 bg-surface-warm-white p-4 lovable-shadow-subtle">
               <div className="flex aspect-square items-center justify-center rounded-radius-2xl bg-surface-base p-spacing-9">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -142,7 +157,7 @@ export default function LogoLabPage() {
               <div className="mt-4 flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-medium">{logo.name}</h2>
-                  <p className="mt-1 font-mono text-xs text-text-secondary">#{String(logo.id).padStart(3, "0")}</p>
+                  <p className="mt-1 font-mono text-xs text-text-secondary">Rank #{String(index + 1).padStart(3, "0")} · ID {String(logo.id).padStart(3, "0")}</p>
                 </div>
                 <a
                   href={dataUri(logo.svg)}

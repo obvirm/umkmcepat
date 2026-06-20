@@ -105,7 +105,7 @@ export default function HomePage() {
       <section className="lovable-aurora px-4 pb-12 pt-14 sm:px-6 sm:pb-16 sm:pt-16 lg:px-spacing-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center text-center">
           <h1 className="max-w-5xl text-balance text-[clamp(3.6rem,9.4vw,8.25rem)] font-semibold leading-[0.86] tracking-[-0.075em]">
-            Buat asdasddlanding page UMKM dengan AI
+            Buat landing page UMKM dengan AI
           </h1>
           <p className="mt-6 max-w-2xl text-balance text-lg leading-8 text-text-secondary sm:text-xl">
             Ceritakan usahamu. UMKM Cepat menyusun halaman promosi yang rapi, siap diedit, dan mudah dibagikan.

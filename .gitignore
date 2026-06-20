@@ -45,7 +45,7 @@ next-env.d.ts
 .qodo
 
 # Local automation/browser artifacts
-.agent/
+.browser/
 .pi/
 
 # Dev/runtime logs

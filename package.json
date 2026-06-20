@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/next-dev.mjs",
     "build": "npm run lint && npm run typecheck && next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
@@ -14,7 +14,7 @@
     "prepare": "husky",
     "verify": "npm run test && npm run build",
     "commitlint": "commitlint --from HEAD~1 --to HEAD --verbose",
-    "dev:clean": "node scripts/clean-next-cache.mjs && next dev",
+    "dev:clean": "node scripts/clean-next-cache.mjs && node scripts/next-dev.mjs",
     "dev:docker": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up app",
     "docker:dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up app",
     "docker:prod": "docker compose -f docker-compose.prod.yml up -d --build"

@@ -46,10 +46,12 @@ cp .env.example .env
 npm run dev
 ```
 
-If `.next` gets stale or the app shows 500 errors for missing manifest files:
+`npm run dev` starts Next with polling enabled by default, kills stale dev servers on ports `3000` and `3001`, cleans stale `.next` cache, and pins Next to port `3000`. This is more reliable for this repo on a Windows drive.
+
+If you need to skip the automatic cleanup for a special debugging session:
 
 ```bash
-npm run dev:clean
+SKIP_DEV_PORT_KILL=true SKIP_NEXT_CLEAN=true npm run dev
 ```
 
 Open `http://localhost:3000`.
