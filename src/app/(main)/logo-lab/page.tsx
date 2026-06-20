@@ -157,7 +157,7 @@ export default function LogoLabPage() {
               <div className="mt-4 flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-medium">{logo.name}</h2>
-                  <p className="mt-1 font-mono text-xs text-text-secondary">Rank #{String(index + 1).padStart(3, "0")} · ID {String(logo.id).padStart(3, "0")}</p>
+                  <p className="mt-1 font-mono text-xs text-text-secondary">Rank #{String(index + 1).padStart(3, "0")} - ID {String(logo.id).padStart(3, "0")}</p>
                 </div>
                 <a
                   href={dataUri(logo.svg)}
