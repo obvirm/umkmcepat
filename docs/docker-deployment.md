@@ -18,7 +18,33 @@ Local database URL:
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/umkmcepat?schema=public"
 ```
 
-## App + database containers
+## Dev app + database containers
+
+Use this when you want Docker-based development with hot reload:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up app
+```
+
+On Windows with WSL Docker and a repo mounted from `D:\...`, the dev compose file enables polling:
+
+```env
+WATCHPACK_POLLING=true
+CHOKIDAR_USEPOLLING=true
+```
+
+It also mounts container-only volumes for:
+
+```text
+/app/node_modules
+/app/.next
+```
+
+This avoids Windows/Linux dependency conflicts and reduces host `.next` cache corruption.
+
+For the smoothest hot reload, keep the repo inside the WSL filesystem, for example `~/code/umkmcepat`, and edit through VS Code Remote WSL.
+
+## App + database production containers
 
 Use this for a simple VPS-style container run:
 
@@ -69,3 +95,4 @@ For VPS, change `POSTGRES_PASSWORD` and do not expose port `5432` publicly unles
 - Migrations run at container startup.
 - Local uploads are persisted in the `uploads` Docker volume.
 - For serious production, prefer S3/R2 object storage over local uploads.
+- If local dev returns 500 errors with missing `.next` manifest files, stop the dev server and run `npm run dev:clean`.

@@ -38,7 +38,7 @@ Redis is reserved for future queue/rate-limit work.
 docker compose --profile redis up -d redis
 ```
 
-## App
+## App without Docker
 
 ```bash
 npm install
@@ -46,7 +46,23 @@ cp .env.example .env
 npm run dev
 ```
 
+If `.next` gets stale or the app shows 500 errors for missing manifest files:
+
+```bash
+npm run dev:clean
+```
+
 Open `http://localhost:3000`.
+
+## App with Docker hot reload
+
+From WSL repo path:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up app
+```
+
+The dev Docker setup uses bind mounts for source files and container-only volumes for `/app/node_modules` and `/app/.next`. Polling is enabled for Windows-drive compatibility.
 
 ## Logs
 
