@@ -16,7 +16,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "umkmcepat.com - AI Landing Page Generator untuk UMKM",
+  title: "UMKM Cepat - AI Landing Page Generator untuk UMKM",
   description:
     "Buat landing page promosi instan dengan AI. Mudah, cepat, tanpa login.",
 };
