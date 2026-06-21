@@ -33,6 +33,7 @@ services:
       NEXT_PUBLIC_BASE_URL: ${NINE_ROUTER_PUBLIC_URL:-http://localhost:20129}
     ports:
       - "127.0.0.1:20129:20128"
+      - "[::1]:20129:20128"
     volumes:
       - nine_router_data:/app/data
 
