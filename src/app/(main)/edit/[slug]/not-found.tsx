@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-center px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-surface-warm-white text-center px-4">
       <AlertTriangle className="h-16 w-16 text-yellow-500 mb-6" />
       <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-4">
         404 - Halaman Tidak Ditemukan

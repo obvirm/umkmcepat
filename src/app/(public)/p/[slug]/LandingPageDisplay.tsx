@@ -65,42 +65,42 @@ interface LandingPageDisplayProps {
 
 // Definisikan tema warna default (sama seperti di API route)
 const defaultColorTheme: ColorThemeJson = {
-  primary: "hsl(222.2 47.4% 11.2%)",
-  "on-primary": "hsl(0 0% 100%)",
-  secondary: "hsl(210 40% 96.1%)",
-  "on-secondary": "hsl(222.2 47.4% 11.2%)",
-  background: "hsl(0 0% 100%)",
-  "on-background": "hsl(222.2 47.4% 11.2%)",
-  surface: "hsl(0 0% 100%)", // Often same as background or card
-  "on-surface": "hsl(222.2 47.4% 11.2%)",
-  accent: "hsl(217.2 91.2% 59.8%)",
-  muted: "hsl(210 40% 96.1%)",
-  border: "hsl(214.3 31.8% 91.4%)",
-  success: "hsl(142.1 70.6% 45.3%)", // Example HSL for success
-  error: "hsl(0 84.2% 60.2%)", // Example HSL for error
+  primary: "#1c1c1c",
+  "on-primary": "#fcfbf8",
+  secondary: "#f7f4ed",
+  "on-secondary": "#1c1c1c",
+  background: "#fcfbf8",
+  "on-background": "#1c1c1c",
+  surface: "#fcfbf8", // Often same as background or card
+  "on-surface": "#1c1c1c",
+  accent: "#eceae4",
+  muted: "#f7f4ed",
+  border: "#d8d5cc",
+  success: "#1c1c1c", // Example HSL for success
+  error: "#9f1d1d", // Example HSL for error
   // Added missing ones for full shadcn compatibility
-  card: "hsl(0 0% 100%)",
-  "on-card": "hsl(222.2 47.4% 11.2%)",
-  popover: "hsl(0 0% 100%)",
-  "on-popover": "hsl(222.2 47.4% 11.2%)",
-  destructive: "hsl(0 84.2% 60.2%)", // alias for error
-  "on-destructive": "hsl(0 0% 100%)", // Added missing property
-  input: "hsl(214.3 31.8% 91.4%)", // Use 'input' key
-  ring: "hsl(215 20.2% 65.1%)", // focus ring etc.
+  card: "#fcfbf8",
+  "on-card": "#1c1c1c",
+  popover: "#fcfbf8",
+  "on-popover": "#1c1c1c",
+  destructive: "#9f1d1d", // alias for error
+  "on-destructive": "#fcfbf8", // Added missing property
+  input: "#d8d5cc", // Use 'input' key
+  ring: "#1c1c1c", // focus ring etc.
 
   // Add missing foreground variants based on convention
-  foreground: "hsl(222.2 47.4% 11.2%)", // Same as on-background
-  primary_foreground: "hsl(0 0% 100%)", // Same as on-primary
-  secondary_foreground: "hsl(222.2 47.4% 11.2%)", // Same as on-secondary
-  muted_foreground: "hsl(215.4 16.3% 46.9%)", // Default shadcn muted-foreground
-  accent_foreground: "hsl(0 0% 100%)", // Often same as on-primary
-  destructive_foreground: "hsl(0 0% 100%)", // Same as on-destructive
-  card_foreground: "hsl(222.2 47.4% 11.2%)", // Same as on-card
-  popover_foreground: "hsl(222.2 47.4% 11.2%)", // Same as on-popover
+  foreground: "#1c1c1c", // Same as on-background
+  primary_foreground: "#fcfbf8", // Same as on-primary
+  secondary_foreground: "#1c1c1c", // Same as on-secondary
+  muted_foreground: "#5f5f5d", // Default shadcn muted-foreground
+  accent_foreground: "#fcfbf8", // Often same as on-primary
+  destructive_foreground: "#fcfbf8", // Same as on-destructive
+  card_foreground: "#1c1c1c", // Same as on-card
+  popover_foreground: "#1c1c1c", // Same as on-popover
 
   // Optional (can be omitted or added)
-  // "on-success": "hsl(0 0% 100%)",
-  // "on-error": "hsl(0 0% 100%)",
+  // "on-success": "#fcfbf8",
+  // "on-error": "#fcfbf8",
 };
 
 // Define an extended CSS Properties type to include our theme variables
@@ -333,13 +333,13 @@ export function LandingPageDisplay({
   return (
     <div className="relative overflow-x-hidden" style={themeStyle}>
       {/* Client Content (Claim/Tweak Buttons) */}
-      <div className="container mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-4xl px-spacing-7 pt-spacing-7 sm:px-spacing-9 lg:px-spacing-10">
         {/* Assuming LandingPageClientContent is okay here */}
         <LandingPageClientContent pageData={pageData} session={session} />
       </div>
 
       {/* Main Content Area */}
-      <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="container mx-auto max-w-4xl px-spacing-7 py-spacing-10 sm:px-spacing-9 md:py-spacing-12 lg:px-spacing-10">
         {/* Ensure only necessary props are passed down */}
         <LandingPageRenderer
           data={pageData.aiContent}
@@ -349,15 +349,15 @@ export function LandingPageDisplay({
         />
 
         {/* --- Share Buttons Section --- */}
-        <div className="my-10 md:my-12">
-          <Separator className="mb-6" />
+        <div className="my-spacing-11 md:my-spacing-12">
+          <Separator className="mb-spacing-9" />
           <ShareButtons url={pageUrl} title={pageTitle} />
         </div>
 
         {/* --- Gallery Section --- */}
         {pageData.images && pageData.images.length > 0 && (
           <motion.section
-            className="my-16 md:my-20 rounded-lg p-6 md:p-8 shadow-inner bg-card border"
+            className="my-spacing-14 rounded-radius-2xl border border-foreground-primary/10 bg-surface-warm-white p-spacing-9 md:p-spacing-10 lovable-shadow-subtle"
             variants={sectionVariants}
             initial="hidden"
             whileInView="visible"
@@ -369,15 +369,15 @@ export function LandingPageDisplay({
               isOwner={isOwner}
               fieldKey="galleryTitle"
               onSave={handleSaveContent}
-              className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10 text-center text-card-foreground"
-              inputClassName="text-2xl md:text-3xl font-semibold text-center"
+              className="text-[36px] font-semibold leading-[39.6px] tracking-[-0.9px] mb-spacing-10 text-center text-foreground-primary"
+              inputClassName="text-[36px] font-semibold leading-[39.6px] tracking-[-0.9px] text-center"
               placeholder="Judul Galeri"
             />
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-spacing-7">
               {pageData.images.map((imgUrl, index) => (
                 <div
                   key={index}
-                  className="relative aspect-[4/3] w-full sm:w-[48%] md:w-[31%] overflow-hidden rounded-lg shadow-md grow-0 shrink-0 cursor-pointer"
+                  className="relative aspect-[4/3] w-full sm:w-[48%] md:w-[31%] overflow-hidden rounded-radius-xl lovable-shadow-subtle grow-0 shrink-0 cursor-pointer"
                   onClick={() => {
                     setLightboxIndex(index);
                     setOpenLightbox(true);
@@ -399,7 +399,7 @@ export function LandingPageDisplay({
         {/* --- Testimonials Section --- */}
         {testimonials && testimonials.length > 0 && (
           <motion.section
-            className="my-16 md:my-20 text-center"
+            className="my-spacing-14 text-center"
             variants={sectionVariants}
             initial="hidden"
             whileInView="visible"
@@ -411,28 +411,28 @@ export function LandingPageDisplay({
               isOwner={isOwner}
               fieldKey="testimonialsTitle"
               onSave={handleSaveContent}
-              className="text-2xl lg:text-3xl font-semibold mb-8 text-foreground"
+              className="text-[36px] font-semibold leading-[39.6px] tracking-[-0.9px] mb-spacing-10 text-foreground-primary"
               inputClassName="text-2xl lg:text-3xl font-semibold text-center"
               placeholder="Judul Testimoni"
             />
             <div
-              className={`grid grid-cols-1 gap-6 ${
+              className={`grid grid-cols-1 gap-spacing-9 ${
                 testimonials.length > 1 ? "md:grid-cols-2" : ""
               }`}
             >
               {testimonials.map((testimonial, index) => (
                 <blockquote
                   key={index}
-                  className="p-6 md:p-8 rounded-r-lg text-left shadow-lg transition duration-300 hover:shadow-xl bg-card text-card-foreground border-l-4 border-primary"
+                  className="rounded-radius-xl border border-foreground-primary/10 bg-surface-warm-white p-spacing-9 text-left text-foreground-primary lovable-shadow-subtle transition duration-300"
                 >
                   <Quote
-                    className="h-5 w-5 mb-2 opacity-80 text-primary"
+                    className="h-5 w-5 mb-spacing-4 opacity-80 text-foreground-primary"
                     aria-hidden="true"
                   />
-                  <p className="italic leading-relaxed mb-3 text-card-foreground">
+                  <p className="leading-[24px] mb-spacing-6 text-foreground-primary">
                     {testimonial.comment}
                   </p>
-                  <footer className="text-sm font-medium text-foreground">
+                  <footer className="text-sm font-[480] text-text-secondary">
                     - {testimonial.name}
                   </footer>
                 </blockquote>
@@ -450,11 +450,11 @@ export function LandingPageDisplay({
             viewport={{ once: true, amount: 0.2 }}
           >
             <Separator
-              className="my-16 md:my-20"
+              className="my-spacing-14"
               style={{ backgroundColor: theme.border }}
             />
             <section
-              className="my-16 md:my-20 text-center rounded-lg p-8 md:p-10 shadow-inner"
+              className="my-spacing-14 text-center rounded-radius-lg p-spacing-10 md:p-10 lovable-shadow-subtle"
               style={{
                 backgroundColor: theme.surface,
                 border: `1px solid ${theme.border}`,
@@ -466,14 +466,14 @@ export function LandingPageDisplay({
                 isOwner={isOwner}
                 fieldKey="contactTitle"
                 onSave={handleSaveContent}
-                className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10"
-                inputClassName="text-2xl md:text-3xl font-semibold text-center"
+                className="text-[36px] font-semibold leading-[39.6px] tracking-[-0.9px] mb-spacing-10"
+                inputClassName="text-[36px] font-semibold leading-[39.6px] tracking-[-0.9px] text-center"
                 placeholder="Judul Kontak"
               />
-              <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-col items-center gap-spacing-9">
                 {address && (
                   <div
-                    className="flex items-center gap-3 md:text-lg"
+                    className="flex items-center gap-spacing-6 md:text-lg"
                     style={{ color: theme["on-surface"] }}
                   >
                     <MapPin className="w-5 h-5 flex-shrink-0" />
@@ -481,14 +481,14 @@ export function LandingPageDisplay({
                   </div>
                 )}
                 {socialLinks && socialLinks.length > 0 && (
-                  <div className="mt-8 flex flex-wrap justify-center gap-4">
+                  <div className="mt-8 flex flex-wrap justify-center gap-spacing-7">
                     {socialLinks.map((link, index) => (
                       <a
                         key={index}
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center p-3 rounded-full transition-colors duration-200 bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
+                        className="inline-flex items-center justify-center p-spacing-6 rounded-radius-lg transition-colors duration-200 bg-surface-muted text-foreground-primary hover:bg-action-primary hover:text-surface-warm-white"
                         aria-label={`Kunjungi ${link.platform}`}
                       >
                         <SocialIcon
@@ -513,14 +513,14 @@ export function LandingPageDisplay({
       </div>
 
       {/* --- Watermark Section (Always shows now) --- */}
-      <footer className="text-center py-6 border-t border-border mt-16">
-        <p className="text-xs text-muted-foreground">
+      <footer className="text-center py-spacing-9 border-t border-foreground-primary/10 mt-spacing-14">
+        <p className="text-xs text-text-secondary">
           Dibuat dengan {" "}
           <Link
             href="https://umkmcepat.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium hover:underline text-primary/80"
+            className="font-[480] hover:underline text-foreground-primary"
           >
             umkmcepat.com
           </Link>

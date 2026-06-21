@@ -109,7 +109,7 @@ export default async function EditLandingPage({ params, searchParams }: Props) {
     // If verification is successful, render the form
     return (
         <div className="container mx-auto max-w-2xl px-4 py-12">
-            <Card className="w-full border border-border/60 shadow-none">
+            <Card className="w-full border border-foreground-primary/10 ">
                 <CardHeader>
                     <CardTitle className="text-2xl">✏️ Edit Landing Page</CardTitle>
                     <CardDescription>

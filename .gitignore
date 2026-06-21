@@ -44,6 +44,12 @@ next-env.d.ts
 .env.sentry-build-plugin
 .qodo
 
-# Dev logs
-.dev.err.log
-.dev.log
+# Local automation/browser artifacts
+.browser/
+.pi/
+
+# Dev/runtime logs
+*.log
+*.err.log
+# Local dev process files
+*.pid

@@ -21,7 +21,7 @@ export default function MainLayout({
 
   // Always render with Header and Footer
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="relative flex min-h-screen flex-col bg-surface-warm-white">
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

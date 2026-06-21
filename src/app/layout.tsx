@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/AppProviders";
 import { Toaster } from "@/components/ui/sonner";
@@ -9,12 +9,24 @@ import "./globals.css";
 // import { auth } from "@/lib/auth";
 // import QueryProvider from "@/components/providers/QueryProvider";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "umkmcepat.com - AI Landing Page Generator untuk UMKM",
+  title: "UMKM Cepat - AI Landing Page Generator untuk UMKM",
   description:
     "Buat landing page promosi instan dengan AI. Mudah, cepat, tanpa login.",
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -26,19 +38,11 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-          <head>
-            <link
-              rel="icon"
-              href="/logo.svg"
-              type="image/svg+xml"
-              sizes="any"
-            />
-          </head>
           <body
             suppressHydrationWarning={true}
             className={cn(
-              "min-h-screen bg-background font-sans antialiased",
-              inter.variable
+              "min-h-screen bg-surface-warm-white font-sans antialiased",
+              plusJakartaSans.variable
             )}
           >
             {/* REMOVED wrapper div, Header, main wrapper, Footer */}

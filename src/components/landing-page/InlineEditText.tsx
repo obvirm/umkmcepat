@@ -236,7 +236,7 @@ export function InlineEditText({
       return (
         <Tag
           className={cn(
-            "cursor-pointer relative group border border-transparent hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus:ring-1 focus:ring-primary p-1 -m-1 rounded transition-colors duration-150 ease-in-out min-h-[1em] w-full block", // Make block to allow click anywhere
+            "cursor-pointer relative group border border-transparent hover:bg-surface-muted/50 focus:bg-surface-muted/50 focus:outline-none focus:ring-1 focus:ring-action-primary p-1 -m-1 rounded-radius-sm transition-colors duration-150 ease-in-out min-h-[1em] w-full block", // Make block to allow click anywhere
             className
           )}
           onClick={() => setIsEditing(true)}
@@ -259,12 +259,12 @@ export function InlineEditText({
               currentValue
             )
           ) : (
-            <span className="text-muted-foreground italic opacity-70">
+            <span className="text-text-secondary italic opacity-70">
               {placeholder}
             </span>
           )}
           {/* Simplified Edit icon, appears on hover/focus */}
-          <Edit className="h-3 w-3 absolute top-1 right-1 text-muted-foreground opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none" />
+          <Edit className="h-3 w-3 absolute top-1 right-1 text-text-secondary opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity pointer-events-none" />
         </Tag>
       );
     }

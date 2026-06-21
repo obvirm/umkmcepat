@@ -335,7 +335,7 @@ export default function MyPagesDashboard() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">
+                      <Label className="text-xs text-text-secondary">
                         Link Publik:
                       </Label>
                       <Link
@@ -383,8 +383,8 @@ export default function MyPagesDashboard() {
             </div>
           </>
         ) : (
-          <div className="text-center py-10 border rounded-lg bg-card">
-            <p className="text-muted-foreground mb-4">
+          <div className="text-center py-10 border rounded-radius-lg bg-surface-warm-white">
+            <p className="text-text-secondary mb-4">
               Anda belum membuat landing page.
             </p>
             <Button asChild>
