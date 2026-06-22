@@ -167,7 +167,6 @@ export function HomePromptForm() {
         <label htmlFor="hero-prompt" className="sr-only">
           Ceritakan usaha yang ingin dibuatkan website
         </label>
-
         {isLoading && !isContinuing ? (
           <div className="flex h-36 w-full items-center px-spacing-9 py-spacing-9">
             <div className="flex items-center space-x-2 text-surface-warm-white/80 sm:text-lg">
@@ -180,7 +179,7 @@ export function HomePromptForm() {
         ) : (
           <textarea
             id="hero-prompt"
-            name="prompt"
+            name="business-story"
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
             placeholder="Tulis usahamu di sini... contoh: Saya jual sambal rumahan, butuh website hangat dengan tombol WhatsApp."
@@ -188,7 +187,6 @@ export function HomePromptForm() {
             className="h-36 w-full resize-none bg-transparent px-spacing-9 py-spacing-9 text-base leading-7 text-surface-warm-white outline-none placeholder:text-surface-warm-white/42 disabled:opacity-70 sm:text-lg"
           />
         )}
-
         <div className="flex items-center justify-between gap-spacing-5 px-spacing-7 pb-spacing-7">
           <ModeSelect
             value={mode}
@@ -218,7 +216,7 @@ export function HomePromptForm() {
         </div>
         {isContinuing ? (
           <p className="px-spacing-7 pb-spacing-7 text-sm text-surface-warm-white/58">
-            Prompt kamu dipulihkan. Kami sedang menyiapkan proyekmu.
+            Cerita usahamu sudah tersimpan. AI sedang menyiapkan website kamu.
           </p>
         ) : null}
       </form>
@@ -228,8 +226,8 @@ export function HomePromptForm() {
           <DialogHeader>
             <DialogTitle>Masuk dulu untuk lanjut</DialogTitle>
             <DialogDescription>
-              Prompt kamu sudah disimpan. Setelah masuk, kami lanjutkan otomatis
-              tanpa perlu mengetik ulang.
+              Cerita usahamu sudah disimpan. Setelah masuk, AI akan lanjut
+              otomatis tanpa perlu mengetik ulang.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col-reverse gap-spacing-4 sm:flex-row sm:justify-end">
