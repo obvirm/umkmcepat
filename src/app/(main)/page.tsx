@@ -51,13 +51,13 @@ export default async function HomePage() {
         <div className="mx-auto flex min-h-[calc(100dvh-12rem)] w-full max-w-5xl flex-col items-center justify-center text-center">
           <h1 className="max-w-4xl text-balance text-[clamp(3rem,6vw,5.4rem)] font-semibold leading-[0.96] tracking-[-0.055em] text-surface-warm-white">
             {session?.user
-              ? "Mau bikin apa hari ini?"
+              ? "Website apa yang mau kamu buat?"
               : "Usahamu layak punya website. 100% gratis."}
           </h1>
           <p className="mt-spacing-7 max-w-2xl text-balance text-lg leading-7 text-surface-warm-white/72 sm:text-xl">
             {session?.user
-              ? "Ceritakan rencana baru, atau lanjutkan website yang sudah kamu buat."
-              : "Ceritakan usahamu, lalu AI bantu susun jadi halaman online yang profesional dan siap kamu bagikan."}
+              ? "Tulis kebutuhan usahamu. AI bantu susun website yang cocok untuk pelangganmu."
+              : "Tulis tentang usahamu. AI bantu buatkan website yang rapi, jelas, dan siap dibagikan."}
           </p>
 
           <HomePromptForm />
@@ -70,11 +70,11 @@ export default async function HomePage() {
             <div className="rounded-[32px] border border-surface-warm-white/10 bg-[#1f1f1d] p-spacing-7 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-spacing-10">
               <div className="max-w-xl">
                 <h2 className="text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">
-                  Proyek kamu
+                  Website kamu
                 </h2>
                 <p className="mt-spacing-4 text-sm leading-6 text-surface-warm-white/62 sm:text-base">
-                  Lanjutkan website yang sudah dibuat, atau bersihkan proyek
-                  lama yang tidak dipakai.
+                  Buka lagi website yang sudah kamu buat, atau hapus yang tidak
+                  dipakai.
                 </p>
               </div>
 
@@ -88,11 +88,11 @@ export default async function HomePage() {
               ) : (
                 <div className="mt-spacing-10 rounded-[26px] border border-dashed border-surface-warm-white/16 bg-surface-warm-white/[0.06] p-spacing-10 text-center">
                   <h3 className="text-xl font-semibold tracking-[-0.04em]">
-                    Belum ada proyek
+                    Belum ada website
                   </h3>
                   <p className="mx-auto mt-spacing-4 max-w-md text-sm leading-6 text-surface-warm-white/58">
-                    Ceritakan usahamu di atas. Website barumu akan muncul di
-                    sini.
+                    Tulis kebutuhan usahamu di atas. Website barumu akan muncul
+                    di sini.
                   </p>
                 </div>
               )}

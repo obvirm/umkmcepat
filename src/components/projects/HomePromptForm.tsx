@@ -113,14 +113,14 @@ export function HomePromptForm() {
         className="mt-spacing-12 w-full max-w-3xl overflow-visible rounded-[28px] border border-surface-warm-white/10 bg-[#232321] text-left shadow-[0_24px_80px_rgba(0,0,0,0.32)]"
       >
         <label htmlFor="hero-prompt" className="sr-only">
-          Ceritakan usaha yang ingin dibuatkan website
+          Tulis kebutuhan usaha yang ingin dibuatkan website
         </label>
         <textarea
           id="hero-prompt"
           name="business-story"
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
-          placeholder="Tulis usahamu di sini... contoh: Saya jual sambal rumahan, butuh website hangat dengan tombol WhatsApp."
+          placeholder="Tulis kebutuhan usahamu di sini... contoh: Saya jual produk rumahan dan ingin pelanggan bisa pesan lewat WhatsApp."
           disabled={isContinuing}
           className="h-36 w-full resize-none bg-transparent px-spacing-9 py-spacing-9 text-base leading-7 text-surface-warm-white outline-none placeholder:text-surface-warm-white/42 disabled:opacity-70 sm:text-lg"
         />
@@ -149,7 +149,7 @@ export function HomePromptForm() {
         </div>
         {isContinuing ? (
           <p className="px-spacing-7 pb-spacing-7 text-sm text-surface-warm-white/58">
-            Cerita usahamu sudah tersimpan. AI sedang menyiapkan website kamu.
+            Chat kamu sudah tersimpan. AI sedang menyiapkan website kamu.
           </p>
         ) : null}
       </form>
@@ -159,8 +159,8 @@ export function HomePromptForm() {
           <DialogHeader>
             <DialogTitle>Masuk dulu untuk lanjut</DialogTitle>
             <DialogDescription>
-              Cerita usahamu sudah disimpan. Setelah masuk, AI akan lanjut
-              otomatis tanpa perlu mengetik ulang.
+              Chat kamu sudah disimpan. Setelah masuk, AI akan lanjut otomatis
+              tanpa perlu mengetik ulang.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col-reverse gap-spacing-4 sm:flex-row sm:justify-end">

@@ -16,13 +16,13 @@ const options: ModeOption[] = [
   {
     value: "discuss",
     label: "Diskusi",
-    description: "Bahas dulu kebutuhan usahamu",
+    description: "AI bantu rapikan idemu dulu",
     Icon: MessagesSquare,
   },
   {
     value: "build",
     label: "Buat",
-    description: "Langsung buat website",
+    description: "AI langsung buatkan website",
     Icon: Hammer,
   },
 ];

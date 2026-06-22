@@ -13,9 +13,9 @@ type WorkspaceShellProps = {
 
 const progress = [
   "Memahami usaha dan calon pembeli",
-  "Menyusun struktur halaman",
-  "Menulis copy berbahasa Indonesia",
-  "Menyiapkan visual dan CTA WhatsApp",
+  "Menyusun isi halaman",
+  "Menulis kalimat yang mudah dipahami",
+  "Menyiapkan tombol WhatsApp",
 ];
 
 export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
@@ -104,9 +104,9 @@ export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
                     ))}
                 </div>
               ) : mode === "build" ? (
-                "Siap. Saya akan buat struktur website yang fokus ke pembeli, CTA jelas, dan nyaman dibuka dari HP."
+                "Siap. AI akan buat website yang jelas, mudah dipahami pelanggan, dan nyaman dibuka dari HP."
               ) : (
-                "Kita bahas dulu kebutuhan usahamu. Saya akan bantu susun tujuan, isi, dan arahan website sebelum dibuat."
+                "Kita bahas dulu kebutuhan usahamu. AI akan bantu merapikan isi dan arahan website sebelum dibuat."
               )}
               {status === "submitted" || status === "streaming" ? (
                 <p className="mt-spacing-4 text-xs text-surface-warm-white/46">
@@ -123,7 +123,7 @@ export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
             <div className="rounded-radius-2xl border border-surface-warm-white/10 bg-[#171716] p-spacing-7">
               <div className="flex items-center gap-spacing-5 text-sm font-medium">
                 <Code2 className="size-4" aria-hidden="true" />
-                Progress
+                Sedang dikerjakan
               </div>
               <ul className="mt-spacing-6 space-y-spacing-5 text-sm text-surface-warm-white/64">
                 {progress.map((item) => (
@@ -149,7 +149,7 @@ export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
               placeholder={
                 mode === "build"
                   ? "Minta perubahan, contoh: buat lebih premium..."
-                  : "Ceritakan usaha, pembeli, atau tujuan websitemu..."
+                  : "Tulis kebutuhan usaha, pelanggan, atau tujuan websitemu..."
               }
               className="w-full resize-none bg-transparent px-spacing-4 py-spacing-4 text-sm leading-6 text-surface-warm-white outline-none placeholder:text-surface-warm-white/38"
             />
@@ -170,7 +170,7 @@ export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
           <div className="mb-spacing-5 flex flex-wrap items-center justify-between gap-spacing-5 rounded-[22px] bg-surface-warm-white px-spacing-5 py-spacing-4">
             <div className="flex items-center gap-spacing-4 text-sm font-medium">
               <Globe2 className="size-4" aria-hidden="true" />
-              Preview
+              Tampilan website
             </div>
             <div className="flex rounded-full bg-surface-muted p-1 text-sm">
               <button
@@ -179,7 +179,7 @@ export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
                 className={`flex items-center gap-spacing-3 rounded-full px-spacing-6 py-spacing-3 transition ${viewport === "desktop" ? "bg-foreground-primary text-surface-warm-white" : "text-text-secondary hover:text-foreground-primary"}`}
               >
                 <Monitor className="size-4" aria-hidden="true" />
-                Web
+                Komputer
               </button>
               <button
                 type="button"
@@ -187,7 +187,7 @@ export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
                 className={`flex items-center gap-spacing-3 rounded-full px-spacing-6 py-spacing-3 transition ${viewport === "mobile" ? "bg-foreground-primary text-surface-warm-white" : "text-text-secondary hover:text-foreground-primary"}`}
               >
                 <Smartphone className="size-4" aria-hidden="true" />
-                Mobile
+                HP
               </button>
             </div>
           </div>
@@ -198,13 +198,15 @@ export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
             >
               <div className="grid gap-spacing-10 p-spacing-10 md:grid-cols-[1.1fr_0.9fr] md:p-spacing-12">
                 <div>
-                  <p className="text-sm text-text-secondary">Preview website</p>
+                  <p className="text-sm text-text-secondary">
+                    Tampilan website
+                  </p>
                   <h2 className="mt-spacing-7 text-[clamp(2.4rem,5vw,4.6rem)] font-semibold leading-[0.95] tracking-[-0.06em]">
                     {previewTitle}
                   </h2>
                   <p className="mt-spacing-7 max-w-xl text-lg leading-8 text-text-secondary">
-                    Landing page yang dibuat untuk menjelaskan produk, membangun
-                    rasa percaya, dan mengarahkan pembeli ke WhatsApp.
+                    Halaman website untuk menjelaskan usaha, membangun rasa
+                    percaya, dan mengarahkan pelanggan ke WhatsApp.
                   </p>
                   <Button className="mt-spacing-9 rounded-radius-lg bg-foreground-primary px-spacing-10 text-surface-warm-white hover:bg-foreground-primary/90">
                     Pesan via WhatsApp
@@ -213,18 +215,22 @@ export function WorkspaceShell({ initialPrompt = "" }: WorkspaceShellProps) {
                 <div className="min-h-72 rounded-[28px] bg-[radial-gradient(circle_at_30%_20%,rgba(255,94,39,0.9),transparent_32%),radial-gradient(circle_at_72%_34%,rgba(255,31,128,0.76),transparent_30%),linear-gradient(135deg,#1c1c1c,#455ee8)]" />
               </div>
               <div className="grid gap-spacing-5 border-t border-foreground-primary/10 p-spacing-10 md:grid-cols-3">
-                {["Copy jelas", "Visual rapi", "CTA fokus"].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-radius-xl bg-surface-muted p-spacing-7"
-                  >
-                    <h3 className="font-semibold tracking-[-0.03em]">{item}</h3>
-                    <p className="mt-spacing-4 text-sm leading-6 text-text-secondary">
-                      Disusun agar pengunjung cepat paham dan mudah mengambil
-                      tindakan.
-                    </p>
-                  </div>
-                ))}
+                {["Tulisan jelas", "Tampilan rapi", "Arah pesan jelas"].map(
+                  (item) => (
+                    <div
+                      key={item}
+                      className="rounded-radius-xl bg-surface-muted p-spacing-7"
+                    >
+                      <h3 className="font-semibold tracking-[-0.03em]">
+                        {item}
+                      </h3>
+                      <p className="mt-spacing-4 text-sm leading-6 text-text-secondary">
+                        Disusun agar pelanggan cepat paham dan mudah menghubungi
+                        kamu.
+                      </p>
+                    </div>
+                  ),
+                )}
               </div>
             </div>
           </div>
