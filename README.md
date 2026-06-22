@@ -20,8 +20,6 @@ UMKM Cepat focuses on:
 
 This project is early-stage. The foundation is being shaped for public collaboration, strong design quality, and reliable local development.
 
-Some live integrations, such as Google OAuth, AI providers, Sentry, and cloud storage, need private credentials. They are optional for basic local development and are never committed to the repository.
-
 ## Tech overview
 
 - Next.js 15 and React 19
@@ -43,16 +41,7 @@ Start here:
 - [docs/9router.md](docs/9router.md) - AI gateway setup
 - [docs/observability.md](docs/observability.md) - optional Sentry setup
 
-Before opening a PR, run:
-
-```bash
-bun run check
-bun run build
-```
-
-## Security
-
-Do not commit `.env`, API keys, OAuth secrets, Sentry tokens, database URLs, or private customer data. Use `.env.example` for placeholders only.
+Before opening a PR, run the quality gate from [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
