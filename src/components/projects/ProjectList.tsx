@@ -40,10 +40,10 @@ export function ProjectList({ projects, deleteProject }: ProjectListProps) {
     startTransition(async () => {
       try {
         await deleteProject(formData);
-        toast.success("Proyek dihapus.");
+        toast.success("Website dihapus.");
         setSelectedProject(null);
       } catch {
-        toast.error("Gagal menghapus proyek.");
+        toast.error("Website belum berhasil dihapus.");
       }
     });
   }
@@ -109,9 +109,9 @@ export function ProjectList({ projects, deleteProject }: ProjectListProps) {
       >
         <DialogContent showCloseButton={!isPending}>
           <DialogHeader>
-            <DialogTitle>Hapus proyek?</DialogTitle>
+            <DialogTitle>Hapus website?</DialogTitle>
             <DialogDescription>
-              {`Proyek "${selectedProject?.title}" akan dihapus permanen.`}
+              Website ini akan dihapus permanen dan tidak bisa dikembalikan.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-spacing-4">
