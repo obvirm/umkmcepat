@@ -63,8 +63,8 @@ Do not run `bun run build` during normal development unless explicitly requested
 
 - Do not assume Docker is available. Check it first when needed.
 - App runs with `bun run dev`.
-- Postgres runs with `docker compose up -d postgres`.
-- 9Router runs with `docker compose --profile ai up -d 9router`.
+- Basic infrastructure runs with `docker compose up -d`.
+- AI infrastructure runs with `docker compose --profile ai up -d`.
 - If Docker is unavailable, report that clearly instead of inventing status.
 
 ## Repository cleanliness

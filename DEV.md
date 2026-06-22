@@ -27,8 +27,8 @@ bun run dev
 Run infrastructure in Docker:
 
 ```bash
-docker compose up -d postgres
-docker compose --profile ai up -d 9router
+docker compose up -d
+docker compose --profile ai up -d
 ```
 
 Apply database migrations:

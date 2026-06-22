@@ -26,7 +26,7 @@ Fill `.env` with local placeholders and private credentials.
 ## Start Postgres
 
 ```bash
-docker compose up -d postgres
+docker compose up -d
 ```
 
 Default local database URL:
@@ -51,7 +51,7 @@ bun run db:migrate
 ## Start 9Router
 
 ```bash
-docker compose --profile ai up -d 9router
+docker compose --profile ai up -d
 ```
 
 Open the 9Router dashboard:
