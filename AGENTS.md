@@ -40,13 +40,9 @@ Before handoff, run:
 npm run check
 ```
 
-Run this after meaningful code, config, provider, or deployment changes:
+Do not run `npm run build` during normal development unless explicitly requested or the change touches build/deployment behavior. It is slower, writes `.next/`, and can interfere with a running dev server. CI still runs build for protected branches.
 
-```bash
-npm run build
-```
-
-`npm run check` covers Prettier, ESLint with zero warnings, TypeScript, Vitest, and Knip.
+`npm run check` covers Prettier, ESLint with zero warnings, TypeScript, Vitest, and Knip. Treat it as the default local quality gate.
 
 ## Security
 
