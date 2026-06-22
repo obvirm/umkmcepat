@@ -47,15 +47,21 @@ const eslintConfig = [
       "import/order": [
         "error",
         {
-          groups: ["builtin", "external", "internal", ["parent", "sibling", "index"], "type"],
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["parent", "sibling", "index"],
+            "type",
+          ],
           "newlines-between": "always",
           alphabetize: { order: "asc", caseInsensitive: true },
         },
       ],
       "no-console": ["error", { allow: ["warn", "error"] }],
       "prefer-const": "error",
-      "eqeqeq": ["error", "always", { null: "ignore" }],
-      "curly": ["error", "all"],
+      eqeqeq: ["error", "always", { null: "ignore" }],
+      curly: ["error", "all"],
     },
   },
 ];

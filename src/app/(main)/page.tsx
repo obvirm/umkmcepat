@@ -1,8 +1,20 @@
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { HomePromptForm } from "@/components/projects/HomePromptForm";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+const HomePromptForm = dynamic(
+  () =>
+    import("@/components/projects/HomePromptForm").then(
+      (mod) => mod.HomePromptForm,
+    ),
+  {
+    loading: () => (
+      <div className="mt-spacing-12 h-36 w-full max-w-3xl animate-pulse rounded-[28px] border border-surface-warm-white/10 bg-[#232321]" />
+    ),
+  },
+);
 
 export default async function HomePage() {
   const session = await auth();
