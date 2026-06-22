@@ -9,7 +9,7 @@ UMKM Cepat backend -> 9Router -> Command Code/provider -> model
 ## Start locally
 
 ```bash
-docker compose --profile ai up -d 9router
+docker compose --profile ai up -d
 docker compose ps 9router
 ```
 

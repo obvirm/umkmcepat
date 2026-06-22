@@ -106,7 +106,7 @@ If another process owns 5432, show the user the process and ask before stopping 
 
 Start Postgres:
 
-  docker compose up -d postgres
+  docker compose up -d
   docker compose ps postgres
 
 If it fails:
@@ -153,7 +153,7 @@ After basic setup succeeds, say:
 
 If they want AI generation:
 
-  docker compose --profile ai up -d 9router
+  docker compose --profile ai up -d
   docker compose ps 9router
 
 Then tell them:
@@ -265,7 +265,7 @@ git clone https://github.com/suryaelidanto/umkmcepat.git
 cd umkmcepat
 bun install
 cp .env.example .env
-docker compose up -d postgres
+docker compose up -d
 bun run db:migrate
 bun run dev
 ```
@@ -283,7 +283,7 @@ This gives you a working local app. Continue only with the sections your change 
 ### AI generation
 
 ```bash
-docker compose --profile ai up -d 9router
+docker compose --profile ai up -d
 ```
 
 Open:

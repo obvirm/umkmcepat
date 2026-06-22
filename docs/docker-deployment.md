@@ -16,7 +16,7 @@ This keeps hot reload fast and avoids Windows-drive bind mount issues with Next.
 Start local infrastructure:
 
 ```bash
-docker compose up -d postgres
+docker compose up -d
 bun run db:migrate
 ```
 
