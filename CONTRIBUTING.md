@@ -4,29 +4,9 @@ Thanks for helping build UMKM Cepat.
 
 This guide gets you from a fresh machine to a running local app. The repo handles formatting, linting, type checks, tests, commit format, and CI checks for you.
 
-## Fast path
+## 1. Install tools
 
-After installing the tools for your OS:
-
-```bash
-git clone https://github.com/suryaelidanto/umkmcepat.git
-cd umkmcepat
-bun install
-cp .env.example .env
-docker compose up -d postgres
-bun run db:migrate
-bun run dev
-```
-
-Open:
-
-```text
-http://localhost:3000
-```
-
-## 1. Pick your environment
-
-Use one shell consistently for this repo. Do not mix Windows native `node_modules` with WSL `node_modules`.
+Pick your environment. Use one shell consistently for this repo. Do not mix Windows native `node_modules` with WSL `node_modules`.
 
 The Bun version is pinned in `package.json`.
 
@@ -130,34 +110,15 @@ If Docker needs sudo, either use `sudo docker ...` consistently or configure Doc
 
 </details>
 
-## 2. Clone and install
+## 2. Run the app
 
 ```bash
 git clone https://github.com/suryaelidanto/umkmcepat.git
 cd umkmcepat
 bun install
-```
-
-This repo uses Bun only. The canonical lockfile is `bun.lock`.
-
-## 3. Configure env
-
-```bash
 cp .env.example .env
-```
-
-The placeholders are enough for basic local development. Add real credentials only when you work on integrations that need them.
-
-## 4. Start the database
-
-```bash
 docker compose up -d postgres
 bun run db:migrate
-```
-
-## 5. Start the app
-
-```bash
 bun run dev
 ```
 
@@ -167,71 +128,14 @@ Open:
 http://localhost:3000
 ```
 
-## 6. Quality gate
+This repo uses Bun only. The canonical lockfile is `bun.lock`.
 
-Run this before opening a PR:
+## 3. Add what you need
 
-```bash
-bun run check
-```
+<details>
+<summary>AI generation</summary>
 
-It checks formatting, linting, TypeScript, tests, and unused code. The pre-commit hook runs it too.
-
-CI also runs:
-
-```bash
-bun run build
-```
-
-Run build locally when you touch build, Docker, deployment, Next config, or before a release.
-
-## 7. Branches and commits
-
-Create branches from `dev`:
-
-```bash
-git checkout dev
-git pull origin dev
-git checkout -b feat/short-name
-```
-
-Use Conventional Commits. The commit hook checks this.
-
-Good:
-
-```text
-feat: add project workspace shell
-fix: handle missing auth session
-docs: clarify setup
-chore: update dependencies
-```
-
-Open PRs into `dev` first unless maintainers say otherwise.
-
-## 8. UI components
-
-This project uses shadcn/ui-style owned components under `src/components/ui`.
-
-Add new primitives with the official CLI:
-
-```bash
-bunx shadcn@latest add button card input
-```
-
-Preview before changing existing primitives:
-
-```bash
-bunx shadcn@latest add button --dry-run
-bunx shadcn@latest add button --diff
-```
-
-Use existing local component patterns before adding new primitives.
-
-## Feature-specific setup
-
-### AI generation
-
-Set this up when you work on prompt generation, model selection, or generated output:
+Set this up when you work on prompt generation, model selection, or generated output.
 
 ```bash
 docker compose --profile ai up -d 9router
@@ -251,17 +155,79 @@ Default password:
 
 Then follow [docs/9router.md](docs/9router.md).
 
-### Google login
+</details>
 
-Set this up when you test real sign-in flows. Use this local callback URL:
+<details>
+<summary>Google login</summary>
+
+Set this up when you test real sign-in flows.
+
+Use this local callback URL:
 
 ```text
 http://localhost:3000/api/auth/callback/google
 ```
 
-### Observability
+</details>
 
-Set this up when you work on Sentry or monitoring. See [docs/observability.md](docs/observability.md).
+<details>
+<summary>Sentry / monitoring</summary>
+
+Set this up when you work on observability.
+
+See [docs/observability.md](docs/observability.md).
+
+</details>
+
+## 4. Before opening a PR
+
+Run:
+
+```bash
+bun run check
+```
+
+It checks formatting, linting, TypeScript, tests, and unused code. The pre-commit hook runs it too.
+
+CI also runs:
+
+```bash
+bun run build
+```
+
+Run build locally when you touch build, Docker, deployment, Next config, or before a release.
+
+Use Conventional Commits. The commit hook checks this.
+
+Good:
+
+```text
+feat: add project workspace shell
+fix: handle missing auth session
+docs: clarify setup
+chore: update dependencies
+```
+
+Open PRs into `dev` first unless maintainers say otherwise.
+
+## 5. UI components
+
+This project uses shadcn/ui-style owned components under `src/components/ui`.
+
+Add new primitives with the official CLI:
+
+```bash
+bunx shadcn@latest add button card input
+```
+
+Preview before changing existing primitives:
+
+```bash
+bunx shadcn@latest add button --dry-run
+bunx shadcn@latest add button --diff
+```
+
+Use existing local component patterns before adding new primitives.
 
 ## Troubleshooting
 
