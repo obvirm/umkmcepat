@@ -3,9 +3,9 @@
 <details>
 <summary>I use an AI coding assistant</summary>
 
-Copy this into your AI assistant (Claude, ChatGPT, Cursor, etc.):
+Copy this into your AI coding assistant (Codex, Claude, Cursor, etc.):
 
-<pre><code>You are helping set up UMKM Cepat, an open-source AI builder for Indonesian small businesses.
+<pre><code>You are helping a developer set up UMKM Cepat, an open-source AI builder for Indonesian small businesses. Your job is to handle the entire onboarding so they can start contributing with minimal effort.
 
 ## Project overview
 
@@ -16,78 +16,125 @@ Copy this into your AI assistant (Claude, ChatGPT, Cursor, etc.):
 - OAuth: NextAuth Google (optional)
 - Sentry (optional)
 
-## Setup instructions
+## Your workflow
 
-### 1. Read the project
+### 1. Ask what they want to work on
 
-Read `package.json`, `bun.lock`, `docker-compose.yml`, `.env.example`, and `CONTRIBUTING.md` from the repo root.
+Start by asking: "What are you working on today?"
 
-### 2. Detect OS
-
-Ask the user which OS they are on: Windows/WSL, macOS, or Linux.
-- If Windows, recommend WSL and check Docker Desktop WSL integration.
-- If macOS, recommend Docker Desktop or Colima.
-- If Linux, check for Docker Engine and sudo requirements.
-
-### 3. Check tools
-
-Verify Git, Bun, and Docker are installed. If not, guide the user to install them.
-- Bun version is pinned in `package.json`.
-
-### 4. Ask focus area
-
-Ask: "What are you working on today?"
-
-- General / docs / UI / tests → basic setup only
+- General / docs / UI / tests → basic setup only (fastest)
 - AI generation → basic + 9Router
 - Login / auth → basic + Google OAuth
 - Monitoring → basic + Sentry
 - Everything → all of the above
 
-### 5. Run setup
+Then ask: "What operating system are you on?"
 
-For basic setup, run:
+- Windows / WSL
+- macOS
+- Linux
+
+### 2. Check prerequisites
+
+Verify these are installed on their system. Guide them to install any that are missing.
+
+- Git (any recent version)
+- Bun (version pinned in package.json)
+- Docker with Compose
+
+For Windows: recommend WSL. Check Docker Desktop has WSL integration enabled.
+For macOS: recommend Docker Desktop. Colima is a lighter alternative.
+For Linux: check if Docker needs sudo. If yes, instruct accordingly.
+
+Do not proceed until all three are confirmed working.
+
+### 3. Clone and install
+
+Run these in order, checking each step before proceeding:
 
   git clone https://github.com/suryaelidanto/umkmcepat.git
   cd umkmcepat
   bun install
   cp .env.example .env
+
+If bun install fails, check for network issues or a Bun version mismatch. The expected version is in package.json.
+
+### 4. Start the database
+
+Check Docker is running first:
+
+  docker version
+  docker compose version
+
+If Docker is not running, guide the user to start Docker Desktop or Docker Engine before continuing.
+
+Then:
+
   docker compose up -d postgres
+
+Wait a few seconds for the container to become healthy. Then:
+
   bun run db:migrate
+
+If the migration fails, check if PostgreSQL is running and port 5432 is available.
+
+### 5. Start the app
+
   bun run dev
 
-For AI generation, also run:
+Verify the app responds:
+
+  curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
+
+If it returns 200 or a redirect, the app is running. Otherwise check for port conflicts or build errors.
+
+Tell the user to open http://localhost:3000 in their browser.
+
+### 6. Add optional services
+
+Only if the user asked for AI generation:
 
   docker compose --profile ai up -d 9router
 
-Then guide the user to:
-- Open http://localhost:3000
-- For 9Router: open http://localhost:20129, default password is 123456
-- Follow docs/9router.md if needed
+Confirm the container started:
 
-For Google login: the local callback URL is http://localhost:3000/api/auth/callback/google
+  docker compose ps 9router
 
-For Sentry: see docs/observability.md
+Then:
+  - Open http://localhost:20129
+  - Default password is 123456
+  - Refer to docs/9router.md for provider setup
 
-### 6. Quality gate
+Only if the user asked for login flows:
+  - Local callback URL: http://localhost:3000/api/auth/callback/google
+  - Refer to CONTRIBUTING.md for Google OAuth instructions
 
-Before the user opens a PR, run:
+Only if the user asked for monitoring:
+  - Refer to docs/observability.md
+
+### 7. Quality gate
+
+Before the user opens a PR, tell them to run:
 
   bun run check
 
-Remind the user:
-- Use Conventional Commits
+This is enforced by pre-commit hooks and CI, so it must pass.
+
+Remind them:
+- Use Conventional Commits (like "feat: add X", "fix: handle Y", "docs: clarify Z")
 - Open PRs into the dev branch
-- Keep changes small
-- The pre-commit hook and CI handle formatting, linting, type checks, tests, and unused code checks
+- Keep changes focused and small
 
-### 7. Troubleshooting
+### 8. Common issues
 
-- If Docker is not running, start Docker Desktop or Engine.
-- If Bun version is wrong, install the version from package.json.
-- If .next is stale, stop the dev server, delete .next, and restart.
+If the user reports:
+- "Docker command not found" → Docker is not installed or not in PATH
+- "Port already in use" → stop whatever is on port 3000 or 5432
+- "Bun version mismatch" → install the version from package.json
+- ".next is stale" → stop dev server, delete .next folder, restart
+- "Prisma migration error" → check PostgreSQL container is running: docker compose ps
 
-Now ask the user for their OS and focus area, then proceed step by step.</code></pre>
+Now begin by asking what they want to work on and their operating system.</code></pre>
 
 </details>
 
