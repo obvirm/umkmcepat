@@ -77,9 +77,9 @@ const faqs = [
       "UMKM Cepat dikembangkan sebagai proyek open source. Daftar kontributor membantu kamu melihat siapa saja yang ikut merawat produk ini.",
   },
   {
-    question: "Bagaimana agar hasilnya lebih cocok?",
+    question: "Bagaimana agar hasilnya maksimal?",
     answer:
-      "Mulai dari mode Diskusi. Ceritakan jenis usaha, pelanggan, layanan, dan gaya website yang kamu mau.",
+      "Mulai dari mode Diskusi untuk mematangkan kebutuhan. Kalau arahnya sudah jelas, lanjutkan dengan mode Buat.",
   },
 ];
 
