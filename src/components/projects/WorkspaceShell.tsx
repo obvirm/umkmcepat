@@ -30,6 +30,7 @@ import {
 
 import { ProjectSitePreview } from "@/components/projects/renderer/ProjectSitePreview";
 import { Button } from "@/components/ui/button";
+import { createGeneratedProjectFiles } from "@/lib/projects/generated-source";
 import { type ProjectSiteSchema } from "@/lib/projects/site-schema";
 
 type WorkspaceShellProps = {
@@ -196,7 +197,7 @@ const guidedQuestions: Array<{
   },
 ];
 
-type BuildTab = "preview" | "timeline" | "changes";
+type BuildTab = "preview" | "timeline" | "changes" | "code";
 
 export function WorkspaceShell({
   projectId,
@@ -349,6 +350,10 @@ export function WorkspaceShell({
     return Math.min(100, Math.round(((1 + completed.length) / 5) * 100));
   }, [brief]);
 
+  const generatedFiles = useMemo(
+    () => createGeneratedProjectFiles(projectId, siteSchema),
+    [projectId, siteSchema],
+  );
   const nextQuestion = guidedQuestions.find(({ field }) => !brief[field]);
   const isResponding = status === "submitted" || status === "streaming";
   const isBuilding = buildStatus === "building";
@@ -455,6 +460,10 @@ export function WorkspaceShell({
                   siteSchema={siteSchema}
                   buildProgress={buildProgress}
                 />
+              ) : null}
+
+              {activeTab === "code" ? (
+                <CodeView projectId={projectId} files={generatedFiles} />
               ) : null}
             </div>
           </div>
@@ -635,6 +644,13 @@ function WorkspaceTopBar({
           icon={<FileCode2 className="size-4" />}
         >
           Changes
+        </TabButton>
+        <TabButton
+          active={activeTab === "code"}
+          onClick={() => setActiveTab("code")}
+          icon={<Code2 className="size-4" />}
+        >
+          Code
         </TabButton>
       </div>
 
@@ -1022,6 +1038,61 @@ function TimelineView({
           <p className="text-sm text-red-600">{buildError}</p>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function CodeView({
+  projectId,
+  files,
+}: {
+  projectId: string;
+  files: ReturnType<typeof createGeneratedProjectFiles>;
+}) {
+  const [selectedPath, setSelectedPath] = useState(files[0]?.path || "");
+  const selectedFile =
+    files.find((file) => file.path === selectedPath) ?? files[0];
+
+  return (
+    <div className="grid min-h-[680px] overflow-hidden rounded-[28px] bg-[#10100f] text-surface-warm-white shadow-[0_18px_48px_rgba(28,28,28,0.18)] md:grid-cols-[280px_1fr]">
+      <aside className="border-r border-surface-warm-white/10 p-spacing-5">
+        <div className="flex items-center justify-between gap-spacing-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.16em] text-surface-warm-white/42">
+              Source
+            </p>
+            <h2 className="mt-1 text-lg font-semibold">Generated project</h2>
+          </div>
+        </div>
+        <a
+          href={`/api/projects/${projectId}/source`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-spacing-5 inline-flex rounded-full border border-surface-warm-white/12 px-spacing-5 py-spacing-3 text-xs text-surface-warm-white/76 hover:bg-surface-warm-white/8"
+        >
+          Export JSON
+        </a>
+        <div className="mt-spacing-6 grid gap-spacing-2">
+          {files.map((file) => (
+            <button
+              key={file.path}
+              type="button"
+              onClick={() => setSelectedPath(file.path)}
+              className={`rounded-radius-lg px-spacing-4 py-spacing-3 text-left text-sm transition ${selectedFile?.path === file.path ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/62 hover:bg-surface-warm-white/8 hover:text-surface-warm-white"}`}
+            >
+              {file.path}
+            </button>
+          ))}
+        </div>
+      </aside>
+      <section className="min-w-0 p-spacing-5">
+        <p className="mb-spacing-4 text-sm text-surface-warm-white/54">
+          {selectedFile?.path}
+        </p>
+        <pre className="max-h-[620px] overflow-auto rounded-[18px] bg-black/40 p-spacing-5 text-xs leading-6 text-surface-warm-white/82">
+          <code>{selectedFile?.content}</code>
+        </pre>
+      </section>
     </div>
   );
 }
