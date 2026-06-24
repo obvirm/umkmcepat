@@ -15,7 +15,7 @@ import {
 } from "@/lib/projects/site-schema";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-export const maxDuration = 60;
+export const maxDuration = 180;
 
 type RouteProps = {
   params: Promise<{ id: string }>;

@@ -20,5 +20,6 @@ export function getAiModel() {
     baseURL,
     apiKey,
     includeUsage: true,
+    supportsStructuredOutputs: true,
   })(getDefaultAiModel());
 }
