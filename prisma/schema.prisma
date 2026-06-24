@@ -92,6 +92,8 @@ model Project {
   status    String   @default("draft") @db.VarChar(32)
   siteSchema Json?
   chatMessages Json?
+  brief Json?
+  workspaceCard Json?
   sourceFiles Json?
   distFiles Json?
   buildStatus String @default("not_started") @db.VarChar(32)

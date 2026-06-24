@@ -8,6 +8,11 @@ import {
 import { getAiModel } from "@/lib/ai";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseProjectBrief } from "@/lib/projects/brief";
+import {
+  getNextWorkspaceCard,
+  updateBriefFromAnswer,
+} from "@/lib/projects/brief-flow";
 import {
   getProjectChatContext,
   parseProjectChatMessages,
@@ -61,7 +66,7 @@ export async function POST(request: Request) {
 
   const project = await prisma.project.findFirst({
     where: { id: body.projectId, userId },
-    select: { id: true, status: true },
+    select: { id: true, status: true, prompt: true },
   });
 
   if (!project) {
@@ -81,11 +86,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const [chatRow] = await prisma.$queryRaw<[{ chatMessages: unknown }]>`
-    SELECT "chatMessages" FROM "Project" WHERE id = ${project.id} AND "userId" = ${userId}
+  const [chatRow] = await prisma.$queryRaw<
+    [{ chatMessages: unknown; brief: unknown }]
+  >`
+    SELECT "chatMessages", "brief" FROM "Project" WHERE id = ${project.id} AND "userId" = ${userId}
   `;
   const storedMessages = parseProjectChatMessages(chatRow?.chatMessages);
   const incoming = body.message ? [body.message] : (body.messages ?? []);
+  const latestUserText = incoming
+    .flatMap((message) => message.parts)
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join(" ");
+  const updatedBrief = updateBriefFromAnswer(
+    parseProjectBrief(chatRow?.brief, project.prompt),
+    latestUserText,
+  );
+  const workspaceCard = getNextWorkspaceCard(updatedBrief);
 
   if (!incoming.length) {
     return Response.json(
@@ -101,7 +118,7 @@ export async function POST(request: Request) {
 
   const result = streamText({
     model: getAiModel(),
-    system: `${systemPrompt}\n\nMode aktif: ${mode === "build" ? "Buat" : "Diskusi"}.`,
+    system: `${systemPrompt}\n\nMode aktif: ${mode === "build" ? "Buat" : "Diskusi"}.\n\nBrief saat ini:\n${JSON.stringify(updatedBrief)}\n\nKartu berikutnya:\n${JSON.stringify(workspaceCard)}\n\nIkuti kartu berikutnya. Jangan membuat kartu berbeda.`,
     messages: await convertToModelMessages(contextMessages),
   });
 
@@ -111,7 +128,7 @@ export async function POST(request: Request) {
     originalMessages: messages,
     onFinish: async ({ messages }) => {
       await prisma.$executeRaw`
-        UPDATE "Project" SET "chatMessages" = ${JSON.stringify(messages)}::jsonb WHERE id = ${project.id} AND "userId" = ${userId}
+        UPDATE "Project" SET "chatMessages" = ${JSON.stringify(messages)}::jsonb, "brief" = ${JSON.stringify(updatedBrief)}::jsonb, "workspaceCard" = ${JSON.stringify(workspaceCard)}::jsonb WHERE id = ${project.id} AND "userId" = ${userId}
       `;
     },
   });

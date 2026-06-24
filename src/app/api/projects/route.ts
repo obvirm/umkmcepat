@@ -4,6 +4,8 @@ import { getDefaultAiModel } from "@/lib/ai-models";
 import { moderateProjectRequest } from "@/lib/ai-moderation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createInitialBrief } from "@/lib/projects/brief";
+import { getNextWorkspaceCard } from "@/lib/projects/brief-flow";
 import { validateProjectRequest } from "@/lib/projects/input";
 import { createFallbackProjectSiteSchema } from "@/lib/projects/site-schema";
 import { getProjectTitle, type WorkspaceMode } from "@/lib/projects/workspace";
@@ -47,6 +49,8 @@ export async function POST(request: Request) {
   }
 
   const siteSchema = createFallbackProjectSiteSchema(validation.value);
+  const brief = createInitialBrief(validation.value);
+  const workspaceCard = getNextWorkspaceCard(brief);
   const project = await prisma.project.create({
     data: {
       title: getProjectTitle(validation.value),
@@ -54,6 +58,8 @@ export async function POST(request: Request) {
       model: getDefaultAiModel(),
       status: mode === "build" ? "draft" : "discussing",
       siteSchema,
+      brief,
+      workspaceCard,
       userId: session.user.id,
     } as Parameters<typeof prisma.project.create>[0]["data"],
     select: { id: true },

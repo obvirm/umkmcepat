@@ -27,6 +27,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { type WorkspaceCard } from "@/lib/projects/brief";
 import { type GeneratedProjectFile } from "@/lib/projects/generated-source";
 import { type ProjectSiteSchema } from "@/lib/projects/site-schema";
 
@@ -42,6 +43,7 @@ type WorkspaceShellProps = {
   initialMessages: UIMessage[];
   initialChatCursor: number | null;
   initialChatHasMore: boolean;
+  initialWorkspaceCard: WorkspaceCard;
   siteSchema: ProjectSiteSchema;
 };
 
@@ -55,6 +57,7 @@ export function WorkspaceShell({
   initialMessages,
   initialChatCursor,
   initialChatHasMore,
+  initialWorkspaceCard,
   siteSchema: initialSiteSchema,
 }: WorkspaceShellProps) {
   const [mode, setMode] = useState<"build" | "discuss">("discuss");
@@ -71,6 +74,8 @@ export function WorkspaceShell({
   const [sourceFiles, setSourceFiles] = useState<GeneratedProjectFile[]>([]);
   const [sourceStatus, setSourceStatus] = useState("not_started");
   const [sourceLog, setSourceLog] = useState("");
+  const [workspaceCard, setWorkspaceCard] =
+    useState<WorkspaceCard>(initialWorkspaceCard);
   const [olderMessages, setOlderMessages] = useState<UIMessage[]>([]);
   const [chatCursor, setChatCursor] = useState<number | null>(
     initialChatCursor,
@@ -207,16 +212,6 @@ export function WorkspaceShell({
   const isBuilding = buildStatus === "building";
   const isProcessing = isResponding || isBuilding;
   const visibleMessages = [...olderMessages, ...messages];
-  const latestAssistantText = [...messages]
-    .reverse()
-    .find((item) => item.role === "assistant")
-    ?.parts.filter((part) => part.type === "text")
-    .map((part) => part.text)
-    .join(" ");
-  const canStartBuild =
-    /mulai\s+(build|buat)|siap\s+(di)?(build|buat)|brief\s+sudah\s+(cukup\s+)?jelas/i.test(
-      latestAssistantText || "",
-    );
   const hasPreview = sourceStatus === "passed" || buildStatus === "ready";
   const showPreviewPanel = !previewCollapsed;
   const showChatPanel = !chatCollapsed;
@@ -358,6 +353,31 @@ export function WorkspaceShell({
     element.scrollTop = element.scrollHeight;
     previousLiveMessageCount.current = messages.length;
   }, [messages.length]);
+
+  useEffect(() => {
+    if (isProcessing) {
+      return;
+    }
+
+    let ignore = false;
+
+    async function loadWorkspaceCard() {
+      const response = await fetch(`/api/projects/${projectId}/brief-card`);
+      const result = (await response.json().catch(() => null)) as {
+        workspaceCard?: WorkspaceCard;
+      } | null;
+
+      if (!ignore && response.ok && result?.workspaceCard) {
+        setWorkspaceCard(result.workspaceCard);
+      }
+    }
+
+    void loadWorkspaceCard();
+
+    return () => {
+      ignore = true;
+    };
+  }, [isProcessing, messages.length, projectId]);
 
   async function saveProjectTitle() {
     const title = draftTitle.trim();
@@ -536,8 +556,14 @@ export function WorkspaceShell({
                 ) : null}
                 <ChatMessages messages={visibleMessages} />
 
-                {!isProcessing && canStartBuild ? (
-                  <BuildStartCard onBuild={() => void startBuild()} />
+                {!isProcessing ? (
+                  <WorkspaceCardView
+                    card={workspaceCard}
+                    onBuild={() => void startBuild()}
+                    onAnswer={(answer) => {
+                      setMessage(answer);
+                    }}
+                  />
                 ) : null}
 
                 {isResponding ? (
@@ -847,26 +873,65 @@ function ProcessingControl({
   );
 }
 
-function BuildStartCard({ onBuild }: { onBuild: () => void }) {
-  return (
-    <div className="rounded-[22px] border border-[#8ce99a]/30 bg-[#8ce99a]/10 p-spacing-5">
-      <div className="flex items-center justify-between gap-spacing-4">
-        <div>
-          <p className="text-sm font-semibold text-surface-warm-white">
-            Brief sudah cukup jelas.
-          </p>
-          <p className="mt-spacing-2 text-sm text-surface-warm-white/62">
-            Mulai build dari jawaban yang sudah terkumpul.
-          </p>
+function WorkspaceCardView({
+  card,
+  onAnswer,
+  onBuild,
+}: {
+  card: WorkspaceCard;
+  onAnswer: (answer: string) => void;
+  onBuild: () => void;
+}) {
+  if (card.type === "build_recommendation") {
+    return (
+      <div className="rounded-[22px] border border-[#8ce99a]/30 bg-[#8ce99a]/10 p-spacing-5">
+        <div className="flex items-center justify-between gap-spacing-4">
+          <div>
+            <p className="text-sm font-semibold text-surface-warm-white">
+              {card.title}
+            </p>
+            <p className="mt-spacing-2 text-sm text-surface-warm-white/62">
+              {card.summary.join(" · ")}
+            </p>
+          </div>
+          <Button
+            type="button"
+            onClick={onBuild}
+            className="shrink-0 rounded-full bg-surface-warm-white text-foreground-primary hover:bg-surface-warm-white/86"
+          >
+            Mulai build
+          </Button>
         </div>
-        <Button
-          type="button"
-          onClick={onBuild}
-          className="shrink-0 rounded-full bg-surface-warm-white text-foreground-primary hover:bg-surface-warm-white/86"
-        >
-          Mulai build
-        </Button>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-spacing-4 rounded-[22px] border border-surface-warm-white/10 bg-surface-warm-white/6 p-spacing-5">
+      {card.questions.map((question) => (
+        <div key={question.id}>
+          <p className="text-sm font-semibold text-surface-warm-white">
+            {question.question}
+          </p>
+          <div className="mt-spacing-3 grid gap-spacing-2 sm:grid-cols-2">
+            {question.options.map((option) => (
+              <button
+                key={option.label}
+                type="button"
+                onClick={() => onAnswer(option.label)}
+                className="rounded-radius-lg border border-surface-warm-white/10 bg-[#242421] px-spacing-4 py-spacing-3 text-left transition hover:border-surface-warm-white/24 hover:bg-surface-warm-white/8"
+              >
+                <span className="block text-sm font-semibold text-surface-warm-white">
+                  {option.label}
+                </span>
+                <span className="mt-spacing-1 block text-xs leading-5 text-surface-warm-white/54">
+                  {option.description}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

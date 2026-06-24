@@ -4,6 +4,8 @@ import { ClearProjectDraft } from "@/components/projects/ClearProjectDraft";
 import { WorkspaceShell } from "@/components/projects/WorkspaceShell";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseProjectBrief } from "@/lib/projects/brief";
+import { getNextWorkspaceCard } from "@/lib/projects/brief-flow";
 import {
   getProjectChatPage,
   parseProjectChatMessages,
@@ -45,6 +47,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     SELECT "chatMessages" FROM "Project" WHERE id = ${project.id} AND "userId" = ${session.user.id}
   `;
 
+  const [briefRow] = await prisma.$queryRaw<
+    [{ brief: unknown; workspaceCard: unknown }]
+  >`
+    SELECT "brief", "workspaceCard" FROM "Project" WHERE id = ${project.id} AND "userId" = ${session.user.id}
+  `;
+  const initialBrief = parseProjectBrief(briefRow?.brief, project.prompt);
+
   const initialChatPage = getProjectChatPage(
     parseProjectChatMessages(chatRow?.chatMessages),
     null,
@@ -62,6 +71,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         initialMessages={initialChatPage.messages}
         initialChatCursor={initialChatPage.nextCursor}
         initialChatHasMore={initialChatPage.hasMore}
+        initialWorkspaceCard={
+          (briefRow?.workspaceCard as never) ||
+          getNextWorkspaceCard(initialBrief)
+        }
         siteSchema={parseProjectSiteSchema(
           (project as { siteSchema?: unknown }).siteSchema,
           project.prompt,

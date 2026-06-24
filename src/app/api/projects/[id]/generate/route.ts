@@ -3,6 +3,7 @@ import { jsonSchema, Output, streamText } from "ai";
 import { getAiModel } from "@/lib/ai";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { briefToBuildPrompt, parseProjectBrief } from "@/lib/projects/brief";
 import {
   buildGeneratedProject,
   createGeneratedProjectFiles,
@@ -35,6 +36,7 @@ export async function POST(request: Request, { params }: RouteProps) {
     );
   }
 
+  const userId = session.user.id;
   const rateLimitResponse = await checkRateLimit(request, "ai");
 
   if (rateLimitResponse) {
@@ -43,7 +45,7 @@ export async function POST(request: Request, { params }: RouteProps) {
 
   const { id } = await params;
   const project = await prisma.project.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId },
     select: { id: true, prompt: true },
   });
 
@@ -72,6 +74,13 @@ export async function POST(request: Request, { params }: RouteProps) {
           detail: "AI membaca kebutuhan utama dari brief kamu.",
         });
 
+        const [briefRow] = await prisma.$queryRaw<[{ brief: unknown }]>`
+          SELECT "brief" FROM "Project" WHERE id = ${project.id} AND "userId" = ${userId}
+        `;
+        const buildPrompt = briefToBuildPrompt(
+          parseProjectBrief(briefRow?.brief, project.prompt),
+        );
+
         const result = streamText({
           model: getAiModel(),
           temperature: 0.35,
@@ -82,7 +91,7 @@ export async function POST(request: Request, { params }: RouteProps) {
             schema: jsonSchema<ProjectSiteSchema>(projectSiteJsonSchema),
           }),
           system: projectSiteGenerationSystemPrompt,
-          prompt: project.prompt,
+          prompt: buildPrompt,
           onError() {
             send("progress", {
               label: "AI mengalami kendala",
@@ -98,9 +107,9 @@ export async function POST(request: Request, { params }: RouteProps) {
 
         for await (const partial of result.partialOutputStream) {
           latest = partial;
-          const schema = parseProjectSiteSchema(partial, project.prompt);
+          const schema = parseProjectSiteSchema(partial, buildPrompt);
 
-          if (!sentCopy && schema.headline !== project.prompt) {
+          if (!sentCopy && schema.headline !== buildPrompt) {
             sentCopy = true;
             send("progress", {
               label: "Menulis pesan utama",
@@ -132,7 +141,7 @@ export async function POST(request: Request, { params }: RouteProps) {
           send("schema", schema);
         }
 
-        const finalSchema = parseProjectSiteSchema(latest, project.prompt);
+        const finalSchema = parseProjectSiteSchema(latest, buildPrompt);
         const sourceFiles = createGeneratedProjectFiles(
           project.id,
           finalSchema,
