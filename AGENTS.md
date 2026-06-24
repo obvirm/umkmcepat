@@ -11,6 +11,7 @@ Rules for AI agents and automated contributors.
 - Read `docs/9router.md` before AI gateway or model work.
 - Read `docs/provider-architecture.md` and `docs/providers.md` before provider/config changes.
 - Read `docs/observability.md` before Sentry/monitoring changes.
+- Read `docs/graphify.md` before changing the optional Graphify workflow.
 
 ## Operating mode
 
@@ -18,6 +19,8 @@ Rules for AI agents and automated contributors.
 - Work as the supervising senior engineer/PM by default: keep the helicopter view, define the plan/interfaces/risks, then delegate focused execution to subagents.
 - Use pi-subagents as the default execution mindset for coding work: parent agent orchestrates, child agents investigate/plan/implement/review.
 - Prefer this loop for non-trivial work: `scout` for codebase context → `planner` for implementation plan → ask user before production-critical edits → `worker` for implementation → fresh `reviewer` for review → parent synthesizes and applies only correct, minimal, in-scope fixes.
+- For non-trivial codebase discovery, reuse checks, or refactors, use Graphify when available: run `graphify query`, `graphify explain`, or `graphify path` against `graphify-out/graph.json`, then read the specific files it returns. If the graph is missing and Graphify is installed, run `bun run setup:agent`. Do not treat Graphify as a replacement for reading canonical docs or source files.
+- Before adding a new reusable component, helper, parser, provider boundary, or module, query Graphify for an existing fit first; reuse or extend existing code when appropriate.
 - Use parallel subagents when safe and useful, especially for independent review angles: correctness, tests, security, unnecessary complexity, UI/accessibility.
 - Keep parent-agent responsibility: do not blindly accept subagent output; verify scope, architecture fit, repo rules, and final quality gate.
 - Skip subagents only for trivial one-line fixes, pure explanations, quick file reads, or when the user explicitly says no subagents.
@@ -50,6 +53,7 @@ Rules for AI agents and automated contributors.
 - Prefer standard platform tools over custom scripts.
 - Do not add code comments unless they explain non-obvious constraints, security decisions, or platform quirks.
 - Do not add dependencies unless existing code or platform features are insufficient.
+- Do not add Graphify as a project dependency; it is an optional user-local tool installed with `uv tool install graphifyy`.
 - Keep provider-specific SDKs behind internal adapters in `src/lib`.
 - Use TDD for behavior changes: one failing behavior test, minimal implementation, repeat.
 - Do not require one test file per source file. Test behavior boundaries and non-trivial logic.
@@ -91,7 +95,7 @@ Do not run `bun run build` during normal development unless explicitly requested
 ## Repository cleanliness
 
 - Do not leave temporary scripts, scratch files, logs, pid files, screenshots, browser artifacts, or generated junk.
-- Keep `.browser/`, `.pi/`, `.next/`, logs, and pid files untracked.
+- Keep `.browser/`, `.pi/`, `.next/`, `graphify-out/`, logs, and pid files untracked.
 - Inspect `git status --short --untracked-files=all` before handoff.
 
 ## Git

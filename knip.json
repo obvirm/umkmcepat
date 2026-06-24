@@ -7,6 +7,7 @@
     ".husky/commit-msg"
   ],
   "project": ["src/**/*.{ts,tsx}", "*.{ts,js,mjs,cjs}"],
+  "ignoreBinaries": ["graphify"],
   "ignoreDependencies": ["eslint-config-next", "tailwindcss"],
   "ignoreExportsUsedInFile": true,
   "ignoreIssues": {

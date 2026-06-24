@@ -47,6 +47,7 @@ next-env.d.ts
 # Local automation/browser artifacts
 .browser/
 .pi/
+graphify-out/
 
 # Dev/runtime logs
 *.log

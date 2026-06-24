@@ -4,6 +4,7 @@ node_modules
 .pi
 .agent
 .agents
+graphify-out
 coverage
 dist
 build

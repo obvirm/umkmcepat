@@ -294,6 +294,24 @@ http://localhost:3000
 
 This gives you a working local app. Continue only with the sections your change needs.
 
+## Optional AI-agent codebase map
+
+If you use an AI coding agent, Graphify can build a local code graph that helps the agent find existing modules and reusable code before making changes.
+
+Install it outside the project:
+
+```bash
+uv tool install graphifyy
+```
+
+Then generate the local graph:
+
+```bash
+bun run setup:agent
+```
+
+Open `graphify-out/graph.html` or `graphify-out/GRAPH_TREE.html` in a browser. The folder is ignored by git and should not be committed.
+
 ## Feature setup
 
 ### AI generation

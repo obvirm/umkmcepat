@@ -74,6 +74,25 @@ NINE_ROUTER_BASE_URL="http://localhost:20129/v1"
 
 `AI_MODELS` is comma-separated. The first model is the default.
 
+## Optional agent context
+
+Graphify is recommended for contributors using AI agents on non-trivial work. It builds a local code graph without adding project dependencies.
+
+Install it once per machine:
+
+```bash
+uv tool install graphifyy
+```
+
+Build or refresh the local graph:
+
+```bash
+bun run setup:agent
+bun run graph:update
+```
+
+Output stays local under `graphify-out/` and is ignored by git. See `docs/graphify.md` for query examples and guardrails.
+
 ## Quality gate
 
 Run this before handoff or PR:
@@ -192,6 +211,7 @@ Delete stale local artifacts before handoff.
 
 - `git status --short --untracked-files=all` inspected
 - no accidental local artifacts
+- `graphify-out/` remains untracked when generated
 - no secrets in tracked files
 - `bun run check` passed
 - `bun run build` passed when required
