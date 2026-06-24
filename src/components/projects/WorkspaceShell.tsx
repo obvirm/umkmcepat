@@ -221,10 +221,7 @@ export function WorkspaceShell({
   const hasPreview = sourceStatus === "passed" || buildStatus === "ready";
   const showPreviewPanel = !previewCollapsed;
   const showChatPanel = !chatCollapsed;
-  const workspaceColumns =
-    showPreviewPanel && showChatPanel
-      ? "minmax(0, 1fr) 8px var(--chat-width)"
-      : "minmax(0, 1fr)";
+  const showSplitLayout = showPreviewPanel && showChatPanel;
 
   useEffect(() => {
     if (hasPreview && !hasAutoOpenedPreview.current) {
@@ -421,6 +418,19 @@ export function WorkspaceShell({
     setChatCollapsed(false);
   }
 
+  const chatPanelClass = [
+    showChatPanel ? "flex" : "hidden",
+    "min-h-0 min-w-0 flex-col bg-[#1b1b19] p-spacing-5 transition-[width,opacity] duration-300 ease-out",
+    showSplitLayout
+      ? "w-[var(--chat-width)] shrink-0 border-l border-surface-warm-white/10"
+      : "w-full",
+  ].join(" ");
+
+  const previewPanelClass = [
+    showSplitLayout ? "flex-1" : "w-full",
+    "min-h-0 min-w-0 p-spacing-5 transition-[width,opacity] duration-300 ease-out lg:p-spacing-7",
+  ].join(" ");
+
   function handleDividerPointerDown(event: PointerEvent<HTMLDivElement>) {
     event.currentTarget.setPointerCapture(event.pointerId);
     const startX = event.clientX;
@@ -443,14 +453,13 @@ export function WorkspaceShell({
   return (
     <div className="h-dvh overflow-hidden bg-[#10100f] text-surface-warm-white">
       <div
-        className="grid h-full min-h-0 gap-0 transition-[grid-template-columns] duration-300 ease-out"
+        className="flex h-full min-h-0 gap-0 overflow-hidden"
         style={{
           ["--chat-width" as string]: showChatPanel ? `${chatWidth}px` : "0px",
-          gridTemplateColumns: workspaceColumns,
         }}
       >
         {showPreviewPanel ? (
-          <section className="min-h-0 min-w-0 p-spacing-5 transition-opacity duration-300 ease-out lg:order-1 lg:p-spacing-7">
+          <section className={previewPanelClass}>
             <div className="flex h-full min-h-0 flex-col rounded-[32px] border border-surface-warm-white/10 bg-[#ebe8df] p-spacing-4 text-foreground-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
               <WorkspaceTopBar
                 activeTab={activeTab}
@@ -493,7 +502,7 @@ export function WorkspaceShell({
           </section>
         ) : null}
 
-        {showPreviewPanel && showChatPanel ? (
+        {showSplitLayout ? (
           <div
             role="separator"
             aria-orientation="vertical"
@@ -502,9 +511,7 @@ export function WorkspaceShell({
           />
         ) : null}
 
-        <aside
-          className={`${showChatPanel ? "flex" : "hidden"} min-h-0 min-w-0 flex-col bg-[#1b1b19] p-spacing-5 transition-opacity duration-300 ease-out ${showPreviewPanel ? "border-l border-surface-warm-white/10 lg:order-3 lg:flex" : "w-full"}`}
-        >
+        <aside className={chatPanelClass}>
           <div className="flex items-start justify-between gap-spacing-5 px-spacing-1">
             <div className="min-w-0 flex-1">
               <Link
