@@ -285,11 +285,21 @@ export function WorkspaceShell({
   }
 
   useEffect(() => {
-    const element = chatScrollRef.current;
+    const scrollToLatest = () => {
+      const element = chatScrollRef.current;
 
-    if (element) {
-      element.scrollTop = element.scrollHeight;
-    }
+      if (element) {
+        element.scrollTop = element.scrollHeight;
+      }
+    };
+
+    const frame = requestAnimationFrame(scrollToLatest);
+    const timeout = window.setTimeout(scrollToLatest, 120);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+    };
   }, []);
 
   useEffect(() => {
