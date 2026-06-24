@@ -30,14 +30,11 @@ export async function GET(
     );
   }
 
-  const [row] = await prisma.$queryRaw<
-    [{ brief: unknown; workspaceCard: unknown }]
-  >`
-    SELECT "brief", "workspaceCard" FROM "Project" WHERE id = ${id} AND "userId" = ${userId}
+  const [row] = await prisma.$queryRaw<[{ brief: unknown }]>`
+    SELECT "brief" FROM "Project" WHERE id = ${id} AND "userId" = ${userId}
   `;
   const brief = parseProjectBrief(row?.brief, project.prompt);
-  const workspaceCard =
-    row?.workspaceCard || (await generateNextWorkspaceCard(brief));
+  const workspaceCard = await generateNextWorkspaceCard(brief);
 
   return Response.json({ brief, workspaceCard });
 }

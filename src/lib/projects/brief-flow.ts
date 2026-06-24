@@ -80,7 +80,6 @@ export function updateBriefFromAnswer(
     next.notes = [...next.notes, answer].slice(-12);
   }
 
-  inferFromText(next, answer);
   return next;
 }
 
@@ -186,34 +185,4 @@ function fallbackQuestion(field: BriefQuestion["id"]) {
       stylePreference: "Gaya visual website yang kamu inginkan seperti apa?",
     } satisfies Record<BriefQuestion["id"], string>
   )[field];
-}
-
-function inferFromText(brief: ProjectBrief, text: string) {
-  const value = text.toLowerCase();
-
-  if (!brief.businessType) {
-    if (/baju|thrift|fashion|sepatu|jaket|kaos/.test(value)) {
-      brief.businessType = "Fashion";
-    } else if (/makan|minum|kue|kopi|bakso|ayam|kuliner/.test(value)) {
-      brief.businessType = "Kuliner";
-    } else if (/laundry|cuci|service|jasa|bengkel/.test(value)) {
-      brief.businessType = "Jasa";
-    }
-  }
-
-  if (!brief.contactOrCta) {
-    if (/wa|whatsapp/.test(value)) {
-      brief.contactOrCta = "Chat WA";
-    } else if (/instagram|ig|dm/.test(value)) {
-      brief.contactOrCta = "DM Instagram";
-    }
-  }
-
-  if (!brief.stylePreference) {
-    if (/gelap|dark|hitam|bold/.test(value)) {
-      brief.stylePreference = "Bold gelap";
-    } else if (/modern|clean|minimal/.test(value)) {
-      brief.stylePreference = "Clean modern";
-    }
-  }
 }
