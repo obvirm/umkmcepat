@@ -418,7 +418,7 @@ export function WorkspaceShell({
   }
 
   const chatPanelClass =
-    "flex h-full min-h-0 min-w-0 flex-col bg-[#1b1b19] p-spacing-5";
+    "flex h-full min-h-0 min-w-0 overflow-x-hidden flex-col bg-[#1b1b19] p-spacing-5";
   const previewPanelClass = "h-full min-h-0 min-w-0";
 
   return (
@@ -503,7 +503,7 @@ export function WorkspaceShell({
             }}
           >
             <aside className={chatPanelClass}>
-              <div className="flex items-start justify-between gap-spacing-5 px-spacing-1">
+              <div className="flex min-w-0 items-start justify-between gap-spacing-5 px-spacing-1">
                 <div className="min-w-0 flex-1">
                   <Link
                     href="/"
@@ -557,7 +557,7 @@ export function WorkspaceShell({
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-spacing-2">
+                <div className="flex shrink-0 items-center gap-spacing-2">
                   {!showPreviewPanel ? (
                     <button
                       type="button"
@@ -624,7 +624,7 @@ export function WorkspaceShell({
                 ) : (
                   <form
                     onSubmit={handleMessageSubmit}
-                    className="mt-spacing-3 rounded-[28px] border border-surface-warm-white/12 bg-[#262622] p-spacing-4 shadow-[0_18px_48px_rgba(0,0,0,0.22)]"
+                    className="mt-spacing-3 min-w-0 rounded-[28px] border border-surface-warm-white/12 bg-[#262622] p-spacing-4 shadow-[0_18px_48px_rgba(0,0,0,0.22)]"
                   >
                     <label htmlFor="workspace-message" className="sr-only">
                       Pesan untuk AI
@@ -890,7 +890,7 @@ function ChatMessages({ messages }: { messages: UIMessage[] }) {
           className={`flex max-w-full text-base leading-7 ${message.role === "user" ? "justify-end" : "justify-start"}`}
         >
           <div
-            className={`max-w-[88%] overflow-hidden break-words rounded-[22px] px-spacing-6 py-spacing-5 ${message.role === "user" ? "border border-surface-warm-white/12 bg-[#30302c] text-surface-warm-white/88" : "border border-surface-warm-white/10 bg-[#242421] text-surface-warm-white/80"}`}
+            className={`max-w-[88%] overflow-hidden break-words [overflow-wrap:anywhere] rounded-[22px] px-spacing-6 py-spacing-5 ${message.role === "user" ? "border border-surface-warm-white/12 bg-[#30302c] text-surface-warm-white/88" : "border border-surface-warm-white/10 bg-[#242421] text-surface-warm-white/80"}`}
           >
             {message.parts.map((part, index) =>
               part.type === "text" ? (
