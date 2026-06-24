@@ -5,17 +5,16 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   ArrowLeft,
   ArrowUp,
-  Clock3,
+  Check,
   Code2,
-  FileCode2,
   Globe2,
-  Loader2,
   Monitor,
   PanelRightClose,
   PanelRightOpen,
   Pencil,
   Smartphone,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   FormEvent,
@@ -31,6 +30,10 @@ import { Button } from "@/components/ui/button";
 import { type GeneratedProjectFile } from "@/lib/projects/generated-source";
 import { type ProjectSiteSchema } from "@/lib/projects/site-schema";
 
+const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+});
+
 type WorkspaceShellProps = {
   projectId: string;
   initialTitle: string;
@@ -42,12 +45,7 @@ type WorkspaceShellProps = {
   siteSchema: ProjectSiteSchema;
 };
 
-type BuildProgress = {
-  label: string;
-  detail: string;
-};
-
-type BuildTab = "preview" | "timeline" | "changes" | "code";
+type BuildTab = "preview" | "code";
 
 export function WorkspaceShell({
   projectId,
@@ -67,8 +65,6 @@ export function WorkspaceShell({
   const [draftTitle, setDraftTitle] = useState(initialTitle);
   const [siteSchema, setSiteSchema] = useState(initialSiteSchema);
   const [buildStatus, setBuildStatus] = useState(initialStatus);
-  const [buildProgress, setBuildProgress] = useState<BuildProgress[]>([]);
-  const [buildError, setBuildError] = useState("");
   const [chatWidth, setChatWidth] = useState(560);
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<BuildTab>("preview");
@@ -115,10 +111,8 @@ export function WorkspaceShell({
     }
 
     setMode("build");
-    setBuildError("");
     setBuildStatus("building");
-    setBuildProgress([]);
-    setActiveTab("timeline");
+    setActiveTab("preview");
 
     const abortController = new AbortController();
     buildAbortRef.current = abortController;
@@ -130,13 +124,7 @@ export function WorkspaceShell({
       });
 
       if (!response.ok || !response.body) {
-        const result = (await response.json().catch(() => null)) as {
-          message?: string;
-        } | null;
         setBuildStatus("draft");
-        setBuildError(
-          result?.message || "AI belum bisa membangun website ini.",
-        );
         return;
       }
 
@@ -165,12 +153,7 @@ export function WorkspaceShell({
 
           const data = JSON.parse(dataText) as
             | ProjectSiteSchema
-            | BuildProgress
             | { message?: string };
-
-          if (eventName === "progress") {
-            setBuildProgress((items) => [...items, data as BuildProgress]);
-          }
 
           if (eventName === "schema" || eventName === "done") {
             setSiteSchema(data as ProjectSiteSchema);
@@ -183,17 +166,12 @@ export function WorkspaceShell({
 
           if (eventName === "error") {
             setBuildStatus("draft");
-            setBuildError(
-              (data as { message?: string }).message ||
-                "AI belum bisa membangun website ini.",
-            );
           }
         }
       }
     } catch (error) {
       if ((error as Error).name !== "AbortError") {
         setBuildStatus("draft");
-        setBuildError("AI belum bisa membangun website ini.");
       }
     } finally {
       buildAbortRef.current = null;
@@ -303,7 +281,6 @@ export function WorkspaceShell({
     void fetch(`/api/projects/${projectId}/stop`, { method: "POST" });
     setBuildStatus("draft");
     setMode("discuss");
-    setBuildError("Proses dihentikan.");
   }
 
   useEffect(() => {
@@ -420,21 +397,6 @@ export function WorkspaceShell({
                 )
               ) : null}
 
-              {activeTab === "timeline" ? (
-                <TimelineView
-                  isBuilding={isBuilding}
-                  buildProgress={buildProgress}
-                  buildError={buildError}
-                />
-              ) : null}
-
-              {activeTab === "changes" ? (
-                <ChangesView
-                  siteSchema={siteSchema}
-                  buildProgress={buildProgress}
-                />
-              ) : null}
-
               {activeTab === "code" ? (
                 <CodeView
                   projectId={projectId}
@@ -490,14 +452,25 @@ export function WorkspaceShell({
                     {projectTitle}
                   </h1>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setIsRenaming(true)}
-                  className="rounded-full p-spacing-2 text-surface-warm-white/44 hover:bg-surface-warm-white/8 hover:text-surface-warm-white"
-                  aria-label="Ubah nama proyek"
-                >
-                  <Pencil className="size-3.5" />
-                </button>
+                {isRenaming ? (
+                  <button
+                    type="button"
+                    onClick={() => void saveProjectTitle()}
+                    className="rounded-full p-spacing-2 text-[#8ce99a] hover:bg-surface-warm-white/8"
+                    aria-label="Simpan nama proyek"
+                  >
+                    <Check className="size-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsRenaming(true)}
+                    className="rounded-full p-spacing-2 text-surface-warm-white/44 hover:bg-surface-warm-white/8 hover:text-surface-warm-white"
+                    aria-label="Ubah nama proyek"
+                  >
+                    <Pencil className="size-3.5" />
+                  </button>
+                )}
               </div>
             </div>
             <button
@@ -606,35 +579,33 @@ function WorkspaceTopBar({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-spacing-4 rounded-[22px] bg-surface-warm-white px-spacing-5 py-spacing-4">
-      <div className="flex rounded-full bg-surface-muted p-1 text-sm">
-        <TabButton
-          active={activeTab === "preview"}
-          onClick={() => setActiveTab("preview")}
-          icon={<Globe2 className="size-4" />}
-        >
-          Preview
-        </TabButton>
-        <TabButton
-          active={activeTab === "timeline"}
-          onClick={() => setActiveTab("timeline")}
-          icon={<Clock3 className="size-4" />}
-        >
-          Timeline
-        </TabButton>
-        <TabButton
-          active={activeTab === "changes"}
-          onClick={() => setActiveTab("changes")}
-          icon={<FileCode2 className="size-4" />}
-        >
-          Changes
-        </TabButton>
-        <TabButton
-          active={activeTab === "code"}
-          onClick={() => setActiveTab("code")}
-          icon={<Code2 className="size-4" />}
-        >
-          Code
-        </TabButton>
+      <div className="flex items-center gap-spacing-3">
+        {chatCollapsed ? (
+          <button
+            type="button"
+            onClick={() => setChatCollapsed(false)}
+            className="rounded-full bg-foreground-primary p-spacing-3 text-surface-warm-white"
+            aria-label="Buka chat"
+          >
+            <PanelRightOpen className="size-4" />
+          </button>
+        ) : null}
+        <div className="flex rounded-full bg-surface-muted p-1 text-sm">
+          <TabButton
+            active={activeTab === "preview"}
+            onClick={() => setActiveTab("preview")}
+            icon={<Globe2 className="size-4" />}
+          >
+            Preview
+          </TabButton>
+          <TabButton
+            active={activeTab === "code"}
+            onClick={() => setActiveTab("code")}
+            icon={<Code2 className="size-4" />}
+          >
+            Code
+          </TabButton>
+        </div>
       </div>
 
       <div className="flex items-center gap-spacing-3">
@@ -656,16 +627,6 @@ function WorkspaceTopBar({
             HP
           </button>
         </div>
-        {chatCollapsed ? (
-          <button
-            type="button"
-            onClick={() => setChatCollapsed(false)}
-            className="rounded-full bg-foreground-primary p-spacing-3 text-surface-warm-white"
-            aria-label="Buka chat"
-          >
-            <PanelRightOpen className="size-4" />
-          </button>
-        ) : null}
       </div>
     </div>
   );
@@ -715,29 +676,15 @@ function GeneratedPreviewFrame({
 
 function EmptyPreviewState() {
   return (
-    <div className="grid min-h-[620px] place-items-center rounded-[28px] bg-surface-warm-white p-spacing-10 text-center shadow-[0_18px_48px_rgba(28,28,28,0.12)]">
+    <div className="grid min-h-full place-items-center bg-[#10100f] p-spacing-10 text-center">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-text-secondary">
+        <h2 className="text-3xl font-semibold tracking-[-0.05em] text-surface-warm-white">
           Belum ada preview
-        </p>
-        <h2 className="mt-spacing-6 text-6xl font-semibold leading-none tracking-[-0.07em] text-foreground-primary">
-          AI masih merapikan brief.
         </h2>
-        <p className="mx-auto mt-spacing-7 max-w-xl text-lg leading-8 text-text-secondary">
-          Preview akan muncul setelah AI yakin kebutuhan usaha sudah cukup jelas
-          dan proses build selesai.
+        <p className="mx-auto mt-spacing-4 max-w-md text-sm leading-6 text-surface-warm-white/50">
+          Preview akan muncul setelah brief cukup jelas dan proses build
+          selesai.
         </p>
-        <div className="mx-auto mt-spacing-9 grid max-w-2xl gap-spacing-3 text-left text-sm text-text-secondary sm:grid-cols-3">
-          <div className="rounded-[20px] bg-surface-muted p-spacing-5">
-            1. Jawab pertanyaan AI.
-          </div>
-          <div className="rounded-[20px] bg-surface-muted p-spacing-5">
-            2. AI susun brief.
-          </div>
-          <div className="rounded-[20px] bg-surface-muted p-spacing-5">
-            3. Build dimulai saat siap.
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -901,49 +848,28 @@ function formatInlineMarkdown(text: string) {
   );
 }
 
-function TimelineView({
-  isBuilding,
-  buildProgress,
-  buildError,
-}: {
-  isBuilding: boolean;
-  buildProgress: BuildProgress[];
-  buildError: string;
-}) {
-  return (
-    <div className="mx-auto max-w-3xl rounded-[28px] bg-surface-warm-white p-spacing-8 shadow-[0_18px_48px_rgba(28,28,28,0.12)]">
-      <h2 className="text-4xl font-semibold tracking-[-0.06em]">
-        Timeline build
-      </h2>
-      <div className="mt-spacing-8 space-y-spacing-6">
-        {buildProgress.length ? (
-          buildProgress.map((item, index) => (
-            <div key={`${item.label}-${index}`} className="flex gap-spacing-5">
-              <span className="mt-1 flex size-8 items-center justify-center rounded-full bg-foreground-primary text-xs text-surface-warm-white">
-                {index + 1}
-              </span>
-              <div>
-                <p className="font-semibold">{item.label}</p>
-                <p className="mt-1 text-sm leading-6 text-text-secondary">
-                  {item.detail}
-                </p>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-text-secondary">Belum ada timeline build.</p>
-        )}
-        {isBuilding ? (
-          <p className="flex items-center gap-spacing-3 text-sm text-text-secondary">
-            <Loader2 className="size-4 animate-spin" /> Build masih berjalan.
-          </p>
-        ) : null}
-        {buildError ? (
-          <p className="text-sm text-red-600">{buildError}</p>
-        ) : null}
-      </div>
-    </div>
-  );
+function getEditorLanguage(path = "") {
+  if (path.endsWith(".tsx") || path.endsWith(".ts")) {
+    return "typescript";
+  }
+
+  if (path.endsWith(".css")) {
+    return "css";
+  }
+
+  if (path.endsWith(".json")) {
+    return "json";
+  }
+
+  if (path.endsWith(".html")) {
+    return "html";
+  }
+
+  if (path.endsWith(".md")) {
+    return "markdown";
+  }
+
+  return "plaintext";
 }
 
 function CodeView({
@@ -962,14 +888,12 @@ function CodeView({
     files.find((file) => file.path === selectedPath) ?? files[0];
 
   return (
-    <div className="grid min-h-[680px] overflow-hidden rounded-[28px] bg-[#10100f] text-surface-warm-white shadow-[0_18px_48px_rgba(28,28,28,0.18)] md:grid-cols-[280px_1fr]">
-      <aside className="border-r border-surface-warm-white/10 p-spacing-5">
+    <div className="grid h-full min-h-[680px] overflow-hidden rounded-[28px] border border-surface-warm-white/10 bg-[#10100f] text-surface-warm-white md:grid-cols-[280px_1fr]">
+      <aside className="min-h-0 overflow-y-auto border-r border-surface-warm-white/10 p-spacing-5">
         <div className="flex items-center justify-between gap-spacing-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.16em] text-surface-warm-white/42">
-              Source
-            </p>
-            <h2 className="mt-1 text-lg font-semibold">Generated project</h2>
+            <p className="text-xs text-surface-warm-white/42">Source</p>
+            <h2 className="mt-1 text-lg font-semibold">Code</h2>
             <p className="mt-1 text-xs text-surface-warm-white/42">
               Build: {buildStatus}
             </p>
@@ -1006,47 +930,27 @@ function CodeView({
           ))}
         </div>
       </aside>
-      <section className="min-w-0 p-spacing-5">
-        <p className="mb-spacing-4 text-sm text-surface-warm-white/54">
-          {selectedFile?.path}
-        </p>
-        <pre className="max-h-[620px] overflow-auto rounded-[18px] bg-black/40 p-spacing-5 text-xs leading-6 text-surface-warm-white/82">
-          <code>{selectedFile?.content}</code>
-        </pre>
+      <section className="min-h-0 min-w-0">
+        <div className="border-b border-surface-warm-white/10 px-spacing-5 py-spacing-4 text-sm text-surface-warm-white/54">
+          {selectedFile?.path || "Belum ada file"}
+        </div>
+        <MonacoEditor
+          height="640px"
+          language={getEditorLanguage(selectedFile?.path)}
+          value={selectedFile?.content || ""}
+          theme="vs-dark"
+          options={{
+            readOnly: true,
+            minimap: { enabled: false },
+            fontSize: 13,
+            lineHeight: 22,
+            padding: { top: 16, bottom: 16 },
+            scrollBeyondLastLine: false,
+            wordWrap: "on",
+            automaticLayout: true,
+          }}
+        />
       </section>
-    </div>
-  );
-}
-
-function ChangesView({
-  siteSchema,
-  buildProgress,
-}: {
-  siteSchema: ProjectSiteSchema;
-  buildProgress: BuildProgress[];
-}) {
-  return (
-    <div className="mx-auto max-w-3xl rounded-[28px] bg-surface-warm-white p-spacing-8 shadow-[0_18px_48px_rgba(28,28,28,0.12)]">
-      <h2 className="text-4xl font-semibold tracking-[-0.06em]">Changes</h2>
-      <ul className="mt-spacing-8 space-y-spacing-4 text-sm leading-6 text-text-secondary">
-        <li>
-          <span className="font-semibold text-foreground-primary">+</span> Hero:{" "}
-          {siteSchema.headline}
-        </li>
-        <li>
-          <span className="font-semibold text-foreground-primary">+</span> Trust
-          points: {siteSchema.trustPoints.join(", ")}
-        </li>
-        <li>
-          <span className="font-semibold text-foreground-primary">+</span>{" "}
-          Sections:{" "}
-          {siteSchema.sections.map((section) => section.title).join(", ")}
-        </li>
-        <li>
-          <span className="font-semibold text-foreground-primary">~</span> Build
-          steps recorded: {buildProgress.length}
-        </li>
-      </ul>
     </div>
   );
 }
