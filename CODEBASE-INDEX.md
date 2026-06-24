@@ -44,6 +44,7 @@ WorkspaceShell chat
   -> POST /api/projects/preview
   -> validate incoming UI messages
   -> build hidden memory context from chatSummary, memoryFacts, and recent messages
+  -> merge structured workspace-card answers into brief deterministically before AI
   -> generate strict DiscussionTurn JSON (assistantMessage + briefPatch + optional workspaceCard)
   -> stream assistantMessage to UI
   -> merge briefPatch and save chatMessages, brief, workspaceCard JSONB
@@ -84,6 +85,7 @@ Preview
 - `src/lib/rate-limit.ts` — memory/none rate limiter
 - `src/lib/projects/brief.ts` — brief model and build prompt
 - `src/lib/projects/brief-flow.ts` — workspace card parsing, pending card, and manual card regeneration fallback
+- `src/lib/projects/workspace-answers.ts` — deterministic mapping from UI question-card answers to structured brief fields
 - `src/lib/projects/chat-memory.ts` — chat parsing, paging, hidden memory context
 - `src/lib/projects/chat-compaction.ts` — AI-backed summary/facts compaction for long project chats
 - `src/lib/projects/discussion-turn.ts` — strict AI discussion contract separating assistant text from UI question/build cards
@@ -145,6 +147,7 @@ Keep newest first. Only record context useful for future agents, not every tiny 
 
 ### 2026-06-25
 
+- Added deterministic workspace-card answer mapping so selected/custom UI answers update the structured brief before the next AI turn.
 - Added strict `DiscussionTurn` chat contract so one AI turn returns assistant text, brief patch, and optional UI card without duplicating options in the chat transcript.
 - Added hidden chat memory: `chatSummary`, `memoryFacts`, and `lastCompactedMessageCount` keep long workspace conversations continuous while UI chat history stays raw/paginated.
 - Added optional local Graphify workflow: `bun run setup:agent` builds ignored `graphify-out/` artifacts for AI-agent codebase discovery and reuse checks.

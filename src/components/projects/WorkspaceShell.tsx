@@ -35,7 +35,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { type WorkspaceCard } from "@/lib/projects/brief";
+import { type BriefQuestion, type WorkspaceCard } from "@/lib/projects/brief";
 import { type GeneratedProjectFile } from "@/lib/projects/generated-source";
 import { type ProjectSiteSchema } from "@/lib/projects/site-schema";
 
@@ -56,6 +56,13 @@ type WorkspaceShellProps = {
 };
 
 type BuildTab = "preview" | "code";
+
+type WorkspaceAnswerPayload = {
+  answer: string;
+  question: string;
+  questionId: BriefQuestion["id"];
+  source: "custom" | "option";
+};
 
 export function WorkspaceShell({
   projectId,
@@ -428,7 +435,10 @@ export function WorkspaceShell({
   }
 
   const submitChatText = useCallback(
-    (text: string) => {
+    (
+      text: string,
+      options: { workspaceAnswers?: WorkspaceAnswerPayload[] } = {},
+    ) => {
       const trimmed = text.trim();
 
       if (!trimmed || isProcessing) {
@@ -436,7 +446,10 @@ export function WorkspaceShell({
       }
 
       setMessage("");
-      sendMessage({ text: trimmed }, { body: { mode } });
+      sendMessage(
+        { text: trimmed },
+        { body: { mode, workspaceAnswers: options.workspaceAnswers } },
+      );
     },
     [isProcessing, mode, sendMessage],
   );
@@ -641,7 +654,9 @@ export function WorkspaceShell({
                   hasError={cardError}
                   isRefreshing={isRefreshingCard}
                   onRefresh={() => void refreshWorkspaceCard(true)}
-                  onSubmit={submitChatText}
+                  onSubmit={(answer, workspaceAnswers) =>
+                    submitChatText(answer, { workspaceAnswers })
+                  }
                 />
               ) : (
                 <form
@@ -948,20 +963,31 @@ function QuestionStepperComposer({
   hasError: boolean;
   isRefreshing: boolean;
   onRefresh: () => void;
-  onSubmit: (answer: string) => void;
+  onSubmit: (
+    answer: string,
+    workspaceAnswers?: WorkspaceAnswerPayload[],
+  ) => void;
 }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answerSources, setAnswerSources] = useState<
+    Record<string, "custom" | "option">
+  >({});
   const [customAnswer, setCustomAnswer] = useState("");
   const [customAnswerOpen, setCustomAnswerOpen] = useState(false);
   const question = card.questions[Math.min(step, card.questions.length - 1)];
   const selectedAnswer = question ? answers[question.id] : "";
+  const customAnswerSelected =
+    Boolean(selectedAnswer) &&
+    question !== undefined &&
+    answerSources[question.id] === "custom";
   const isLastStep = step >= card.questions.length - 1;
   const canContinue = Boolean(selectedAnswer);
 
   useEffect(() => {
     setStep(0);
     setAnswers({});
+    setAnswerSources({});
     setCustomAnswer("");
     setCustomAnswerOpen(false);
   }, [card]);
@@ -975,10 +1001,14 @@ function QuestionStepperComposer({
     return null;
   }
 
-  function chooseAnswer(answer: string) {
+  function chooseAnswer(answer: string, source: "custom" | "option") {
     setAnswers((value) => ({
       ...value,
       [question.id]: answer,
+    }));
+    setAnswerSources((value) => ({
+      ...value,
+      [question.id]: source,
     }));
   }
 
@@ -989,7 +1019,7 @@ function QuestionStepperComposer({
       return;
     }
 
-    chooseAnswer(answer);
+    chooseAnswer(answer, "custom");
     setCustomAnswerOpen(false);
   }
 
@@ -1003,13 +1033,19 @@ function QuestionStepperComposer({
       return;
     }
 
+    const workspaceAnswers = card.questions.map((item) => ({
+      answer: answers[item.id] || "",
+      question: item.question,
+      questionId: item.id,
+      source: answerSources[item.id] || "custom",
+    }));
     const text = card.questions
       .map(
         (item, index) =>
           `${index + 1}. ${item.question}\nJawaban: ${answers[item.id]}`,
       )
       .join("\n\n");
-    onSubmit(text);
+    onSubmit(text, workspaceAnswers);
   }
 
   return (
@@ -1049,7 +1085,7 @@ function QuestionStepperComposer({
               <button
                 key={option.label}
                 type="button"
-                onClick={() => chooseAnswer(option.label)}
+                onClick={() => chooseAnswer(option.label, "option")}
                 className={`rounded-[16px] border px-spacing-4 py-spacing-3 text-left transition ${
                   isSelected
                     ? "border-[#8ce99a]/55 bg-[#8ce99a]/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
@@ -1072,8 +1108,8 @@ function QuestionStepperComposer({
           })}
           <div
             className={`rounded-[16px] border px-spacing-4 py-spacing-3 transition sm:col-span-2 ${
-              customAnswerOpen
-                ? "border-surface-warm-white/18 bg-[#1f1f1d]"
+              customAnswerOpen || customAnswerSelected
+                ? "border-[#8ce99a]/45 bg-[#8ce99a]/10"
                 : "border-dashed border-surface-warm-white/14 bg-transparent"
             }`}
           >
@@ -1125,7 +1161,9 @@ function QuestionStepperComposer({
                     Jawaban sendiri
                   </span>
                   <span className="mt-spacing-1 block text-xs leading-5 text-surface-warm-white/46">
-                    Pakai ini kalau pilihan AI belum pas untuk keputusan ini.
+                    {customAnswerSelected
+                      ? selectedAnswer
+                      : "Pakai ini kalau pilihan AI belum pas untuk keputusan ini."}
                   </span>
                 </span>
                 <span className="rounded-full border border-surface-warm-white/10 px-spacing-3 py-spacing-1 text-xs text-surface-warm-white/56">

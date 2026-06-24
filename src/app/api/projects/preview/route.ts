@@ -14,10 +14,12 @@ import {
 import {
   createPendingWorkspaceCard,
   generateNextWorkspaceCard,
+  parseWorkspaceCard,
 } from "@/lib/projects/brief-flow";
 import { maybeCompactProjectChat } from "@/lib/projects/chat-compaction";
 import {
   buildProjectChatContext,
+  getTextFromUIMessage,
   parseProjectChatMessages,
   parseProjectChatSummary,
   parseProjectMemoryFacts,
@@ -26,6 +28,7 @@ import {
   createFallbackDiscussionTurn,
   generateDiscussionTurn,
 } from "@/lib/projects/discussion-turn";
+import { buildBriefPatchFromWorkspaceAnswers } from "@/lib/projects/workspace-answers";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -35,6 +38,7 @@ type PreviewRequest = {
   messages?: UIMessage[];
   mode?: "discuss" | "build";
   projectId?: string;
+  workspaceAnswers?: unknown;
 };
 
 export async function POST(request: Request) {
@@ -91,10 +95,11 @@ export async function POST(request: Request) {
         chatSummary: unknown;
         lastCompactedMessageCount: unknown;
         memoryFacts: unknown;
+        workspaceCard: unknown;
       },
     ]
   >`
-    SELECT "chatMessages", "chatSummary", "memoryFacts", "lastCompactedMessageCount", "brief" FROM "Project" WHERE id = ${project.id} AND "userId" = ${userId}
+    SELECT "chatMessages", "chatSummary", "memoryFacts", "lastCompactedMessageCount", "brief", "workspaceCard" FROM "Project" WHERE id = ${project.id} AND "userId" = ${userId}
   `;
   const storedMessages = parseProjectChatMessages(chatRow?.chatMessages);
   const parsedChatSummary = parseProjectChatSummary(chatRow?.chatSummary);
@@ -115,6 +120,40 @@ export async function POST(request: Request) {
     .map((part) => part.text)
     .join(" ");
   const currentBrief = parseProjectBrief(chatRow?.brief, project.prompt);
+  const storedWorkspaceCard = parseWorkspaceCard(
+    chatRow?.workspaceCard,
+    currentBrief,
+  );
+  let workspaceAnswerPatch = buildBriefPatchFromWorkspaceAnswers({
+    card: storedWorkspaceCard,
+    fallbackText: latestUserText,
+    workspaceAnswers: body.workspaceAnswers,
+  });
+
+  if (!hasBriefPatchValue(workspaceAnswerPatch)) {
+    const recentStoredAnswerTexts = storedMessages
+      .filter((message) => message.role === "user")
+      .slice(-6)
+      .reverse()
+      .map(getTextFromUIMessage)
+      .filter((text) => /Jawaban:/i.test(text));
+
+    for (const text of recentStoredAnswerTexts) {
+      workspaceAnswerPatch = buildBriefPatchFromWorkspaceAnswers({
+        card: storedWorkspaceCard,
+        fallbackText: text,
+        workspaceAnswers: undefined,
+      });
+
+      if (hasBriefPatchValue(workspaceAnswerPatch)) {
+        break;
+      }
+    }
+  }
+  const effectiveBrief = mergeProjectBriefPatch(
+    currentBrief,
+    workspaceAnswerPatch,
+  );
 
   if (!incoming.length) {
     return Response.json(
@@ -132,15 +171,15 @@ export async function POST(request: Request) {
     summary: chatSummary,
   });
   const turn = await generateDiscussionTurn({
-    brief: currentBrief,
+    brief: effectiveBrief,
     chatContext,
     latestUserText,
     messages: chatContext.messages,
     mode,
   }).catch(async () => {
-    const fallbackTurn = createFallbackDiscussionTurn(currentBrief);
-    const fallbackCard = await generateNextWorkspaceCard(currentBrief).catch(
-      () => createPendingWorkspaceCard(currentBrief),
+    const fallbackTurn = createFallbackDiscussionTurn(effectiveBrief);
+    const fallbackCard = await generateNextWorkspaceCard(effectiveBrief).catch(
+      () => createPendingWorkspaceCard(effectiveBrief),
     );
 
     return {
@@ -152,7 +191,7 @@ export async function POST(request: Request) {
       workspaceCard: fallbackCard,
     };
   });
-  const updatedBrief = mergeProjectBriefPatch(currentBrief, turn.briefPatch);
+  const updatedBrief = mergeProjectBriefPatch(effectiveBrief, turn.briefPatch);
   const workspaceCard = turn.workspaceCard;
 
   const stream = createUIMessageStream({
@@ -187,4 +226,10 @@ export async function POST(request: Request) {
   });
 
   return createUIMessageStreamResponse({ stream });
+}
+
+function hasBriefPatchValue(patch: object) {
+  return Object.values(patch).some((value) =>
+    Array.isArray(value) ? value.length > 0 : Boolean(value),
+  );
 }

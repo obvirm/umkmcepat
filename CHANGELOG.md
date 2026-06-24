@@ -7,6 +7,7 @@ Short, plain-English daily updates. Keep entries general, one line each, and use
 ### 2026-06-25
 
 - Changed primary chat composers to send with Enter while keeping Shift+Enter for new lines.
+- Fixed guided discussion memory so option-card answers update the project brief before AI asks the next question.
 - Polished the workspace busy and question composer states so AI work feels like a native status flow instead of a generic warning card.
 - Tightened discussion mode so unclear briefs produce UI choices by default, with per-question custom answers when presets do not fit.
 - Added a strict discussion-turn contract so AI chat text, brief updates, and UI option cards are produced as one coherent response without duplicate option text.

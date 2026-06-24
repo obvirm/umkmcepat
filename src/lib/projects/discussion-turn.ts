@@ -8,6 +8,7 @@ import {
   type WorkspaceCard,
   getMissingBriefFields,
   isBriefReady,
+  mergeProjectBriefPatch,
 } from "@/lib/projects/brief";
 import {
   getTextFromUIMessage,
@@ -225,10 +226,13 @@ function normalizeDiscussionTurn(
       throw new Error("ask_question wajib punya questionCard.");
     }
 
-    const missingFields = new Set(getMissingBriefFields(brief));
+    const effectiveBrief = mergeProjectBriefPatch(brief, turn.briefPatch || {});
+    const missingFields = new Set(getMissingBriefFields(effectiveBrief));
 
     if (!missingFields.has(turn.questionCard.id)) {
-      throw new Error("questionCard.id harus field yang belum jelas.");
+      throw new Error(
+        "questionCard.id harus field yang masih belum jelas setelah briefPatch.",
+      );
     }
 
     const options = normalizeOptions(turn.questionCard.options);

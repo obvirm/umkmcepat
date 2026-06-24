@@ -42,13 +42,15 @@ export type ProjectBriefPatch = Partial<
   >
 > & { notes?: string[] };
 
-const REQUIRED_FIELDS: Array<BriefQuestion["id"]> = [
+export const REQUIRED_BRIEF_FIELDS = [
   "businessType",
   "offer",
   "targetCustomer",
   "contactOrCta",
   "stylePreference",
-];
+] as const satisfies Array<BriefQuestion["id"]>;
+
+const REQUIRED_FIELDS: Array<BriefQuestion["id"]> = [...REQUIRED_BRIEF_FIELDS];
 
 export function createInitialBrief(prompt = ""): ProjectBrief {
   return {
@@ -114,6 +116,15 @@ export function mergeProjectBriefPatch(
 
 export function getMissingBriefFields(brief: ProjectBrief) {
   return REQUIRED_FIELDS.filter((field) => !brief[field]);
+}
+
+export function isBriefQuestionId(
+  value: unknown,
+): value is BriefQuestion["id"] {
+  return (
+    typeof value === "string" &&
+    REQUIRED_FIELDS.includes(value as BriefQuestion["id"])
+  );
 }
 
 export function isBriefReady(brief: ProjectBrief) {

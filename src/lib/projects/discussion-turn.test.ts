@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { generateObjectMock } = vi.hoisted(() => ({
   generateObjectMock: vi.fn(),
@@ -20,6 +20,10 @@ import {
 } from "./discussion-turn";
 
 describe("discussion turn", () => {
+  beforeEach(() => {
+    generateObjectMock.mockReset();
+  });
+
   it("normalizes one strict question card with a recommendation", async () => {
     generateObjectMock.mockResolvedValueOnce({
       object: {
@@ -69,6 +73,42 @@ describe("discussion turn", () => {
         ? turn.workspaceCard.questions[0]?.recommendedOptionLabel
         : "",
     ).toBe("Menu sate lengkap");
+  });
+
+  it("rejects asking a field already filled by the same brief patch", async () => {
+    generateObjectMock.mockResolvedValue({
+      object: {
+        assistantMessage:
+          "Saya sudah tahu jenis usahanya. Pilih opsi yang paling dekat.",
+        briefPatch: { businessType: "Toko bakso" },
+        intent: "ask_question",
+        questionCard: {
+          id: "businessType",
+          question: "Apa jenis usaha Anda?",
+          recommendedOptionLabel: "Warung Bakso",
+          whyThisQuestionMatters: "Ini menentukan struktur website.",
+          options: [
+            { label: "Warung Bakso", description: "Fokus jualan bakso." },
+            { label: "Kedai Kopi", description: "Fokus minuman kopi." },
+            { label: "Laundry", description: "Fokus jasa cuci." },
+          ],
+        },
+      },
+    });
+
+    await expect(
+      generateDiscussionTurn({
+        brief: createInitialBrief("buat website"),
+        chatContext: {
+          messages: [],
+          systemContext: "Ringkasan chat lama: belum ada.",
+        },
+        latestUserText: "aku ada toko bakso sih",
+        messages: [],
+        mode: "discuss",
+      }),
+    ).rejects.toThrow("AI gagal membuat discussion turn valid");
+    expect(generateObjectMock).toHaveBeenCalledTimes(3);
   });
 
   it("falls back without exposing option-card internals", () => {
