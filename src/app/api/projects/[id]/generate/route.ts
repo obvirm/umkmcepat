@@ -156,6 +156,7 @@ export async function POST(request: Request, { params }: RouteProps) {
             status: "ready",
             siteSchema: finalSchema,
             sourceFiles,
+            distFiles: buildResult.distFiles,
             buildStatus: buildResult.ok ? "passed" : "failed",
             buildLog: buildResult.log,
             builtAt: new Date(),

@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -10,16 +10,42 @@ export type GeneratedProjectFile = {
   content: string;
 };
 
+export type GeneratedDistFile = {
+  content: string;
+  contentType: string;
+  path: string;
+};
+
 export type BuildGeneratedProjectResult = {
+  distFiles: GeneratedDistFile[];
   ok: boolean;
   log: string;
 };
 
 const MAX_LOG_LENGTH = 20_000;
-const BUILD_TIMEOUT_MS = 45_000;
+const BUILD_TIMEOUT_MS = 180_000;
 
 function json(value: unknown) {
   return JSON.stringify(value, null, 2);
+}
+
+export function parseGeneratedDistFiles(value: unknown): GeneratedDistFile[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((file): file is GeneratedDistFile => {
+    if (!file || typeof file !== "object") {
+      return false;
+    }
+
+    const item = file as Partial<GeneratedDistFile>;
+    return (
+      typeof item.path === "string" &&
+      typeof item.content === "string" &&
+      typeof item.contentType === "string"
+    );
+  });
 }
 
 export function parseGeneratedProjectFiles(
@@ -78,11 +104,15 @@ export async function buildGeneratedProject(
     const install = await runCommand(["bun", "install"], root);
 
     if (!install.ok) {
-      return install;
+      return { ...install, distFiles: [] };
     }
 
     const build = await runCommand(["bun", "run", "build"], root);
+    const distFiles = build.ok
+      ? await collectDistFiles(path.join(root, "dist"))
+      : [];
     return {
+      distFiles,
       ok: build.ok,
       log: [install.log, build.log].filter(Boolean).join("\n"),
     };
@@ -108,7 +138,11 @@ async function runCommand(
     let output = "";
     const timeout = setTimeout(() => {
       child.kill();
-      resolve({ ok: false, log: truncateLog(`${output}\nBuild timed out.`) });
+      resolve({
+        distFiles: [],
+        ok: false,
+        log: truncateLog(`${output}\nBuild timed out.`),
+      });
     }, BUILD_TIMEOUT_MS);
 
     child.stdout.on("data", (chunk: Buffer) => {
@@ -119,11 +153,19 @@ async function runCommand(
     });
     child.on("error", (error) => {
       clearTimeout(timeout);
-      resolve({ ok: false, log: truncateLog(`${output}\n${error.message}`) });
+      resolve({
+        distFiles: [],
+        ok: false,
+        log: truncateLog(`${output}\n${error.message}`),
+      });
     });
     child.on("close", (code) => {
       clearTimeout(timeout);
-      resolve({ ok: code === 0, log: truncateLog(output.trim()) });
+      resolve({
+        distFiles: [],
+        ok: code === 0,
+        log: truncateLog(output.trim()),
+      });
     });
   });
 }
@@ -132,6 +174,62 @@ function truncateLog(value: string) {
   return value.length > MAX_LOG_LENGTH
     ? `${value.slice(0, MAX_LOG_LENGTH)}\n...[truncated]`
     : value;
+}
+
+async function collectDistFiles(root: string): Promise<GeneratedDistFile[]> {
+  const files: GeneratedDistFile[] = [];
+
+  async function walk(current: string) {
+    const entries = await readdir(current, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const absolute = path.join(current, entry.name);
+
+      if (entry.isDirectory()) {
+        await walk(absolute);
+        continue;
+      }
+
+      if (!entry.isFile()) {
+        continue;
+      }
+
+      const relativePath = path.relative(root, absolute).replace(/\\/g, "/");
+      assertSafeProjectFilePath(relativePath);
+      files.push({
+        content: await readFile(absolute, "utf8"),
+        contentType: getContentType(relativePath),
+        path: relativePath,
+      });
+    }
+  }
+
+  await walk(root);
+  return files;
+}
+
+function getContentType(filePath: string) {
+  if (filePath.endsWith(".html")) {
+    return "text/html; charset=utf-8";
+  }
+
+  if (filePath.endsWith(".css")) {
+    return "text/css; charset=utf-8";
+  }
+
+  if (filePath.endsWith(".js")) {
+    return "text/javascript; charset=utf-8";
+  }
+
+  if (filePath.endsWith(".json")) {
+    return "application/json; charset=utf-8";
+  }
+
+  if (filePath.endsWith(".svg")) {
+    return "image/svg+xml";
+  }
+
+  return "text/plain; charset=utf-8";
 }
 
 export function createGeneratedProjectFiles(
@@ -177,7 +275,7 @@ export function createGeneratedProjectFiles(
     },
     {
       path: "vite.config.ts",
-      content: `import { defineConfig } from "vite";\nimport react from "@vitejs/plugin-react";\nimport tailwindcss from "@tailwindcss/vite";\n\nexport default defineConfig({ plugins: [react(), tailwindcss()] });\n`,
+      content: `import { defineConfig } from "vite";\nimport react from "@vitejs/plugin-react";\nimport tailwindcss from "@tailwindcss/vite";\n\nexport default defineConfig({ base: "./", plugins: [react(), tailwindcss()] });\n`,
     },
     {
       path: "src/data/site.ts",

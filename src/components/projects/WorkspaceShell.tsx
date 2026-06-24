@@ -465,6 +465,11 @@ export function WorkspaceShell({
               {activeTab === "preview" ? (
                 buildStatus === "discussing" ? (
                   <DiscussPreview onStartBuild={() => void startBuild()} />
+                ) : sourceStatus === "passed" ? (
+                  <GeneratedPreviewFrame
+                    projectId={projectId}
+                    viewport={viewport}
+                  />
                 ) : (
                   <div className="flex justify-center">
                     <ProjectSitePreview
@@ -741,6 +746,25 @@ function TabButton({
       {icon}
       {children}
     </button>
+  );
+}
+
+function GeneratedPreviewFrame({
+  projectId,
+  viewport,
+}: {
+  projectId: string;
+  viewport: "desktop" | "mobile";
+}) {
+  return (
+    <div className="flex justify-center">
+      <iframe
+        title="Generated website preview"
+        src={`/api/projects/${projectId}/preview/`}
+        sandbox="allow-scripts"
+        className={`${viewport === "mobile" ? "h-[760px] max-w-[390px]" : "h-[760px] max-w-6xl"} w-full rounded-[28px] border-0 bg-white shadow-[0_18px_48px_rgba(28,28,28,0.16)]`}
+      />
+    </div>
   );
 }
 

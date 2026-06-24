@@ -93,6 +93,7 @@ model Project {
   siteSchema Json?
   chatMessages Json?
   sourceFiles Json?
+  distFiles Json?
   buildStatus String @default("not_started") @db.VarChar(32)
   buildLog String? @db.Text
   builtAt DateTime?
