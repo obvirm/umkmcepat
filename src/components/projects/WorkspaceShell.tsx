@@ -719,6 +719,14 @@ function WorkspaceTopBar({
             <PanelLeftOpen className="size-4" />
           </button>
         ) : null}
+        <button
+          type="button"
+          onClick={closePreviewPanel}
+          className="rounded-radius-md border border-surface-warm-white/10 p-spacing-2 text-surface-warm-white/62 hover:bg-surface-warm-white/8 hover:text-surface-warm-white"
+          aria-label="Tutup preview"
+        >
+          <PanelRightClose className="size-4" />
+        </button>
         <div className="flex rounded-radius-md border border-surface-warm-white/10 bg-surface-warm-white/5 p-1 text-xs">
           <TabButton
             active={activeTab === "preview"}
@@ -738,32 +746,26 @@ function WorkspaceTopBar({
       </div>
 
       <div className="flex items-center gap-spacing-3">
-        <button
-          type="button"
-          onClick={closePreviewPanel}
-          className="rounded-radius-md border border-surface-warm-white/10 p-spacing-2 text-surface-warm-white/62 hover:bg-surface-warm-white/8 hover:text-surface-warm-white"
-          aria-label="Tutup preview"
-        >
-          <PanelRightClose className="size-4" />
-        </button>
-        <div className="flex rounded-radius-md border border-surface-warm-white/10 bg-surface-warm-white/5 p-1 text-xs">
-          <button
-            type="button"
-            onClick={() => setViewport("desktop")}
-            className={`flex items-center gap-spacing-2 rounded-radius-md px-spacing-3 py-spacing-2 transition ${viewport === "desktop" ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/58 hover:text-surface-warm-white"}`}
-          >
-            <Monitor className="size-4" aria-hidden="true" />
-            Komputer
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewport("mobile")}
-            className={`flex items-center gap-spacing-2 rounded-radius-md px-spacing-3 py-spacing-2 transition ${viewport === "mobile" ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/58 hover:text-surface-warm-white"}`}
-          >
-            <Smartphone className="size-4" aria-hidden="true" />
-            HP
-          </button>
-        </div>
+        {activeTab === "preview" ? (
+          <div className="flex rounded-radius-md border border-surface-warm-white/10 bg-surface-warm-white/5 p-1 text-xs">
+            <button
+              type="button"
+              onClick={() => setViewport("desktop")}
+              className={`flex items-center gap-spacing-2 rounded-radius-md px-spacing-3 py-spacing-2 transition ${viewport === "desktop" ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/58 hover:text-surface-warm-white"}`}
+            >
+              <Monitor className="size-4" aria-hidden="true" />
+              Komputer
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewport("mobile")}
+              className={`flex items-center gap-spacing-2 rounded-radius-md px-spacing-3 py-spacing-2 transition ${viewport === "mobile" ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/58 hover:text-surface-warm-white"}`}
+            >
+              <Smartphone className="size-4" aria-hidden="true" />
+              HP
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
