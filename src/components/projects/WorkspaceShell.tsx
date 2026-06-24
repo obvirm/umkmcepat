@@ -192,13 +192,13 @@ export function WorkspaceShell({
   }, [initialStatus, startBuild]);
 
   useEffect(() => {
-    if (hasStartedChat.current || !prompt) {
+    if (hasStartedChat.current || !prompt || initialMessages.length) {
       return;
     }
 
     hasStartedChat.current = true;
     sendMessage({ text: prompt }, { body: { mode } });
-  }, [mode, prompt, sendMessage]);
+  }, [initialMessages.length, mode, prompt, sendMessage]);
 
   const isResponding = status === "submitted" || status === "streaming";
   const isBuilding = buildStatus === "building";
