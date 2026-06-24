@@ -5,7 +5,7 @@ import { WorkspaceShell } from "@/components/projects/WorkspaceShell";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseProjectBrief } from "@/lib/projects/brief";
-import { generateNextWorkspaceCard } from "@/lib/projects/brief-flow";
+import { createPendingWorkspaceCard } from "@/lib/projects/brief-flow";
 import {
   getProjectChatPage,
   parseProjectChatMessages,
@@ -52,7 +52,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   `;
   const initialBrief = parseProjectBrief(briefRow?.brief, project.prompt);
 
-  const initialWorkspaceCard = await generateNextWorkspaceCard(initialBrief);
+  const initialWorkspaceCard = createPendingWorkspaceCard(initialBrief);
 
   const initialChatPage = getProjectChatPage(
     parseProjectChatMessages(chatRow?.chatMessages),

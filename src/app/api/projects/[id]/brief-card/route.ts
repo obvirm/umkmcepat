@@ -1,7 +1,10 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseProjectBrief } from "@/lib/projects/brief";
-import { generateNextWorkspaceCard } from "@/lib/projects/brief-flow";
+import {
+  createPendingWorkspaceCard,
+  generateNextWorkspaceCard,
+} from "@/lib/projects/brief-flow";
 
 export async function GET(
   _: Request,
@@ -34,7 +37,9 @@ export async function GET(
     SELECT "brief" FROM "Project" WHERE id = ${id} AND "userId" = ${userId}
   `;
   const brief = parseProjectBrief(row?.brief, project.prompt);
-  const workspaceCard = await generateNextWorkspaceCard(brief);
+  const workspaceCard = await generateNextWorkspaceCard(brief).catch(() =>
+    createPendingWorkspaceCard(brief),
+  );
 
   return Response.json({ brief, workspaceCard });
 }

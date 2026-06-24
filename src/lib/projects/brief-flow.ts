@@ -82,6 +82,23 @@ export function updateBriefFromAnswer(
   return next;
 }
 
+export function createPendingWorkspaceCard(brief: ProjectBrief): WorkspaceCard {
+  if (isBriefReady(brief)) {
+    return buildRecommendationCard(brief);
+  }
+
+  return {
+    type: "questions",
+    questions: getMissingBriefFields(brief)
+      .slice(0, 1)
+      .map((field) => ({
+        id: field,
+        question: "AI sedang menyiapkan opsi yang paling pas untuk proyek ini.",
+        options: [],
+      })),
+  };
+}
+
 export async function generateNextWorkspaceCard(
   brief: ProjectBrief,
 ): Promise<WorkspaceCard> {
