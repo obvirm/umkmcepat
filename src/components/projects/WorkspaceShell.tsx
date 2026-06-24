@@ -67,6 +67,7 @@ export function WorkspaceShell({
   const [buildStatus, setBuildStatus] = useState(initialStatus);
   const [chatWidth, setChatWidth] = useState(560);
   const [chatCollapsed, setChatCollapsed] = useState(false);
+  const [previewCollapsed, setPreviewCollapsed] = useState(true);
   const [activeTab, setActiveTab] = useState<BuildTab>("preview");
   const [sourceFiles, setSourceFiles] = useState<GeneratedProjectFile[]>([]);
   const [sourceStatus, setSourceStatus] = useState("not_started");
@@ -83,6 +84,7 @@ export function WorkspaceShell({
   const modeRef = useRef(mode);
   const buildAbortRef = useRef<AbortController | null>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
+  const hasAutoOpenedPreview = useRef(false);
   const previousLiveMessageCount = useRef(initialMessages.length);
   const { messages, sendMessage, status, error, stop } = useChat({
     id: projectId,
@@ -215,6 +217,19 @@ export function WorkspaceShell({
       latestAssistantText || "",
     );
   const hasPreview = sourceStatus === "passed" || buildStatus === "ready";
+  const showPreviewPanel = !previewCollapsed;
+  const showChatPanel = !chatCollapsed;
+  const layoutClass =
+    showPreviewPanel && showChatPanel
+      ? "lg:grid-cols-[minmax(0,1fr)_8px_var(--chat-width)]"
+      : "lg:grid-cols-1";
+
+  useEffect(() => {
+    if (hasPreview && !hasAutoOpenedPreview.current) {
+      hasAutoOpenedPreview.current = true;
+      setPreviewCollapsed(false);
+    }
+  }, [hasPreview]);
 
   useEffect(() => {
     if (activeTab !== "code" && buildStatus !== "ready") {
@@ -352,13 +367,33 @@ export function WorkspaceShell({
     sendMessage({ text }, { body: { mode } });
   }
 
+  function closePreviewPanel() {
+    if (showChatPanel) {
+      setPreviewCollapsed(true);
+    }
+  }
+
+  function closeChatPanel() {
+    if (showPreviewPanel) {
+      setChatCollapsed(true);
+    }
+  }
+
+  function openPreviewPanel() {
+    setPreviewCollapsed(false);
+  }
+
+  function openChatPanel() {
+    setChatCollapsed(false);
+  }
+
   function handleDividerPointerDown(event: PointerEvent<HTMLDivElement>) {
     event.currentTarget.setPointerCapture(event.pointerId);
     const startX = event.clientX;
     const startWidth = chatWidth;
 
     function move(pointerEvent: globalThis.PointerEvent) {
-      const next = startWidth + (pointerEvent.clientX - startX);
+      const next = startWidth - (pointerEvent.clientX - startX);
       setChatWidth(Math.min(720, Math.max(420, next)));
     }
 
@@ -374,13 +409,13 @@ export function WorkspaceShell({
   return (
     <div className="h-dvh overflow-hidden bg-[#10100f] text-surface-warm-white">
       <div
-        className={`grid h-full min-h-0 gap-0 ${hasPreview ? "lg:grid-cols-[var(--chat-width)_8px_minmax(0,1fr)]" : "lg:grid-cols-1"}`}
+        className={`grid h-full min-h-0 gap-0 ${layoutClass}`}
         style={{
-          ["--chat-width" as string]: chatCollapsed ? "0px" : `${chatWidth}px`,
+          ["--chat-width" as string]: showChatPanel ? `${chatWidth}px` : "0px",
         }}
       >
-        {hasPreview ? (
-          <section className="min-h-0 min-w-0 p-spacing-5 lg:order-3 lg:p-spacing-7">
+        {showPreviewPanel ? (
+          <section className="min-h-0 min-w-0 p-spacing-5 lg:order-1 lg:p-spacing-7">
             <div className="flex h-full min-h-0 flex-col rounded-[32px] border border-surface-warm-white/10 bg-[#ebe8df] p-spacing-4 text-foreground-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
               <WorkspaceTopBar
                 activeTab={activeTab}
@@ -388,7 +423,8 @@ export function WorkspaceShell({
                 viewport={viewport}
                 setViewport={setViewport}
                 chatCollapsed={chatCollapsed}
-                setChatCollapsed={setChatCollapsed}
+                openChatPanel={openChatPanel}
+                closePreviewPanel={closePreviewPanel}
               />
               <div className="mt-spacing-4 flex-1 overflow-auto rounded-[24px] bg-[#d8d3c8] p-spacing-5">
                 {activeTab === "preview" ? (
@@ -422,7 +458,7 @@ export function WorkspaceShell({
           </section>
         ) : null}
 
-        {hasPreview ? (
+        {showPreviewPanel && showChatPanel ? (
           <div
             role="separator"
             aria-orientation="vertical"
@@ -432,7 +468,7 @@ export function WorkspaceShell({
         ) : null}
 
         <aside
-          className={`${chatCollapsed && hasPreview ? "hidden" : "flex"} min-h-0 min-w-0 flex-col bg-[#1b1b19] p-spacing-5 ${hasPreview ? "border-r border-surface-warm-white/10 lg:order-1 lg:flex" : "mx-auto w-full max-w-3xl"}`}
+          className={`${showChatPanel ? "flex" : "hidden"} min-h-0 min-w-0 flex-col bg-[#1b1b19] p-spacing-5 ${showPreviewPanel ? "border-l border-surface-warm-white/10 lg:order-3 lg:flex" : "mx-auto w-full max-w-3xl"}`}
         >
           <div className="flex items-start justify-between gap-spacing-5 px-spacing-1">
             <div className="min-w-0 flex-1">
@@ -488,16 +524,27 @@ export function WorkspaceShell({
                 )}
               </div>
             </div>
-            {hasPreview ? (
-              <button
-                type="button"
-                onClick={() => setChatCollapsed(true)}
-                className="hidden rounded-full border border-surface-warm-white/10 p-spacing-3 text-surface-warm-white/62 hover:text-surface-warm-white lg:block"
-                aria-label="Tutup chat"
-              >
-                <PanelRightClose className="size-4" />
-              </button>
-            ) : null}
+            <div className="flex items-center gap-spacing-2">
+              {!showPreviewPanel ? (
+                <button
+                  type="button"
+                  onClick={openPreviewPanel}
+                  className="hidden rounded-full border border-surface-warm-white/10 px-spacing-4 py-spacing-3 text-xs text-surface-warm-white/62 hover:text-surface-warm-white lg:block"
+                >
+                  Preview
+                </button>
+              ) : null}
+              {showPreviewPanel ? (
+                <button
+                  type="button"
+                  onClick={closeChatPanel}
+                  className="hidden rounded-full border border-surface-warm-white/10 p-spacing-3 text-surface-warm-white/62 hover:text-surface-warm-white lg:block"
+                  aria-label="Tutup chat"
+                >
+                  <PanelRightClose className="size-4" />
+                </button>
+              ) : null}
+            </div>
           </div>
 
           <div
@@ -585,14 +632,16 @@ function WorkspaceTopBar({
   viewport,
   setViewport,
   chatCollapsed,
-  setChatCollapsed,
+  openChatPanel,
+  closePreviewPanel,
 }: {
   activeTab: BuildTab;
   setActiveTab: (tab: BuildTab) => void;
   viewport: "desktop" | "mobile";
   setViewport: (viewport: "desktop" | "mobile") => void;
   chatCollapsed: boolean;
-  setChatCollapsed: (collapsed: boolean) => void;
+  openChatPanel: () => void;
+  closePreviewPanel: () => void;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-spacing-4 rounded-[22px] bg-surface-warm-white px-spacing-5 py-spacing-4">
@@ -600,7 +649,7 @@ function WorkspaceTopBar({
         {chatCollapsed ? (
           <button
             type="button"
-            onClick={() => setChatCollapsed(false)}
+            onClick={openChatPanel}
             className="rounded-full bg-foreground-primary p-spacing-3 text-surface-warm-white"
             aria-label="Buka chat"
           >
@@ -626,6 +675,13 @@ function WorkspaceTopBar({
       </div>
 
       <div className="flex items-center gap-spacing-3">
+        <button
+          type="button"
+          onClick={closePreviewPanel}
+          className="rounded-full border border-foreground-primary/10 px-spacing-4 py-spacing-3 text-xs text-text-secondary hover:text-foreground-primary"
+        >
+          Tutup preview
+        </button>
         <div className="flex rounded-full bg-surface-muted p-1 text-sm">
           <button
             type="button"
