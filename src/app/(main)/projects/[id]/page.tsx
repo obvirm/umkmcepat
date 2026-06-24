@@ -48,7 +48,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const initialChatPage = getProjectChatPage(
     parseProjectChatMessages(chatRow?.chatMessages),
     null,
-    6,
+    4,
   );
 
   return (

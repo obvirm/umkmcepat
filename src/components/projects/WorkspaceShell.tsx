@@ -84,8 +84,10 @@ export function WorkspaceShell({
   const modeRef = useRef(mode);
   const buildAbortRef = useRef<AbortController | null>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
+  const olderChatSentinelRef = useRef<HTMLDivElement | null>(null);
   const hasAutoOpenedPreview = useRef(false);
   const previousLiveMessageCount = useRef(initialMessages.length);
+  const previousScrollHeight = useRef<number | null>(null);
   const { messages, sendMessage, status, error, stop } = useChat({
     id: projectId,
     messages: initialMessages,
@@ -260,12 +262,13 @@ export function WorkspaceShell({
     };
   }, [activeTab, buildStatus, projectId]);
 
-  async function loadOlderChat() {
+  const loadOlderChat = useCallback(async () => {
     if (!hasMoreChat || isLoadingOlderChat || chatCursor === null) {
       return;
     }
 
     setIsLoadingOlderChat(true);
+    previousScrollHeight.current = chatScrollRef.current?.scrollHeight ?? null;
     try {
       const response = await fetch(
         `/api/projects/${projectId}/chat?before=${chatCursor}`,
@@ -284,7 +287,7 @@ export function WorkspaceShell({
     } finally {
       setIsLoadingOlderChat(false);
     }
-  }
+  }, [chatCursor, hasMoreChat, isLoadingOlderChat, projectId]);
 
   function stopCurrentJob() {
     if (isResponding) {
@@ -298,6 +301,37 @@ export function WorkspaceShell({
     setBuildStatus("draft");
     setMode("discuss");
   }
+
+  useEffect(() => {
+    const sentinel = olderChatSentinelRef.current;
+    const root = chatScrollRef.current;
+
+    if (!sentinel || !root || !hasMoreChat) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          void loadOlderChat();
+        }
+      },
+      { root, rootMargin: "160px 0px 0px 0px" },
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [chatCursor, hasMoreChat, isLoadingOlderChat, loadOlderChat]);
+
+  useEffect(() => {
+    const element = chatScrollRef.current;
+
+    if (element && previousScrollHeight.current !== null) {
+      element.scrollTop += element.scrollHeight - previousScrollHeight.current;
+      previousScrollHeight.current = null;
+    }
+  }, [olderMessages.length]);
 
   useEffect(() => {
     const scrollToLatest = () => {
@@ -552,14 +586,16 @@ export function WorkspaceShell({
             className="mt-spacing-5 min-h-0 flex-1 space-y-spacing-6 overflow-y-auto overflow-x-hidden px-spacing-1 pr-spacing-2 [scrollbar-color:#6f6a60_transparent] [scrollbar-width:thin]"
           >
             {hasMoreChat ? (
-              <button
-                type="button"
-                onClick={() => void loadOlderChat()}
-                disabled={isLoadingOlderChat}
-                className="mx-auto block rounded-full border border-surface-warm-white/10 px-spacing-4 py-spacing-2 text-xs text-surface-warm-white/54 hover:text-surface-warm-white disabled:opacity-50"
+              <div
+                ref={olderChatSentinelRef}
+                className="py-spacing-3 text-center"
               >
-                {isLoadingOlderChat ? "Memuat..." : "Muat chat lama"}
-              </button>
+                {isLoadingOlderChat ? (
+                  <span className="text-xs text-surface-warm-white/42">
+                    Memuat chat lama...
+                  </span>
+                ) : null}
+              </div>
             ) : null}
             <ChatMessages messages={visibleMessages} />
 
@@ -844,14 +880,14 @@ function ChatMessages({ messages }: { messages: UIMessage[] }) {
   }
 
   return (
-    <div className="space-y-spacing-7">
+    <div className="space-y-spacing-8">
       {messages.map((message, messageIndex) => (
         <div
           key={message.id || `${message.role}-${messageIndex}`}
-          className={`flex max-w-full text-sm leading-6 ${message.role === "user" ? "justify-end" : "justify-start"}`}
+          className={`flex max-w-full text-base leading-7 ${message.role === "user" ? "justify-end" : "justify-start"}`}
         >
           <div
-            className={`max-w-[86%] overflow-hidden break-words rounded-[18px] px-spacing-5 py-spacing-3 ${message.role === "user" ? "border border-surface-warm-white/12 bg-[#30302c] text-surface-warm-white/86" : "border border-surface-warm-white/10 bg-[#242421] text-surface-warm-white/78"}`}
+            className={`max-w-[88%] overflow-hidden break-words rounded-[22px] px-spacing-6 py-spacing-5 ${message.role === "user" ? "border border-surface-warm-white/12 bg-[#30302c] text-surface-warm-white/88" : "border border-surface-warm-white/10 bg-[#242421] text-surface-warm-white/80"}`}
           >
             {message.parts.map((part, index) =>
               part.type === "text" ? (
@@ -869,7 +905,7 @@ function MessageText({ text }: { text: string }) {
   const lines = text.split("\n").filter((line) => line.trim());
 
   return (
-    <div className="space-y-spacing-3">
+    <div className="space-y-spacing-4">
       {lines.map((line, index) => {
         const trimmed = line.trim();
         const listMatch = trimmed.match(/^(\d+\.|[-*])\s+(.*)$/);
