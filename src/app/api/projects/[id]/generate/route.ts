@@ -150,6 +150,22 @@ export async function POST(request: Request, { params }: RouteProps) {
             ? "Source project berhasil divalidasi dengan bun run build."
             : "Source tetap disimpan, tapi build log perlu dicek di tab Code.",
         });
+        const latestProject = await prisma.project.findUnique({
+          where: { id: project.id },
+          select: { status: true },
+        });
+
+        if (latestProject?.status === "stopping") {
+          await prisma.project.update({
+            where: { id: project.id },
+            data: { status: "draft", buildStatus: "stopped" } as Parameters<
+              typeof prisma.project.update
+            >[0]["data"],
+          });
+          send("error", { message: "Proses dihentikan." });
+          return;
+        }
+
         await prisma.project.update({
           where: { id: project.id },
           data: {

@@ -12,10 +12,6 @@ import {
   useTransition,
 } from "react";
 
-import {
-  ModeSelect,
-  type WorkspaceMode,
-} from "@/components/projects/ModeSelect";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -38,7 +34,6 @@ export function HomePromptForm() {
   const router = useRouter();
   const { status } = useSession();
   const [prompt, setPrompt] = useState("");
-  const [mode, setMode] = useState<WorkspaceMode>("discuss");
   const [loginOpen, setLoginOpen] = useState(false);
   const [isContinuing, setIsContinuing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -55,13 +50,12 @@ export function HomePromptForm() {
     }
 
     setPrompt((current) => current || draft.prompt);
-    setMode(draft.mode);
   }, []);
 
   function saveDraft(continueAfterLogin = false) {
     const draft = createProjectDraft(
       prompt,
-      mode,
+      "discuss",
       Date.now(),
       continueAfterLogin,
     );
@@ -77,11 +71,11 @@ export function HomePromptForm() {
   }
 
   const createProject = useCallback(
-    async (value: string, selectedMode: WorkspaceMode) => {
+    async (value: string) => {
       const response = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: value, mode: selectedMode }),
+        body: JSON.stringify({ prompt: value }),
       });
       const result = (await response.json()) as {
         path?: string;
@@ -125,7 +119,7 @@ export function HomePromptForm() {
       JSON.stringify({ ...draft, continueAfterLogin: false }),
     );
 
-    void createProject(draft.prompt, draft.mode);
+    void createProject(draft.prompt);
   }, [createProject, status]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -147,7 +141,7 @@ export function HomePromptForm() {
 
     setIsContinuing(true);
 
-    await createProject(validation.value, mode);
+    await createProject(validation.value);
   }
 
   const isLoading = isContinuing || isPending;
@@ -177,7 +171,7 @@ export function HomePromptForm() {
           </span>
         </div>
         <div className="flex items-center justify-between gap-spacing-5 px-spacing-7 pb-spacing-7">
-          <ModeSelect value={mode} onChange={setMode} disabled={isLoading} />
+          <div />
           <div className="flex items-center gap-spacing-4">
             {isLoading ? (
               <span className="hidden text-sm text-surface-warm-white/58 sm:inline">

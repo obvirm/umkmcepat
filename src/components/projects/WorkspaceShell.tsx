@@ -206,9 +206,7 @@ export function WorkspaceShell({
   initialMessages,
   siteSchema: initialSiteSchema,
 }: WorkspaceShellProps) {
-  const [mode, setMode] = useState<"build" | "discuss">(
-    initialStatus === "discussing" ? "discuss" : "build",
-  );
+  const [mode, setMode] = useState<"build" | "discuss">("discuss");
   const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
   const [message, setMessage] = useState("");
   const [siteSchema, setSiteSchema] = useState(initialSiteSchema);
@@ -227,6 +225,7 @@ export function WorkspaceShell({
   const hasStartedChat = useRef(false);
   const hasStartedBuild = useRef(false);
   const modeRef = useRef(mode);
+  const buildAbortRef = useRef<AbortController | null>(null);
   const { messages, sendMessage, status, error } = useChat({
     id: projectId,
     messages: initialMessages,
@@ -259,68 +258,83 @@ export function WorkspaceShell({
     setBuildProgress([]);
     setActiveTab("timeline");
 
-    const response = await fetch(`/api/projects/${projectId}/generate`, {
-      method: "POST",
-    });
+    const abortController = new AbortController();
+    buildAbortRef.current = abortController;
 
-    if (!response.ok || !response.body) {
-      const result = (await response.json().catch(() => null)) as {
-        message?: string;
-      } | null;
-      setBuildStatus("draft");
-      setBuildError(result?.message || "AI belum bisa membangun website ini.");
-      return;
-    }
+    try {
+      const response = await fetch(`/api/projects/${projectId}/generate`, {
+        method: "POST",
+        signal: abortController.signal,
+      });
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) {
-        break;
+      if (!response.ok || !response.body) {
+        const result = (await response.json().catch(() => null)) as {
+          message?: string;
+        } | null;
+        setBuildStatus("draft");
+        setBuildError(
+          result?.message || "AI belum bisa membangun website ini.",
+        );
+        return;
       }
 
-      buffer += decoder.decode(value, { stream: true });
-      const events = buffer.split("\n\n");
-      buffer = events.pop() || "";
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
 
-      for (const rawEvent of events) {
-        const eventName = rawEvent.match(/^event: (.+)$/m)?.[1];
-        const dataText = rawEvent.match(/^data: (.+)$/m)?.[1];
+      while (true) {
+        const { done, value } = await reader.read();
 
-        if (!eventName || !dataText) {
-          continue;
+        if (done) {
+          break;
         }
 
-        const data = JSON.parse(dataText) as
-          | ProjectSiteSchema
-          | BuildProgress
-          | { message?: string };
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() || "";
 
-        if (eventName === "progress") {
-          setBuildProgress((items) => [...items, data as BuildProgress]);
-        }
+        for (const rawEvent of events) {
+          const eventName = rawEvent.match(/^event: (.+)$/m)?.[1];
+          const dataText = rawEvent.match(/^data: (.+)$/m)?.[1];
 
-        if (eventName === "schema" || eventName === "done") {
-          setSiteSchema(data as ProjectSiteSchema);
-          setActiveTab("preview");
-        }
+          if (!eventName || !dataText) {
+            continue;
+          }
 
-        if (eventName === "done") {
-          setBuildStatus("ready");
-        }
+          const data = JSON.parse(dataText) as
+            | ProjectSiteSchema
+            | BuildProgress
+            | { message?: string };
 
-        if (eventName === "error") {
-          setBuildStatus("draft");
-          setBuildError(
-            (data as { message?: string }).message ||
-              "AI belum bisa membangun website ini.",
-          );
+          if (eventName === "progress") {
+            setBuildProgress((items) => [...items, data as BuildProgress]);
+          }
+
+          if (eventName === "schema" || eventName === "done") {
+            setSiteSchema(data as ProjectSiteSchema);
+            setActiveTab("preview");
+          }
+
+          if (eventName === "done") {
+            setBuildStatus("ready");
+          }
+
+          if (eventName === "error") {
+            setBuildStatus("draft");
+            setBuildError(
+              (data as { message?: string }).message ||
+                "AI belum bisa membangun website ini.",
+            );
+          }
         }
       }
+    } catch (error) {
+      if ((error as Error).name !== "AbortError") {
+        setBuildStatus("draft");
+        setBuildError("AI belum bisa membangun website ini.");
+      }
+    } finally {
+      buildAbortRef.current = null;
     }
   }, [buildStatus, projectId]);
 
@@ -387,12 +401,13 @@ export function WorkspaceShell({
     };
   }, [activeTab, buildStatus, projectId]);
 
-  function switchMode(nextMode: "build" | "discuss") {
-    setMode(nextMode);
-
-    if (nextMode === "build" && buildStatus === "discussing") {
-      void startBuild();
-    }
+  function stopBuild() {
+    buildAbortRef.current?.abort();
+    buildAbortRef.current = null;
+    void fetch(`/api/projects/${projectId}/stop`, { method: "POST" });
+    setBuildStatus("draft");
+    setMode("discuss");
+    setBuildError("Proses dihentikan.");
   }
 
   function handleOption(option: GuidedOption) {
@@ -536,21 +551,8 @@ export function WorkspaceShell({
             </button>
           </div>
 
-          <div className="mt-spacing-6 flex rounded-full border border-surface-warm-white/10 bg-surface-warm-white/6 p-1 text-sm">
-            <button
-              type="button"
-              onClick={() => switchMode("discuss")}
-              className={`flex-1 rounded-full px-spacing-6 py-spacing-3 transition ${mode === "discuss" ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/62 hover:text-surface-warm-white"}`}
-            >
-              Diskusi
-            </button>
-            <button
-              type="button"
-              onClick={() => switchMode("build")}
-              className={`flex-1 rounded-full px-spacing-6 py-spacing-3 transition ${mode === "build" ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/62 hover:text-surface-warm-white"}`}
-            >
-              Buat
-            </button>
+          <div className="mt-spacing-6 rounded-full border border-surface-warm-white/10 bg-surface-warm-white/6 px-spacing-5 py-spacing-3 text-sm text-surface-warm-white/66">
+            AI sedang mode {isBuilding ? "Buat" : "Diskusi"}
           </div>
 
           <div className="mt-spacing-6 flex-1 space-y-spacing-5 overflow-y-auto pr-1">
@@ -558,7 +560,7 @@ export function WorkspaceShell({
               {prompt}
             </div>
 
-            {mode === "discuss" ? (
+            {!isBuilding ? (
               <BriefReadinessCard
                 readiness={readiness}
                 brief={brief}
@@ -568,7 +570,7 @@ export function WorkspaceShell({
 
             <ChatMessages messages={messages} />
 
-            {mode === "discuss" && nextQuestion ? (
+            {!isBuilding && nextQuestion ? (
               <GuidedQuestionCard
                 question={nextQuestion.question}
                 options={nextQuestion.options}
@@ -576,7 +578,7 @@ export function WorkspaceShell({
               />
             ) : null}
 
-            {mode === "discuss" && !nextQuestion ? (
+            {!isBuilding && !nextQuestion ? (
               <BuildReadyCard onBuild={() => void startBuild()} />
             ) : null}
 
@@ -600,43 +602,58 @@ export function WorkspaceShell({
               buildProgress={buildProgress}
               buildError={buildError}
             />
-            <form
-              onSubmit={handleMessageSubmit}
-              className="mt-spacing-4 rounded-[26px] border border-surface-warm-white/10 bg-[#232321] p-spacing-5 shadow-[0_18px_48px_rgba(0,0,0,0.22)]"
-            >
-              <label htmlFor="workspace-message" className="sr-only">
-                Pesan untuk AI
-              </label>
-              <textarea
-                id="workspace-message"
-                rows={3}
-                value={message}
-                onChange={(event) => setMessage(event.target.value)}
-                disabled={chatDisabled}
-                placeholder={
-                  mode === "build"
-                    ? "Minta perubahan, contoh: buat lebih premium..."
-                    : "Jawab pilihan atau tulis kebutuhanmu..."
-                }
-                className="w-full resize-none bg-transparent px-spacing-3 py-spacing-3 text-sm leading-6 text-surface-warm-white outline-none [scrollbar-width:none] placeholder:text-surface-warm-white/38 disabled:opacity-60 [&::-webkit-scrollbar]:hidden"
-              />
-              <div className="flex items-center justify-between gap-spacing-4">
-                <span className="text-xs text-surface-warm-white/42">
-                  {mode === "discuss"
-                    ? "Diskusi tidak akan membangun website."
-                    : "Mode buat akan mengubah preview."}
-                </span>
+            {isBuilding ? (
+              <div className="mt-spacing-4 rounded-[26px] border border-[#ff5e27]/30 bg-[#ff5e27]/10 p-spacing-5">
+                <p className="text-sm text-surface-warm-white/72">
+                  AI sedang membangun. Input ditutup sementara supaya proses
+                  tidak bentrok.
+                </p>
                 <Button
-                  type="submit"
-                  size="icon"
-                  disabled={!message.trim() || chatDisabled}
-                  className="size-9 rounded-full bg-surface-warm-white text-foreground-primary hover:bg-surface-warm-white/86 disabled:opacity-50"
-                  aria-label="Kirim pesan"
+                  type="button"
+                  onClick={stopBuild}
+                  className="mt-spacing-4 rounded-full bg-surface-warm-white text-foreground-primary hover:bg-surface-warm-white/86"
                 >
-                  <ArrowUp className="size-4" />
+                  Stop proses
                 </Button>
               </div>
-            </form>
+            ) : (
+              <form
+                onSubmit={handleMessageSubmit}
+                className="mt-spacing-4 rounded-[26px] border border-surface-warm-white/10 bg-[#232321] p-spacing-5 shadow-[0_18px_48px_rgba(0,0,0,0.22)]"
+              >
+                <label htmlFor="workspace-message" className="sr-only">
+                  Pesan untuk AI
+                </label>
+                <textarea
+                  id="workspace-message"
+                  rows={3}
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  disabled={chatDisabled}
+                  placeholder={
+                    mode === "build"
+                      ? "Minta perubahan, contoh: buat lebih premium..."
+                      : "Jawab pilihan atau tulis kebutuhanmu..."
+                  }
+                  className="w-full resize-none bg-transparent px-spacing-3 py-spacing-3 text-sm leading-6 text-surface-warm-white outline-none [scrollbar-width:none] placeholder:text-surface-warm-white/38 disabled:opacity-60 [&::-webkit-scrollbar]:hidden"
+                />
+                <div className="flex items-center justify-between gap-spacing-4">
+                  <span className="text-xs text-surface-warm-white/42">
+                    Diskusi dulu. AI akan menawarkan build saat brief cukup
+                    jelas.
+                  </span>
+                  <Button
+                    type="submit"
+                    size="icon"
+                    disabled={!message.trim() || chatDisabled}
+                    className="size-9 rounded-full bg-surface-warm-white text-foreground-primary hover:bg-surface-warm-white/86 disabled:opacity-50"
+                    aria-label="Kirim pesan"
+                  >
+                    <ArrowUp className="size-4" />
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
         </aside>
       </div>

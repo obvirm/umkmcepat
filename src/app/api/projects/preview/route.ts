@@ -55,13 +55,23 @@ export async function POST(request: Request) {
 
   const project = await prisma.project.findFirst({
     where: { id: body.projectId, userId: session.user.id },
-    select: { id: true },
+    select: { id: true, status: true },
   });
 
   if (!project) {
     return Response.json(
       { message: "Proyek tidak ditemukan." },
       { status: 404 },
+    );
+  }
+
+  if (project.status === "building") {
+    return Response.json(
+      {
+        message:
+          "AI sedang membangun. Tunggu sampai selesai atau hentikan dulu.",
+      },
+      { status: 409 },
     );
   }
 
