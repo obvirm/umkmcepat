@@ -9,6 +9,8 @@ import {
   Code2,
   Globe2,
   Monitor,
+  PanelLeftClose,
+  PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
   Pencil,
@@ -417,7 +419,7 @@ export function WorkspaceShell({
 
   const chatPanelClass =
     "flex h-full min-h-0 min-w-0 flex-col bg-[#1b1b19] p-spacing-5";
-  const previewPanelClass = "h-full min-h-0 min-w-0 p-spacing-5 lg:p-spacing-7";
+  const previewPanelClass = "h-full min-h-0 min-w-0";
 
   return (
     <div className="h-dvh overflow-hidden bg-[#10100f] text-surface-warm-white">
@@ -426,9 +428,19 @@ export function WorkspaceShell({
         className="h-full min-h-0 overflow-hidden"
       >
         {showPreviewPanel ? (
-          <ResizablePanel defaultSize={showSplitLayout ? 68 : 100} minSize={35}>
+          <ResizablePanel
+            defaultSize={showSplitLayout ? 68 : 100}
+            minSize={8}
+            collapsible
+            collapsedSize={0}
+            onResize={(size) => {
+              if (Number(size) <= 8 && showChatPanel) {
+                setPreviewCollapsed(true);
+              }
+            }}
+          >
             <section className={previewPanelClass}>
-              <div className="flex h-full min-h-0 flex-col rounded-[32px] border border-surface-warm-white/10 bg-[#ebe8df] p-spacing-4 text-foreground-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
+              <div className="flex h-full min-h-0 flex-col bg-[#10100f] text-surface-warm-white">
                 <WorkspaceTopBar
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
@@ -438,7 +450,7 @@ export function WorkspaceShell({
                   openChatPanel={openChatPanel}
                   closePreviewPanel={closePreviewPanel}
                 />
-                <div className="mt-spacing-4 flex-1 overflow-auto rounded-[24px] bg-[#d8d3c8] p-spacing-5">
+                <div className="min-h-0 flex-1 overflow-auto bg-[#10100f]">
                   {activeTab === "preview" ? (
                     sourceStatus === "passed" ? (
                       <GeneratedPreviewFrame
@@ -479,7 +491,17 @@ export function WorkspaceShell({
         ) : null}
 
         {showChatPanel ? (
-          <ResizablePanel defaultSize={showSplitLayout ? 32 : 100} minSize={24}>
+          <ResizablePanel
+            defaultSize={showSplitLayout ? 32 : 100}
+            minSize={8}
+            collapsible
+            collapsedSize={0}
+            onResize={(size) => {
+              if (Number(size) <= 8 && showPreviewPanel) {
+                setChatCollapsed(true);
+              }
+            }}
+          >
             <aside className={chatPanelClass}>
               <div className="flex items-start justify-between gap-spacing-5 px-spacing-1">
                 <div className="min-w-0 flex-1">
@@ -540,16 +562,17 @@ export function WorkspaceShell({
                     <button
                       type="button"
                       onClick={openPreviewPanel}
-                      className="hidden rounded-full border border-surface-warm-white/10 px-spacing-4 py-spacing-3 text-xs text-surface-warm-white/62 hover:text-surface-warm-white lg:block"
+                      className="hidden rounded-full border border-surface-warm-white/10 p-spacing-3 text-surface-warm-white/62 hover:bg-surface-warm-white/8 hover:text-surface-warm-white lg:block"
+                      aria-label="Buka preview"
                     >
-                      Preview
+                      <PanelLeftOpen className="size-4" />
                     </button>
                   ) : null}
                   {showPreviewPanel ? (
                     <button
                       type="button"
                       onClick={closeChatPanel}
-                      className="hidden rounded-full border border-surface-warm-white/10 p-spacing-3 text-surface-warm-white/62 hover:text-surface-warm-white lg:block"
+                      className="hidden rounded-full border border-surface-warm-white/10 p-spacing-3 text-surface-warm-white/62 hover:bg-surface-warm-white/8 hover:text-surface-warm-white lg:block"
                       aria-label="Tutup chat"
                     >
                       <PanelRightClose className="size-4" />
@@ -659,19 +682,19 @@ function WorkspaceTopBar({
   closePreviewPanel: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-spacing-4 rounded-[22px] bg-surface-warm-white px-spacing-5 py-spacing-4">
+    <div className="flex h-14 items-center justify-between gap-spacing-4 border-b border-surface-warm-white/10 bg-[#171715] px-spacing-4">
       <div className="flex items-center gap-spacing-3">
         {chatCollapsed ? (
           <button
             type="button"
             onClick={openChatPanel}
-            className="rounded-full bg-foreground-primary p-spacing-3 text-surface-warm-white"
+            className="rounded-radius-md border border-surface-warm-white/10 p-spacing-2 text-surface-warm-white/70 hover:bg-surface-warm-white/8 hover:text-surface-warm-white"
             aria-label="Buka chat"
           >
             <PanelRightOpen className="size-4" />
           </button>
         ) : null}
-        <div className="flex rounded-full bg-surface-muted p-1 text-sm">
+        <div className="flex rounded-radius-md border border-surface-warm-white/10 bg-surface-warm-white/5 p-1 text-xs">
           <TabButton
             active={activeTab === "preview"}
             onClick={() => setActiveTab("preview")}
@@ -693,15 +716,16 @@ function WorkspaceTopBar({
         <button
           type="button"
           onClick={closePreviewPanel}
-          className="rounded-full border border-foreground-primary/10 px-spacing-4 py-spacing-3 text-xs text-text-secondary hover:text-foreground-primary"
+          className="rounded-radius-md border border-surface-warm-white/10 p-spacing-2 text-surface-warm-white/62 hover:bg-surface-warm-white/8 hover:text-surface-warm-white"
+          aria-label="Tutup preview"
         >
-          Tutup preview
+          <PanelLeftClose className="size-4" />
         </button>
-        <div className="flex rounded-full bg-surface-muted p-1 text-sm">
+        <div className="flex rounded-radius-md border border-surface-warm-white/10 bg-surface-warm-white/5 p-1 text-xs">
           <button
             type="button"
             onClick={() => setViewport("desktop")}
-            className={`flex items-center gap-spacing-3 rounded-full px-spacing-5 py-spacing-3 transition ${viewport === "desktop" ? "bg-foreground-primary text-surface-warm-white" : "text-text-secondary hover:text-foreground-primary"}`}
+            className={`flex items-center gap-spacing-2 rounded-radius-md px-spacing-3 py-spacing-2 transition ${viewport === "desktop" ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/58 hover:text-surface-warm-white"}`}
           >
             <Monitor className="size-4" aria-hidden="true" />
             Komputer
@@ -709,7 +733,7 @@ function WorkspaceTopBar({
           <button
             type="button"
             onClick={() => setViewport("mobile")}
-            className={`flex items-center gap-spacing-3 rounded-full px-spacing-5 py-spacing-3 transition ${viewport === "mobile" ? "bg-foreground-primary text-surface-warm-white" : "text-text-secondary hover:text-foreground-primary"}`}
+            className={`flex items-center gap-spacing-2 rounded-radius-md px-spacing-3 py-spacing-2 transition ${viewport === "mobile" ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/58 hover:text-surface-warm-white"}`}
           >
             <Smartphone className="size-4" aria-hidden="true" />
             HP
@@ -735,7 +759,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-spacing-3 rounded-full px-spacing-5 py-spacing-3 transition ${active ? "bg-foreground-primary text-surface-warm-white" : "text-text-secondary hover:text-foreground-primary"}`}
+      className={`flex items-center gap-spacing-2 rounded-radius-md px-spacing-3 py-spacing-2 transition ${active ? "bg-surface-warm-white text-foreground-primary" : "text-surface-warm-white/58 hover:text-surface-warm-white"}`}
     >
       {icon}
       {children}
@@ -756,7 +780,7 @@ function GeneratedPreviewFrame({
         title="Generated website preview"
         src={`/api/projects/${projectId}/preview/`}
         sandbox="allow-scripts"
-        className={`${viewport === "mobile" ? "h-[760px] max-w-[390px]" : "h-[760px] max-w-6xl"} w-full rounded-[28px] border-0 bg-white shadow-[0_18px_48px_rgba(28,28,28,0.16)]`}
+        className={`${viewport === "mobile" ? "h-[760px] max-w-[390px]" : "h-[760px] max-w-6xl"} w-full border-0 bg-white`}
       />
     </div>
   );
@@ -976,7 +1000,7 @@ function CodeView({
     files.find((file) => file.path === selectedPath) ?? files[0];
 
   return (
-    <div className="grid h-full min-h-[680px] overflow-hidden rounded-[28px] border border-surface-warm-white/10 bg-[#10100f] text-surface-warm-white md:grid-cols-[280px_1fr]">
+    <div className="grid h-full min-h-[680px] overflow-hidden border border-surface-warm-white/10 bg-[#10100f] text-surface-warm-white md:grid-cols-[280px_1fr]">
       <aside className="min-h-0 overflow-y-auto border-r border-surface-warm-white/10 p-spacing-5">
         <div className="flex items-center justify-between gap-spacing-4">
           <div>
