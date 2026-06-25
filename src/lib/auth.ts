@@ -3,6 +3,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
 import { prisma } from "@/lib/prisma";
+import { toPublicProfileImage } from "@/lib/profile";
 
 const googleConfigured = Boolean(
   process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
@@ -41,7 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.sub = user.id;
         token.name = user.name;
-        token.picture = user.image;
+        token.picture = toPublicProfileImage(user.image);
       }
 
       if (trigger === "update") {
@@ -50,6 +51,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (name) {
           token.name = name;
         }
+
+        const image = getSessionUpdateImage(session);
+
+        if (image) {
+          token.picture = image;
+        }
       }
 
       return token;
@@ -57,6 +64,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
+
+function getSessionUpdateImage(value: unknown) {
+  if (!value || typeof value !== "object") {
+    return "";
+  }
+
+  const input = value as { image?: unknown; user?: { image?: unknown } };
+  const image =
+    typeof input.image === "string"
+      ? input.image
+      : typeof input.user?.image === "string"
+        ? input.user.image
+        : "";
+
+  return toPublicProfileImage(image);
+}
 
 function getSessionUpdateName(value: unknown) {
   if (!value || typeof value !== "object") {

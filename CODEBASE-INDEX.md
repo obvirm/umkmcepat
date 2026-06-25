@@ -35,7 +35,8 @@ User projects are data and artifacts, not separate apps/processes/containers. Do
 ```text
 /profile
   -> auth + user fetch
-  -> edit User.name through PATCH /api/profile
+  -> edit User.name and small avatar image through PATCH /api/profile
+  -> GET /api/profile/avatar serves stored uploaded avatar privately
   -> refreshed session drives account dropdown and homepage greeting
 ```
 
@@ -99,8 +100,9 @@ Preview
 - `src/lib/projects/site-schema.ts` — safe generated website schema and parser
 - `src/lib/projects/site-generation.ts` — AI generation system prompt
 - `src/lib/projects/generated-source.ts` — generated Vite files, temp build, dist collection
-- `src/app/(main)/profile/page.tsx` — signed-in profile page for editing display name
+- `src/app/(main)/profile/page.tsx` — signed-in profile page for editing display name and avatar
 - `src/app/api/profile/route.ts` — authenticated profile update endpoint
+- `src/app/api/profile/avatar/route.ts` — private uploaded avatar serving endpoint
 - `src/app/api/projects/route.ts` — project creation
 - `src/app/api/projects/preview/route.ts` — AI discussion endpoint
 - `src/app/api/projects/[id]/generate/route.ts` — build endpoint
@@ -110,7 +112,7 @@ Preview
 
 ## Data model snapshot
 
-`User` stores auth-owned profile data. `name` is editable from `/profile` and is used for the account dropdown plus homepage greeting.
+`User` stores auth-owned profile data. `name` is editable from `/profile` and is used for the account dropdown plus homepage greeting. Uploaded avatar data is stored in `User.image` as a small validated data URL and served through `/api/profile/avatar` so large data URLs are not copied into session cookies.
 
 `Project` is the main product model:
 
@@ -158,7 +160,8 @@ Keep newest first. Only record context useful for future agents, not every tiny 
 
 ### 2026-06-25
 
-- Added `/profile` and `PATCH /api/profile` so signed-in users can edit their display name for account UI and homepage greeting.
+- Redesigned the signed-in homepage project list as one recent-work area with local deterministic abstract project marks instead of fake preview images.
+- Added `/profile`, `PATCH /api/profile`, and private avatar serving so signed-in users can edit their display name/avatar for account UI and homepage greeting.
 - Added deterministic workspace-card answer mapping so selected/custom UI answers update the structured brief before the next AI turn.
 - Added strict `DiscussionTurn` chat contract so one AI turn returns assistant text, brief patch, and optional UI card without duplicating options in the chat transcript.
 - Added hidden chat memory: `chatSummary`, `memoryFacts`, and `lastCompactedMessageCount` keep long workspace conversations continuous while UI chat history stays raw/paginated.

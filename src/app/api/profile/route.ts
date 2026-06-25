@@ -1,5 +1,10 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  normalizeProfileImageDataUrl,
+  normalizeProfileName,
+  toPublicProfileImage,
+} from "@/lib/profile";
 
 export async function PATCH(request: Request) {
   const session = await auth();
@@ -11,8 +16,11 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const body = (await request.json().catch(() => ({}))) as { name?: unknown };
-  const name = normalizeName(body.name);
+  const body = (await request.json().catch(() => ({}))) as {
+    imageDataUrl?: unknown;
+    name?: unknown;
+  };
+  const name = normalizeProfileName(body.name);
 
   if (!name) {
     return Response.json(
@@ -21,17 +29,30 @@ export async function PATCH(request: Request) {
     );
   }
 
+  const data: { image?: string; name: string } = { name };
+  const sessionImage = toPublicProfileImage(session.user.image);
+
+  if (sessionImage.startsWith("https://")) {
+    data.image = sessionImage;
+  }
+
+  if (body.imageDataUrl !== undefined) {
+    const image = normalizeProfileImageDataUrl(body.imageDataUrl);
+
+    if (!image.ok) {
+      return Response.json({ message: image.message }, { status: 400 });
+    }
+
+    data.image = image.value;
+  }
+
   const user = await prisma.user.update({
     where: { id: session.user.id },
-    data: { name },
-    select: { name: true },
+    data,
+    select: { image: true, name: true },
   });
 
-  return Response.json({ user });
-}
-
-function normalizeName(value: unknown) {
-  return typeof value === "string"
-    ? value.trim().replace(/\s+/g, " ").slice(0, 100)
-    : "";
+  return Response.json({
+    user: { image: toPublicProfileImage(user.image), name: user.name },
+  });
 }
