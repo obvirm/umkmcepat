@@ -136,9 +136,36 @@ For UI, styling, layout, typography, colors, or components:
 
 1. Read `DESIGN.md`.
 2. Reuse `src/components/ui` and existing design tokens first.
-3. Keep visible product copy Indonesian.
-4. Keep developer/internal text English.
-5. Include artifact paths in handoff when browser review was used.
+3. Check Storybook for existing approved component states before changing reusable UI.
+4. Add or update a Storybook story when adding a reusable component or meaningful visual state.
+5. Keep visible product copy Indonesian.
+6. Keep developer/internal text English.
+7. Include artifact paths in handoff when browser review was used.
+
+Run Storybook for design-system review:
+
+```bash
+bun run storybook
+```
+
+Open:
+
+```text
+Storybook: http://localhost:6006
+```
+
+Run Storybook checks:
+
+```bash
+bun run storybook:build
+bun run test:storybook
+```
+
+Chromatic visual baselines are optional and require `CHROMATIC_PROJECT_TOKEN`:
+
+```bash
+bun run chromatic
+```
 
 ## shadcn/ui
 

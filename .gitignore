@@ -58,3 +58,6 @@ graphify-out/
 *.err.log
 # Local dev process files
 *.pid
+
+# Storybook build output
+/storybook-static/

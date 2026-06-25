@@ -15,6 +15,7 @@ UMKM Cepat is an AI website builder for Indonesian UMKM. Users describe a busine
 - Vercel AI SDK through 9Router OpenAI-compatible gateway
 - Bun only; `bun.lock` is canonical
 - Vitest, ESLint, Prettier, TypeScript, Knip via `bun run check`
+- Storybook for design-system review and reusable UI state catalog
 
 ## Architecture rule
 
@@ -92,6 +93,7 @@ Preview
 - `AGENTS.md` — agent rules
 - `CHANGELOG.md` — daily general one-line change log for reporting/history
 - `DEV.md` — maintainer workflow and quality gate
+- `.storybook/`, `src/stories/`, `vitest.config.ts`, and `scripts/run-storybook-tests.mjs` — design-system catalog plus component tests for reusable UI states and AI-agent UI consistency
 - `docs/graphify.md` — optional local code graph workflow for AI-agent users
 - `docs/project-architecture.md` — project/workspace/renderer/publishing constraints
 - `docs/9router.md` — local AI gateway setup
@@ -173,6 +175,7 @@ Keep newest first. Only record context useful for future agents, not every tiny 
 
 ### 2026-06-25
 
+- Expanded Storybook into a design-system catalog with grouped stories, MDX agent guide, viewports, autodocs, component tests, and optional Chromatic visual-test wiring.
 - Redesigned the signed-in homepage project list as one recent-work area with local deterministic abstract project marks instead of fake preview images.
 - Added login consent gate with Turnstile support and canonical Terms/Privacy agreement before Google OAuth.
 - Added a Terms availability/funding clause for free/subsidized service continuity.

@@ -44,6 +44,7 @@ jobs:
       STORAGE_PROVIDER: local
       RATE_LIMIT_PROVIDER: memory
       QUEUE_PROVIDER: none
+      CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
 
     steps:
       - name: Checkout
@@ -62,6 +63,16 @@ jobs:
 
       - name: Check
         run: bun run check
+
+      - name: Storybook build
+        run: bun run storybook:build
+
+      - name: Storybook component tests
+        run: bun run test:storybook
+
+      - name: Chromatic visual tests
+        if: ${{ env.CHROMATIC_PROJECT_TOKEN != '' }}
+        run: bun run chromatic
 
       - name: Build
         run: bun run build
