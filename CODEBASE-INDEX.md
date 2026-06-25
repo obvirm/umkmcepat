@@ -35,7 +35,8 @@ User projects are data and artifacts, not separate apps/processes/containers. Do
 ```text
 /profile
   -> auth + user fetch
-  -> edit User.name and small avatar image through PATCH /api/profile
+  -> edit User.name and avatar image through PATCH /api/profile
+  -> profile image upload writes to env-selected object storage, local by default
   -> GET /api/profile/avatar serves stored uploaded avatar privately
   -> refreshed session drives account dropdown and homepage greeting
 ```
@@ -91,6 +92,7 @@ Preview
 - `src/lib/auth.ts` — NextAuth config
 - `src/lib/ai.ts` — 9Router AI SDK adapter
 - `src/lib/rate-limit.ts` — memory/none rate limiter
+- `src/lib/object-storage.ts` — env-driven object storage adapter, local filesystem by default
 - `src/lib/projects/brief.ts` — brief model and build prompt
 - `src/lib/projects/brief-flow.ts` — workspace card parsing, pending card, and manual card regeneration fallback
 - `src/lib/projects/workspace-answers.ts` — deterministic mapping from UI question-card answers to structured brief fields
@@ -112,7 +114,7 @@ Preview
 
 ## Data model snapshot
 
-`User` stores auth-owned profile data. `name` is editable from `/profile` and is used for the account dropdown plus homepage greeting. Uploaded avatar data is stored in `User.image` as a small validated data URL and served through `/api/profile/avatar` so large data URLs are not copied into session cookies.
+`User` stores auth-owned profile data. `name` is editable from `/profile` and is used for the account dropdown plus homepage greeting. Uploaded avatars are saved through object storage and `User.image` stores either an OAuth URL, a legacy data URL, or an object storage ref served privately through `/api/profile/avatar`.
 
 `Project` is the main product model:
 
@@ -151,6 +153,7 @@ JSONB fields are intentionally not indexed yet. Add JSON indexes only after a re
 
 - `buildGeneratedProject()` runs `bun install` and `bun run build` per build. Simple but slow; optimize only when build time hurts real usage.
 - Rate limiting is process-local memory. Fine for local/MVP; use Redis only when multi-instance/prod pressure appears.
+- Object storage defaults to ignored local filesystem under `LOCAL_UPLOAD_DIR`. Mount it as a persistent volume for Docker/VPS; use R2 later for serverless/multi-instance deployments.
 - Large JSONB project fields (`chatMessages`, `chatSummary`, `memoryFacts`, `sourceFiles`, `distFiles`) can grow. Split to version/artifact tables or object storage only when row size or query patterns demand it.
 - Some routes use `$queryRaw` for JSON fields. Keep parameterized. Replace only if Prisma typing improves or queries get repeated enough to justify helper extraction.
 
@@ -161,6 +164,7 @@ Keep newest first. Only record context useful for future agents, not every tiny 
 ### 2026-06-25
 
 - Redesigned the signed-in homepage project list as one recent-work area with local deterministic abstract project marks instead of fake preview images.
+- Added local-first object storage for uploaded profile avatars, with env placeholders for future Cloudflare R2.
 - Added `/profile`, `PATCH /api/profile`, and private avatar serving so signed-in users can edit their display name/avatar for account UI and homepage greeting.
 - Added deterministic workspace-card answer mapping so selected/custom UI answers update the structured brief before the next AI turn.
 - Added strict `DiscussionTurn` chat contract so one AI turn returns assistant text, brief patch, and optional UI card without duplicating options in the chat transcript.

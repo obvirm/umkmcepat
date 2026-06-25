@@ -1,7 +1,15 @@
+import { isObjectStorageRef } from "@/lib/object-storage";
+
 export const PROFILE_IMAGE_MAX_BYTES = 1_000_000;
 
 const PROFILE_IMAGE_DATA_URL_PATTERN =
   /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/;
+
+export type ProfileImageInput = {
+  body: Buffer;
+  contentType: string;
+  ext: "jpg" | "png" | "webp";
+};
 
 export function normalizeProfileName(value: unknown) {
   return typeof value === "string"
@@ -11,7 +19,7 @@ export function normalizeProfileName(value: unknown) {
 
 export function normalizeProfileImageDataUrl(
   value: unknown,
-): { ok: true; value: string } | { message: string; ok: false } {
+): { ok: true; value: ProfileImageInput } | { message: string; ok: false } {
   if (typeof value !== "string") {
     return { message: "Foto profil tidak valid.", ok: false };
   }
@@ -27,32 +35,35 @@ export function normalizeProfileImageDataUrl(
   }
 
   const [, contentType, base64] = match;
-  const byteLength = Buffer.byteLength(base64, "base64");
+  const body = Buffer.from(base64, "base64");
 
-  if (byteLength > PROFILE_IMAGE_MAX_BYTES) {
+  if (body.byteLength > PROFILE_IMAGE_MAX_BYTES) {
     return { message: "Ukuran foto maksimal 1 MB.", ok: false };
   }
 
-  return { ok: true, value: `data:${contentType};base64,${base64}` };
+  return {
+    ok: true,
+    value: {
+      body,
+      contentType,
+      ext:
+        contentType === "image/webp"
+          ? "webp"
+          : contentType === "image/jpeg"
+            ? "jpg"
+            : "png",
+    },
+  };
 }
 
-export function parseStoredProfileImage(value: unknown) {
+export function parseLegacyProfileImage(value: unknown) {
   if (typeof value !== "string") {
     return null;
   }
 
-  const match = value.trim().match(PROFILE_IMAGE_DATA_URL_PATTERN);
+  const image = normalizeProfileImageDataUrl(value);
 
-  if (!match) {
-    return null;
-  }
-
-  const [, contentType, base64] = match;
-
-  return {
-    body: Buffer.from(base64, "base64"),
-    contentType,
-  };
+  return image.ok ? image.value : null;
 }
 
 export function toPublicProfileImage(value: unknown) {
@@ -66,7 +77,7 @@ export function toPublicProfileImage(value: unknown) {
     return "";
   }
 
-  if (PROFILE_IMAGE_DATA_URL_PATTERN.test(image)) {
+  if (PROFILE_IMAGE_DATA_URL_PATTERN.test(image) || isObjectStorageRef(image)) {
     return "/api/profile/avatar";
   }
 
@@ -74,7 +85,7 @@ export function toPublicProfileImage(value: unknown) {
     return image;
   }
 
-  if (image.startsWith("/api/profile/avatar")) {
+  if (image === "/api/profile/avatar") {
     return image;
   }
 

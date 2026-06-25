@@ -1,18 +1,34 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { authMock, userUpdateMock } = vi.hoisted(() => ({
-  authMock: vi.fn<() => Promise<unknown>>(async () => null),
-  userUpdateMock: vi.fn(
-    async ({ data }: { data: { image?: string; name: string } }) => ({
-      image: data.image || null,
-      name: data.name,
-    }),
-  ),
-}));
+const { authMock, replaceStoredObjectMock, userUpdateMock } = vi.hoisted(
+  () => ({
+    authMock: vi.fn<() => Promise<unknown>>(async () => null),
+    replaceStoredObjectMock: vi.fn(
+      async () => "object:local:profile-avatars/user_1/avatar.png",
+    ),
+    userUpdateMock: vi.fn(
+      async ({ data }: { data: { image?: string; name: string } }) => ({
+        image: data.image || null,
+        name: data.name,
+      }),
+    ),
+  }),
+);
 
 vi.mock("@/lib/auth", () => ({
   auth: authMock,
 }));
+
+vi.mock("@/lib/object-storage", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/object-storage")>(
+    "@/lib/object-storage",
+  );
+
+  return {
+    ...actual,
+    replaceStoredObject: replaceStoredObjectMock,
+  };
+});
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -29,6 +45,7 @@ const pngDataUrl = `data:image/png;base64,${Buffer.from("avatar").toString("base
 describe("profile API route", () => {
   beforeEach(() => {
     authMock.mockReset();
+    replaceStoredObjectMock.mockClear();
     userUpdateMock.mockClear();
   });
 
@@ -124,9 +141,18 @@ describe("profile API route", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(replaceStoredObjectMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentType: "image/png",
+        key: "profile-avatars/user_1/avatar.png",
+      }),
+    );
     expect(userUpdateMock).toHaveBeenCalledWith({
       where: { id: "user_1" },
-      data: { image: pngDataUrl, name: "Surya" },
+      data: {
+        image: "object:local:profile-avatars/user_1/avatar.png",
+        name: "Surya",
+      },
       select: { image: true, name: true },
     });
     await expect(response.json()).resolves.toEqual({

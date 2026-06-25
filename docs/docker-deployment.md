@@ -36,7 +36,7 @@ Docker Compose:
   postgres container: database, unless using managed Postgres
   9router container:  AI gateway dashboard/API
   headroom container: context compression proxy for 9Router
-  uploads volume:     local upload persistence, unless using S3/R2
+  uploads volume:     local upload persistence under LOCAL_UPLOAD_DIR, unless using S3/R2
 ```
 
 Deploy on a VPS:
@@ -88,12 +88,14 @@ AI_PROVIDER="9router"
 NINE_ROUTER_BASE_URL="http://9router:20128/v1"
 NINE_ROUTER_API_KEY="replace-with-9router-api-key"
 RATE_LIMIT_PROVIDER="memory"
+OBJECT_STORAGE_PROVIDER="local"
+LOCAL_UPLOAD_DIR=".data/uploads"
 POSTGRES_USER="postgres"
 POSTGRES_PASSWORD="replace-with-strong-db-password"
 POSTGRES_DB="umkmcepat"
 ```
 
-For VPS, change `POSTGRES_PASSWORD`. Do not expose Postgres or Headroom publicly.
+For VPS, change `POSTGRES_PASSWORD`. Do not expose Postgres or Headroom publicly. If `OBJECT_STORAGE_PROVIDER="local"`, mount `LOCAL_UPLOAD_DIR` as a persistent volume so uploaded avatars survive container rebuilds.
 
 If Headroom compression is enabled in 9Router, use this Docker-internal proxy URL:
 

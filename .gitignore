@@ -49,6 +49,10 @@ next-env.d.ts
 .pi/
 graphify-out/
 
+# Local object storage uploads
+/.data/
+/uploads/
+
 # Dev/runtime logs
 *.log
 *.err.log

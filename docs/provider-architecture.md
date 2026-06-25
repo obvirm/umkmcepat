@@ -21,6 +21,7 @@ UMKM Cepat keeps vendor-specific code behind small internal boundaries. Add a pr
 | Auth       | Auth.js / NextAuth with Google  | GitHub, Microsoft, email, or other Auth.js providers |
 | Rate limit | Memory                          | Redis-backed limiter later                           |
 | Monitoring | Optional Sentry                 | Any observability provider later                     |
+| Storage    | Local filesystem                | Cloudflare R2/S3-compatible storage behind adapter   |
 
 ## Adapter rule
 
@@ -42,6 +43,7 @@ Provider SDKs should live behind internal modules such as:
 ```text
 src/lib/ai.ts
 src/lib/rate-limit.ts
+src/lib/object-storage.ts
 ```
 
 ## Environment-driven configuration
@@ -51,6 +53,7 @@ Provider selection should be explicit:
 ```env
 AI_PROVIDER="9router"
 RATE_LIMIT_PROVIDER="memory"
+OBJECT_STORAGE_PROVIDER="local"
 ```
 
 Provider credentials stay in `.env` locally or deployment secrets. Never commit real values.
@@ -63,7 +66,8 @@ Current implementation priority:
 2. Keep Auth.js/Google as-is.
 3. Keep AI access behind the Vercel AI SDK and `src/lib/ai.ts`.
 4. Simplify or isolate rate limiting.
-5. Add storage, queues, or payments only when product flow requires them.
+5. Storage exists as a local-first adapter for uploads. Keep R2/S3 behind `src/lib/object-storage.ts` when remote persistence is needed.
+6. Add queues or payments only when product flow requires them.
 
 ## Provider migration checklist
 

@@ -7,6 +7,7 @@ Short, plain-English daily updates. Keep entries general, one line each, and use
 ### 2026-06-25
 
 - Redesigned the signed-in homepage project list with a calmer recent-work layout and local abstract project marks.
+- Added local-first object storage for profile avatars, with env placeholders for future Cloudflare R2.
 - Added an account dropdown, dark profile page, editable display name/avatar, and personalized homepage greeting for signed-in users.
 - Changed primary chat composers to send with Enter while keeping Shift+Enter for new lines.
 - Fixed guided discussion memory so option-card answers update the project brief before AI asks the next question.

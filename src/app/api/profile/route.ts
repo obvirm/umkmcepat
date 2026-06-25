@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { replaceStoredObject } from "@/lib/object-storage";
 import { prisma } from "@/lib/prisma";
 import {
   normalizeProfileImageDataUrl,
@@ -43,7 +44,11 @@ export async function PATCH(request: Request) {
       return Response.json({ message: image.message }, { status: 400 });
     }
 
-    data.image = image.value;
+    data.image = await replaceStoredObject({
+      body: image.value.body,
+      contentType: image.value.contentType,
+      key: `profile-avatars/${session.user.id}/avatar.${image.value.ext}`,
+    });
   }
 
   const user = await prisma.user.update({

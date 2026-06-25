@@ -4,11 +4,12 @@ Provider selection is controlled by `.env`. Registered provider names live in `s
 
 ## Current defaults
 
-| Capability | Env                   | Current default |
-| ---------- | --------------------- | --------------- |
-| AI         | `AI_PROVIDER`         | `9router`       |
-| Rate limit | `RATE_LIMIT_PROVIDER` | `memory`        |
-| Auth       | Google OAuth          | Google          |
+| Capability | Env                       | Current default |
+| ---------- | ------------------------- | --------------- |
+| AI         | `AI_PROVIDER`             | `9router`       |
+| Rate limit | `RATE_LIMIT_PROVIDER`     | `memory`        |
+| Auth       | Google OAuth              | Google          |
+| Storage    | `OBJECT_STORAGE_PROVIDER` | `local`         |
 
 ## AI
 
@@ -37,3 +38,20 @@ Registered future provider name: `redis`.
 ```env
 RATE_LIMIT_PROVIDER="memory"
 ```
+
+## Storage
+
+Current implemented provider:
+
+- `local`
+
+Registered future provider name: `r2`.
+
+```env
+OBJECT_STORAGE_PROVIDER="local"
+LOCAL_UPLOAD_DIR=".data/uploads"
+```
+
+Local storage is for development or a VPS/Docker deployment with a persistent volume. It writes uploaded files under the ignored upload directory and serves private profile avatars through `/api/profile/avatar`.
+
+R2 placeholders are available in `.env.example`, but the runtime adapter is intentionally not enabled until remote object storage is needed.
