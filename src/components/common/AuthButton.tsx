@@ -114,10 +114,14 @@ function AvatarCircle({ image, initial }: { image: string; initial: string }) {
   if (image) {
     return (
       <span
-        className="size-7 shrink-0 rounded-full bg-surface-warm-white bg-cover bg-center"
-        style={{ backgroundImage: `url(${JSON.stringify(image)})` }}
+        className="size-7 shrink-0 overflow-hidden rounded-full bg-surface-warm-white"
         aria-hidden="true"
-      />
+      >
+        <span
+          className="block size-full scale-[1.12] bg-cover bg-center"
+          style={{ backgroundImage: `url(${JSON.stringify(image)})` }}
+        />
+      </span>
     );
   }
 

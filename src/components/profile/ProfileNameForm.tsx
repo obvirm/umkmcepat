@@ -109,18 +109,18 @@ export function ProfileNameForm({
       <div className="flex flex-col gap-spacing-6 sm:flex-row sm:items-center">
         <div
           className="grid size-24 shrink-0 place-items-center overflow-hidden rounded-full border border-surface-warm-white/12 bg-surface-warm-white/8 text-3xl font-semibold text-surface-warm-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-          style={
-            imagePreview
-              ? {
-                  backgroundImage: `url(${JSON.stringify(imagePreview)})`,
-                  backgroundPosition: "center",
-                  backgroundSize: "cover",
-                }
-              : undefined
-          }
           aria-hidden="true"
         >
-          {imagePreview ? null : initial}
+          {imagePreview ? (
+            <span
+              className="block size-full scale-[1.12] bg-cover bg-center"
+              style={{
+                backgroundImage: `url(${JSON.stringify(imagePreview)})`,
+              }}
+            />
+          ) : (
+            initial
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-surface-warm-white">
