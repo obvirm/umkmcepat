@@ -8,18 +8,25 @@ import { prisma } from "@/lib/prisma";
 
 export default async function HomePage() {
   const session = await auth();
-  const projects = session?.user?.id
-    ? await prisma.project.findMany({
-        where: { userId: session.user.id },
-        orderBy: { updatedAt: "desc" },
-        take: 6,
-        select: {
-          id: true,
-          title: true,
-          updatedAt: true,
-        },
-      })
-    : [];
+  const [projects, user] = session?.user?.id
+    ? await Promise.all([
+        prisma.project.findMany({
+          where: { userId: session.user.id },
+          orderBy: { updatedAt: "desc" },
+          take: 6,
+          select: {
+            id: true,
+            title: true,
+            updatedAt: true,
+          },
+        }),
+        prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { name: true },
+        }),
+      ])
+    : [[], null];
+  const greetingName = getGreetingName(user?.name || session?.user?.name);
 
   async function deleteProject(formData: FormData) {
     "use server";
@@ -52,7 +59,9 @@ export default async function HomePage() {
         <div className="mx-auto flex min-h-[calc(100dvh-12rem)] w-full max-w-5xl flex-col items-center justify-center text-center">
           <h1 className="max-w-4xl text-balance text-[clamp(3rem,6vw,5.4rem)] font-semibold leading-[0.96] tracking-[-0.055em] text-surface-warm-white">
             {session?.user
-              ? "Website apa yang mau kamu buat?"
+              ? greetingName
+                ? `Hai, ${greetingName}. Website apa yang mau kamu buat?`
+                : "Website apa yang mau kamu buat?"
               : "Usahamu layak punya website. 100% gratis."}
           </h1>
           <p className="mt-spacing-7 max-w-2xl text-balance text-lg leading-7 text-surface-warm-white/72 sm:text-xl">
@@ -105,4 +114,8 @@ export default async function HomePage() {
       ) : null}
     </div>
   );
+}
+
+function getGreetingName(name?: string | null) {
+  return name?.trim().split(/\s+/)[0]?.slice(0, 32) || "";
 }

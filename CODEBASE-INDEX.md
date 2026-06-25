@@ -33,6 +33,13 @@ User projects are data and artifacts, not separate apps/processes/containers. Do
 ```
 
 ```text
+/profile
+  -> auth + user fetch
+  -> edit User.name through PATCH /api/profile
+  -> refreshed session drives account dropdown and homepage greeting
+```
+
+```text
 /projects/[id]
   -> auth + ownership check by userId
   -> load Project, chatMessages, hidden chat memory, brief, workspaceCard
@@ -92,6 +99,8 @@ Preview
 - `src/lib/projects/site-schema.ts` — safe generated website schema and parser
 - `src/lib/projects/site-generation.ts` — AI generation system prompt
 - `src/lib/projects/generated-source.ts` — generated Vite files, temp build, dist collection
+- `src/app/(main)/profile/page.tsx` — signed-in profile page for editing display name
+- `src/app/api/profile/route.ts` — authenticated profile update endpoint
 - `src/app/api/projects/route.ts` — project creation
 - `src/app/api/projects/preview/route.ts` — AI discussion endpoint
 - `src/app/api/projects/[id]/generate/route.ts` — build endpoint
@@ -100,6 +109,8 @@ Preview
 - `src/components/projects/renderer/ProjectSitePreview.tsx` — schema renderer preview
 
 ## Data model snapshot
+
+`User` stores auth-owned profile data. `name` is editable from `/profile` and is used for the account dropdown plus homepage greeting.
 
 `Project` is the main product model:
 
@@ -147,6 +158,7 @@ Keep newest first. Only record context useful for future agents, not every tiny 
 
 ### 2026-06-25
 
+- Added `/profile` and `PATCH /api/profile` so signed-in users can edit their display name for account UI and homepage greeting.
 - Added deterministic workspace-card answer mapping so selected/custom UI answers update the structured brief before the next AI turn.
 - Added strict `DiscussionTurn` chat contract so one AI turn returns assistant text, brief patch, and optional UI card without duplicating options in the chat transcript.
 - Added hidden chat memory: `chatSummary`, `memoryFacts`, and `lastCompactedMessageCount` keep long workspace conversations continuous while UI chat history stays raw/paginated.
