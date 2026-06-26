@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { AvatarFrame } from "@/components/ui/avatar-frame";
 import { Button } from "@/components/ui/button";
 
 const PROFILE_IMAGE_MAX_BYTES = 1_000_000;
@@ -107,21 +108,11 @@ export function ProfileNameForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-spacing-7">
       <div className="flex flex-col gap-spacing-6 sm:flex-row sm:items-center">
-        <div
-          className="grid size-24 shrink-0 place-items-center overflow-hidden rounded-full border border-surface-warm-white/12 bg-surface-warm-white/8 text-3xl font-semibold text-surface-warm-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-          aria-hidden="true"
-        >
-          {imagePreview ? (
-            <span
-              className="block size-full scale-[1.12] bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${JSON.stringify(imagePreview)})`,
-              }}
-            />
-          ) : (
-            initial
-          )}
-        </div>
+        <AvatarFrame
+          image={imagePreview}
+          initial={initial}
+          className="grid size-24 place-items-center border border-surface-warm-white/12 bg-surface-warm-white/8 text-3xl font-semibold text-surface-warm-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+        />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-surface-warm-white">
             Foto profil

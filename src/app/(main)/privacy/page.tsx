@@ -1,6 +1,8 @@
+import { DarkPage } from "@/components/ui/surface";
+
 export default function PrivacyPage() {
   return (
-    <div className="bg-[#151515] px-4 py-spacing-14 text-surface-warm-white sm:px-spacing-9 lg:px-spacing-10">
+    <DarkPage className="py-spacing-14">
       <article className="mx-auto max-w-3xl">
         <h1 className="text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
           Kebijakan privasi
@@ -57,6 +59,6 @@ export default function PrivacyPage() {
           </section>
         </div>
       </article>
-    </div>
+    </DarkPage>
   );
 }

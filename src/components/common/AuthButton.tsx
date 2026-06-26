@@ -6,6 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { LoginConsentDialog } from "@/components/common/LoginConsentDialog";
+import { AvatarFrame } from "@/components/ui/avatar-frame";
 import { Button } from "@/components/ui/button";
 
 export function AuthButton() {
@@ -80,7 +81,11 @@ export function AuthButton() {
         aria-controls={menuId}
         aria-label={open ? "Tutup menu akun" : "Buka menu akun"}
       >
-        <AvatarCircle image={session.user.image || ""} initial={initial} />
+        <AvatarFrame
+          image={session.user.image || ""}
+          initial={initial}
+          className="size-7 bg-surface-warm-white text-xs font-semibold text-foreground-primary"
+        />
         <span className="hidden min-w-0 truncate sm:block">{displayName}</span>
         <ChevronDown
           className={`size-4 shrink-0 text-surface-warm-white/58 transition ${open ? "rotate-180" : ""}`}
@@ -112,27 +117,5 @@ export function AuthButton() {
         </div>
       ) : null}
     </div>
-  );
-}
-
-function AvatarCircle({ image, initial }: { image: string; initial: string }) {
-  if (image) {
-    return (
-      <span
-        className="size-7 shrink-0 overflow-hidden rounded-full bg-surface-warm-white"
-        aria-hidden="true"
-      >
-        <span
-          className="block size-full scale-[1.12] bg-cover bg-center"
-          style={{ backgroundImage: `url(${JSON.stringify(image)})` }}
-        />
-      </span>
-    );
-  }
-
-  return (
-    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-warm-white text-xs font-semibold text-foreground-primary">
-      {initial}
-    </span>
   );
 }

@@ -94,6 +94,7 @@ Preview
 - `CHANGELOG.md` — daily general one-line change log for reporting/history
 - `DEV.md` — maintainer workflow and quality gate
 - `.storybook/`, `src/stories/`, `vitest.config.ts`, and `scripts/run-storybook-tests.mjs` — atomic Storybook design-system catalog plus component tests for reusable UI states and AI-agent UI consistency
+- `src/components/ui/avatar-frame.tsx` and `src/components/ui/surface.tsx` — shared atomic primitives for avatar cropping and dark product surfaces
 - `docs/graphify.md` — optional local code graph workflow for AI-agent users
 - `docs/project-architecture.md` — project/workspace/renderer/publishing constraints
 - `docs/9router.md` — local AI gateway setup
@@ -175,6 +176,7 @@ Keep newest first. Only record context useful for future agents, not every tiny 
 
 ### 2026-06-25
 
+- Added shared avatar/surface primitives and wired profile/legal/account UI to the Storybook-backed atomic design system.
 - Simplified Storybook into an atomic design-system catalog: foundations, atoms, molecules, and organisms only; removed page/product bucket stories and kept reusable UI as the source of truth.
 - Redesigned the signed-in homepage project list as one recent-work area with local deterministic abstract project marks instead of fake preview images.
 - Added login consent gate with Turnstile support and canonical Terms/Privacy agreement before Google OAuth.
