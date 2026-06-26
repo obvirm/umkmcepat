@@ -184,13 +184,52 @@ export function LoginConsentDialog({
           ) : null}
         </DialogHeader>
 
-        <div className="space-y-spacing-5">
+        <div className="space-y-spacing-4">
+          <label className="flex gap-spacing-4 rounded-radius-xl border border-surface-warm-white/10 bg-surface-warm-white/[0.055] p-spacing-5 text-sm leading-6 text-surface-warm-white/78 transition hover:bg-surface-warm-white/[0.075]">
+            <input
+              type="checkbox"
+              checked={agrees}
+              onChange={(event) => setAgrees(event.target.checked)}
+              className="mt-1 size-4 accent-surface-warm-white"
+            />
+            <span>
+              Saya setuju dengan{" "}
+              <button
+                type="button"
+                className="font-medium underline underline-offset-4 hover:text-surface-warm-white"
+                onClick={(event) => {
+                  event.preventDefault();
+                  setActiveLegalDocument("terms");
+                }}
+              >
+                Ketentuan penggunaan
+              </button>{" "}
+              dan{" "}
+              <button
+                type="button"
+                className="font-medium underline underline-offset-4 hover:text-surface-warm-white"
+                onClick={(event) => {
+                  event.preventDefault();
+                  setActiveLegalDocument("privacy");
+                }}
+              >
+                Kebijakan privasi
+              </button>
+              .
+            </span>
+          </label>
+
           {hasTurnstile ? (
-            <div className="space-y-spacing-3">
-              <p className="text-xs font-medium text-surface-warm-white/54">
-                Verifikasi keamanan
-              </p>
-              <div className="flex justify-center rounded-radius-xl border border-surface-warm-white/10 bg-[#1d1d1b] px-spacing-4 py-spacing-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <div className="rounded-radius-xl border border-surface-warm-white/10 bg-[#1d1d1b] p-spacing-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <div className="mb-spacing-3 flex items-center justify-between gap-spacing-4 text-xs text-surface-warm-white/54">
+                <span>Verifikasi keamanan</span>
+                {turnstileToken ? (
+                  <span className="text-[#86efac]">Berhasil</span>
+                ) : (
+                  <span>Wajib</span>
+                )}
+              </div>
+              <div className="flex justify-center">
                 <div
                   ref={setTurnstileElement}
                   className="min-h-[65px] w-[300px] max-w-full overflow-hidden rounded-radius-md [&_iframe]:rounded-radius-md"
@@ -198,45 +237,6 @@ export function LoginConsentDialog({
               </div>
             </div>
           ) : null}
-
-          <div className="space-y-spacing-3">
-            <p className="text-xs font-medium text-surface-warm-white/54">
-              Persetujuan
-            </p>
-            <label className="flex gap-spacing-4 rounded-radius-xl border border-surface-warm-white/10 bg-surface-warm-white/[0.055] p-spacing-5 text-sm leading-6 text-surface-warm-white/78 transition hover:bg-surface-warm-white/[0.075]">
-              <input
-                type="checkbox"
-                checked={agrees}
-                onChange={(event) => setAgrees(event.target.checked)}
-                className="mt-1 size-4 accent-surface-warm-white"
-              />
-              <span>
-                Saya setuju dengan{" "}
-                <button
-                  type="button"
-                  className="font-medium underline underline-offset-4 hover:text-surface-warm-white"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setActiveLegalDocument("terms");
-                  }}
-                >
-                  Ketentuan penggunaan
-                </button>{" "}
-                dan{" "}
-                <button
-                  type="button"
-                  className="font-medium underline underline-offset-4 hover:text-surface-warm-white"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setActiveLegalDocument("privacy");
-                  }}
-                >
-                  Kebijakan privasi
-                </button>
-                .
-              </span>
-            </label>
-          </div>
         </div>
 
         {activeLegalDocument ? (
