@@ -184,6 +184,15 @@ export function LoginConsentDialog({
           ) : null}
         </DialogHeader>
 
+        {hasTurnstile ? (
+          <div className="flex justify-center">
+            <div
+              ref={setTurnstileElement}
+              className="min-h-[65px] w-[300px] max-w-full overflow-hidden rounded-radius-md [&_iframe]:rounded-radius-md"
+            />
+          </div>
+        ) : null}
+
         <div className="space-y-spacing-4">
           <label className="flex gap-spacing-4 rounded-radius-xl border border-surface-warm-white/10 bg-surface-warm-white/[0.055] p-spacing-5 text-sm leading-6 text-surface-warm-white/78 transition hover:bg-surface-warm-white/[0.075]">
             <input
@@ -237,15 +246,6 @@ export function LoginConsentDialog({
           <GoogleLogoIcon />
           {isVerifying ? "Memeriksa..." : "Masuk dengan Google"}
         </Button>
-
-        {hasTurnstile ? (
-          <div className="flex justify-center">
-            <div
-              ref={setTurnstileElement}
-              className="min-h-[65px] w-[300px] max-w-full overflow-hidden rounded-radius-md [&_iframe]:rounded-radius-md"
-            />
-          </div>
-        ) : null}
       </DialogContent>
     </Dialog>
   );
