@@ -37,6 +37,7 @@ bun run test:storybook
 
 ## Rules
 
+- Optimize for the next capable agent with zero session context: leave canonical docs, scripts, and checks clear enough that future work resumes in minutes, not archaeology.
 - Use Bun only; keep `bun.lock` as the canonical lockfile.
 - Work from `dev`; open PRs into `dev` unless maintainers say otherwise.
 - Keep changes small, focused, and easy to review.

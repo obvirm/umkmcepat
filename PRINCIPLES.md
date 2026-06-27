@@ -1,6 +1,6 @@
 # Principles
 
-Timeless operating principles for UMKM Cepat. Use this before planning product, design, code, AI, docs, or marketing work.
+Timeless operating principles for UMKM Cepat. Use this before planning product, design, code, AI, docs, or marketing work. Assume a future AI agent starts with zero session context: decisions, guardrails, and workflows must be discoverable from the repo, not memory.
 
 ## Product
 
@@ -94,6 +94,7 @@ Timeless operating principles for UMKM Cepat. Use this before planning product, 
 
 ## Docs
 
+- Write for the next agent with no chat history: capture why, how to verify, and when to change direction.
 - One canonical doc beats duplicated advice.
 - Docs should help the reader complete one real task with minimum ambiguity.
 - Delete stale docs before adding new docs.
