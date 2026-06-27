@@ -7,9 +7,6 @@ module.exports = {
         "http://localhost:3005/privacy",
       ],
       numberOfRuns: 3,
-      startServerCommand: "bun run build && bun run start -- -p 3005",
-      startServerReadyPattern: "Ready in|started server|Local:",
-      startServerReadyTimeout: 120000,
       settings: {
         onlyCategories: [
           "performance",

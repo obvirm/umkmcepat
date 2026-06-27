@@ -9,8 +9,8 @@
     "lighthouserc.desktop.cjs"
   ],
   "project": ["src/**/*.{ts,tsx}", "*.{ts,js,mjs,cjs}"],
-  "ignoreBinaries": ["graphify"],
-  "ignoreDependencies": ["eslint-config-next", "tailwindcss"],
+  "ignoreBinaries": ["graphify", "netstat"],
+  "ignoreDependencies": ["@lhci/cli", "eslint-config-next", "tailwindcss"],
   "ignoreExportsUsedInFile": true,
   "ignoreIssues": {
     "src/components/ui/**": ["exports"],

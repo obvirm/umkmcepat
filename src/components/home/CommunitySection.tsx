@@ -156,7 +156,7 @@ async function getTopContributors(): Promise<ContributorCard[]> {
 
         return {
           login: contributor.author.login,
-          avatarUrl: contributor.author.avatar_url,
+          avatarUrl: `${contributor.author.avatar_url}&s=104`,
           profileUrl: contributor.author.html_url,
           totalCommits: contributor.total,
           recentCommits,

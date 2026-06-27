@@ -61,7 +61,7 @@ Raise mobile performance to 95 only after it is stable across repeated local run
 
 ## How it runs
 
-`@lhci/cli` builds the app, starts `next start` on port 3005, runs three audits per URL, keeps the representative run, asserts category scores, and saves HTML/JSON reports locally. Port 3005 avoids clashing with `bun run dev` on port 3000.
+`scripts/run-lighthouse.mjs` builds the app once, starts `next start` on port 3005, waits for a real HTTP 200, then runs `@lhci/cli` for mobile and/or desktop. LHCI runs three audits per URL, keeps the representative run, asserts category scores, and saves HTML/JSON reports locally. Port 3005 avoids clashing with `bun run dev` on port 3000. The runner sets local-only Auth.js host env (`AUTH_TRUST_HOST`, `NEXTAUTH_URL`, `NEXT_PUBLIC_APP_URL`) so public pages do not fail from host mismatch during the audit.
 
 ## Agent workflow
 
