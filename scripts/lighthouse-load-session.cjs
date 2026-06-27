@@ -50,7 +50,12 @@ module.exports = async (browser, context) => {
     );
   }
 
-  const cookies = parseCookieLines(fs.readFileSync(cookiePath, "utf8"));
+  const cookies = parseCookieLines(fs.readFileSync(cookiePath, "utf8")).filter(
+    (cookie) => {
+      const name = cookie.name.toLowerCase();
+      return name.includes("authjs") || name.includes("next-auth");
+    },
+  );
 
   if (!cookies.length) {
     throw new Error(`${cookiePath} has no cookies.`);

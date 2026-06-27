@@ -522,7 +522,7 @@ export function WorkspaceShell({
         <ResizablePanel
           id="chat"
           panelRef={chatPanelRef}
-          defaultSize={100}
+          defaultSize={showPreviewPanel ? 32 : 100}
           minSize={8}
           collapsible
           collapsedSize={0}
@@ -699,61 +699,65 @@ export function WorkspaceShell({
             </div>
           </aside>
         </ResizablePanel>
-        <ResizableHandle
-          withHandle
-          className="bg-surface-warm-white/8 transition-colors hover:bg-surface-warm-white/16"
-        />
+        {showPreviewPanel ? (
+          <>
+            <ResizableHandle
+              withHandle
+              className="bg-surface-warm-white/8 transition-colors hover:bg-surface-warm-white/16"
+            />
 
-        <ResizablePanel
-          id="preview"
-          panelRef={previewPanelRef}
-          defaultSize={0}
-          minSize={8}
-          collapsible
-          collapsedSize={0}
-        >
-          <section className={previewPanelClass}>
-            <div className="flex h-full min-h-0 flex-col bg-[#10100f] text-surface-warm-white">
-              <WorkspaceTopBar
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                viewport={viewport}
-                setViewport={setViewport}
-                chatCollapsed={chatCollapsed}
-                openChatPanel={openChatPanel}
-                closeChatPanel={closeChatPanel}
-              />
-              <div className="min-h-0 flex-1 overflow-auto bg-[#10100f]">
-                {activeTab === "preview" ? (
-                  sourceStatus === "passed" ? (
-                    <GeneratedPreviewFrame
-                      projectId={projectId}
-                      viewport={viewport}
-                    />
-                  ) : buildStatus === "ready" ? (
-                    <div className="flex justify-center">
-                      <ProjectSitePreview
-                        siteSchema={siteSchema}
-                        viewport={viewport}
-                      />
-                    </div>
-                  ) : (
-                    <EmptyPreviewState />
-                  )
-                ) : null}
-
-                {activeTab === "code" ? (
-                  <CodeView
-                    projectId={projectId}
-                    files={sourceFiles}
-                    buildLog={sourceLog}
-                    buildStatus={sourceStatus}
+            <ResizablePanel
+              id="preview"
+              panelRef={previewPanelRef}
+              defaultSize={68}
+              minSize={8}
+              collapsible
+              collapsedSize={0}
+            >
+              <section className={previewPanelClass}>
+                <div className="flex h-full min-h-0 flex-col bg-[#10100f] text-surface-warm-white">
+                  <WorkspaceTopBar
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    viewport={viewport}
+                    setViewport={setViewport}
+                    chatCollapsed={chatCollapsed}
+                    openChatPanel={openChatPanel}
+                    closeChatPanel={closeChatPanel}
                   />
-                ) : null}
-              </div>
-            </div>
-          </section>
-        </ResizablePanel>
+                  <div className="min-h-0 flex-1 overflow-auto bg-[#10100f]">
+                    {activeTab === "preview" ? (
+                      sourceStatus === "passed" ? (
+                        <GeneratedPreviewFrame
+                          projectId={projectId}
+                          viewport={viewport}
+                        />
+                      ) : buildStatus === "ready" ? (
+                        <div className="flex justify-center">
+                          <ProjectSitePreview
+                            siteSchema={siteSchema}
+                            viewport={viewport}
+                          />
+                        </div>
+                      ) : (
+                        <EmptyPreviewState />
+                      )
+                    ) : null}
+
+                    {activeTab === "code" ? (
+                      <CodeView
+                        projectId={projectId}
+                        files={sourceFiles}
+                        buildLog={sourceLog}
+                        buildStatus={sourceStatus}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              </section>
+            </ResizablePanel>
+          </>
+        ) : null}
       </ResizablePanelGroup>
     </div>
   );
