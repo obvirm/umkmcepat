@@ -22,7 +22,6 @@ import {
 } from "react";
 import { type PanelImperativeHandle } from "react-resizable-panels";
 
-import { ProjectSitePreview } from "@/components/projects/renderer/ProjectSitePreview";
 import {
   EmptyPreviewState,
   GeneratedPreviewFrame,
@@ -47,6 +46,14 @@ import { type ProjectSiteSchema } from "@/lib/projects/site-schema";
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
 });
+
+const ProjectSitePreview = dynamic(
+  () =>
+    import("@/components/projects/renderer/ProjectSitePreview").then(
+      (module) => module.ProjectSitePreview,
+    ),
+  { ssr: false },
+);
 
 type WorkspaceShellProps = {
   projectId: string;
@@ -515,17 +522,17 @@ export function WorkspaceShell({
         <ResizablePanel
           id="chat"
           panelRef={chatPanelRef}
-          defaultSize="100%"
-          minSize="8%"
+          defaultSize={100}
+          minSize={8}
           collapsible
-          collapsedSize="0%"
+          collapsedSize={0}
         >
           <aside className={chatPanelClass}>
             <div className="flex min-w-0 items-start justify-between gap-spacing-5 px-spacing-1">
               <div className="min-w-0 flex-1">
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-spacing-2 text-xs text-surface-warm-white/46 hover:text-surface-warm-white"
+                  className="inline-flex items-center gap-spacing-2 text-xs text-surface-warm-white/58 hover:text-surface-warm-white"
                 >
                   <ArrowLeft className="size-3.5" />
                   Dashboard
@@ -700,10 +707,10 @@ export function WorkspaceShell({
         <ResizablePanel
           id="preview"
           panelRef={previewPanelRef}
-          defaultSize="0%"
-          minSize="8%"
+          defaultSize={0}
+          minSize={8}
           collapsible
-          collapsedSize="0%"
+          collapsedSize={0}
         >
           <section className={previewPanelClass}>
             <div className="flex h-full min-h-0 flex-col bg-[#10100f] text-surface-warm-white">

@@ -40,7 +40,7 @@ The local audit covers public pages:
 - `/terms`
 - `/privacy`
 
-Authenticated audit covers `/profile` when `.lighthouse-auth/cookies.txt` exists. To include one project workspace, set `LIGHTHOUSE_AUTH_PROJECT_URL` to a local project URL before running `bun run lighthouse:auth`. `/projects/new` currently redirects after auth and is not a meaningful Lighthouse target.
+Authenticated audit covers `/profile` when `.lighthouse-auth/cookies.txt` exists. To include one project workspace, set `LIGHTHOUSE_AUTH_PROJECT_URL` to a local project URL before running `bun run lighthouse:auth`. `/projects/new` currently redirects after auth and is not a meaningful Lighthouse target. Authenticated/private routes audit performance, accessibility, and best practices only; SEO is excluded because `robots.txt` intentionally blocks private `/projects/` pages from indexing.
 
 ## Thresholds
 
@@ -70,7 +70,7 @@ Raise mobile performance to 95 only after it is stable across repeated local run
 
 ## How it runs
 
-`scripts/run-lighthouse.mjs` builds the app once, starts `next start` on port 3005, waits for a real HTTP 200, then runs `@lhci/cli` for mobile and/or desktop. LHCI runs three audits per URL, keeps the representative run, asserts category scores, and saves HTML/JSON reports locally. Port 3005 avoids clashing with `bun run dev` on port 3000. The runner sets local-only Auth.js host env (`AUTH_TRUST_HOST`, `NEXTAUTH_URL`, `NEXT_PUBLIC_APP_URL`) so public pages do not fail from host mismatch during the audit.
+`scripts/run-lighthouse.mjs` reuses an existing `.next` build when available, otherwise builds once, starts `next start` on port 3005, waits for a real HTTP 200, then runs `@lhci/cli` for mobile and/or desktop. LHCI runs three audits per URL, keeps the representative run, asserts category scores, and saves HTML/JSON reports locally. Port 3005 avoids clashing with `bun run dev` on port 3000. The runner sets local-only Auth.js host env (`AUTH_TRUST_HOST`, `NEXTAUTH_URL`, `NEXT_PUBLIC_APP_URL`) so public pages do not fail from host mismatch during the audit.
 
 ## Agent workflow
 

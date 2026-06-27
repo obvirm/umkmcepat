@@ -1,4 +1,5 @@
 import { execSync, spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { platform } from "node:os";
 
 const target = process.argv[2] || "all";
@@ -95,7 +96,11 @@ async function waitForServer() {
 
 killPort3005();
 
-await run("bun", ["run", "build"]);
+if (process.env.LIGHTHOUSE_SKIP_BUILD === "1" || existsSync(".next/BUILD_ID")) {
+  console.warn("Using existing .next build for Lighthouse.");
+} else {
+  await run("bun", ["run", "build"]);
+}
 
 const server = startServer();
 
