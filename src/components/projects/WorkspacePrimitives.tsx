@@ -315,58 +315,33 @@ export function ProcessingControl({
   );
 }
 
-export function QuestionStepperComposer({
-  card,
-  hasError,
-  isRefreshing,
-  onRefresh,
+export function QuestionComposer({
+  question,
   onSubmit,
 }: {
-  card: Extract<WorkspaceCard, { type: "questions" }>;
-  hasError: boolean;
-  isRefreshing: boolean;
-  onRefresh: () => void;
+  question: BriefQuestion;
   onSubmit: (
     answer: string,
     workspaceAnswers?: WorkspaceAnswerPayload[],
   ) => void;
 }) {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [answerSources, setAnswerSources] = useState<
-    Record<string, "custom" | "option">
-  >({});
+  const [selected, setSelected] = useState("");
+  const [source, setSource] = useState<"custom" | "option">("option");
   const [customAnswer, setCustomAnswer] = useState("");
   const [customAnswerOpen, setCustomAnswerOpen] = useState(false);
-  const question = card.questions[Math.min(step, card.questions.length - 1)];
-  const selectedAnswer = question ? answers[question.id] : "";
-  const customAnswerSelected =
-    Boolean(selectedAnswer) &&
-    question !== undefined &&
-    answerSources[question.id] === "custom";
-  const isLastStep = step >= card.questions.length - 1;
-  const canContinue = Boolean(selectedAnswer);
+  const customAnswerSelected = Boolean(selected) && source === "custom";
+  const canSubmit = Boolean(selected);
 
   useEffect(() => {
-    setStep(0);
-    setAnswers({});
-    setAnswerSources({});
+    setSelected("");
+    setSource("option");
     setCustomAnswer("");
     setCustomAnswerOpen(false);
-  }, [card]);
+  }, [question.id]);
 
-  useEffect(() => {
-    setCustomAnswer("");
-    setCustomAnswerOpen(false);
-  }, [question?.id]);
-
-  if (!question) {
-    return null;
-  }
-
-  function chooseAnswer(answer: string, source: "custom" | "option") {
-    setAnswers((value) => ({ ...value, [question.id]: answer }));
-    setAnswerSources((value) => ({ ...value, [question.id]: source }));
+  function chooseAnswer(answer: string, nextSource: "custom" | "option") {
+    setSelected(answer);
+    setSource(nextSource);
   }
 
   function useCustomAnswer() {
@@ -378,35 +353,26 @@ export function QuestionStepperComposer({
     setCustomAnswerOpen(false);
   }
 
-  function continueStep() {
-    if (!canContinue) {
-      return;
-    }
-    if (!isLastStep) {
-      setStep((value) => value + 1);
+  function submitAnswer() {
+    if (!canSubmit) {
       return;
     }
 
-    const workspaceAnswers = card.questions.map((item) => ({
-      answer: answers[item.id] || "",
-      question: item.question,
-      questionId: item.id,
-      source: answerSources[item.id] || "custom",
-    }));
-    const text = card.questions
-      .map(
-        (item, index) =>
-          `${index + 1}. ${item.question}\nJawaban: ${answers[item.id]}`,
-      )
-      .join("\n\n");
-    onSubmit(text, workspaceAnswers as WorkspaceAnswerPayload[]);
+    onSubmit(`${question.question}\nJawaban: ${selected}`, [
+      {
+        answer: selected,
+        question: question.question,
+        questionId: question.id,
+        source,
+      },
+    ]);
   }
 
   return (
     <div className="mt-spacing-3 overflow-hidden border-y border-surface-warm-white/10 bg-[#1d1d1a] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
       <div className="border-b border-surface-warm-white/8 px-spacing-5 py-spacing-4">
         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-surface-warm-white/38">
-          Keputusan {step + 1} / {card.questions.length}
+          Satu keputusan dulu
         </p>
         <h2 className="mt-spacing-1 max-w-3xl text-base font-semibold leading-6 text-surface-warm-white">
           {question.question}
@@ -416,145 +382,111 @@ export function QuestionStepperComposer({
             {question.whyThisQuestionMatters}
           </p>
         ) : null}
-        <div className="mt-spacing-4 flex gap-spacing-2">
-          {card.questions.map((item) => (
-            <div
-              key={item.id}
-              className={`h-px flex-1 ${item.id === question.id ? "bg-surface-warm-white/72" : answers[item.id] ? "bg-[#8ce99a]/70" : "bg-surface-warm-white/10"}`}
-            />
-          ))}
+      </div>
+
+      <div className="divide-y divide-surface-warm-white/8">
+        {question.options.map((option) => {
+          const isSelected = selected === option.label && source === "option";
+          const isRecommended =
+            question.recommendedOptionLabel === option.label;
+          return (
+            <button
+              key={option.label}
+              type="button"
+              onClick={() => chooseAnswer(option.label, "option")}
+              className={`group grid w-full grid-cols-[1fr_auto] items-start gap-spacing-4 px-spacing-5 py-spacing-4 text-left transition ${isSelected ? "bg-surface-warm-white/[0.075]" : "hover:bg-surface-warm-white/[0.045]"}`}
+            >
+              <span>
+                <span className="block text-sm font-semibold text-surface-warm-white">
+                  {option.label}
+                </span>
+                <span className="mt-spacing-1 block text-xs leading-5 text-surface-warm-white/54">
+                  {option.description}
+                </span>
+                {isRecommended ? (
+                  <span className="mt-spacing-2 block text-[11px] font-medium text-[#c7f8cf]/82">
+                    Rekomendasi paling aman
+                  </span>
+                ) : null}
+              </span>
+              <span
+                className={`mt-1 size-3 border ${isSelected ? "border-[#8ce99a] bg-[#8ce99a]" : "border-surface-warm-white/22 group-hover:border-surface-warm-white/44"}`}
+              />
+            </button>
+          );
+        })}
+        <div
+          className={`px-spacing-5 py-spacing-4 transition ${customAnswerOpen || customAnswerSelected ? "bg-surface-warm-white/[0.075]" : "bg-transparent"}`}
+        >
+          {customAnswerOpen ? (
+            <div className="space-y-spacing-3">
+              <label
+                htmlFor={`custom-answer-${question.id}`}
+                className="text-xs font-medium text-surface-warm-white/58"
+              >
+                Jawaban sendiri untuk keputusan ini
+              </label>
+              <textarea
+                id={`custom-answer-${question.id}`}
+                rows={3}
+                value={customAnswer}
+                onChange={(event) => setCustomAnswer(event.target.value)}
+                placeholder="Tulis jawabanmu sendiri..."
+                className="w-full resize-none rounded-[14px] border border-surface-warm-white/10 bg-[#181817] px-spacing-4 py-spacing-3 text-sm leading-6 text-surface-warm-white outline-none placeholder:text-surface-warm-white/34 focus:border-surface-warm-white/28"
+              />
+              <div className="flex items-center justify-end gap-spacing-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomAnswerOpen(false);
+                    setCustomAnswer("");
+                  }}
+                  className="rounded-full px-spacing-3 py-spacing-2 text-xs text-surface-warm-white/54 hover:bg-surface-warm-white/8"
+                >
+                  Batal
+                </button>
+                <Button
+                  type="button"
+                  disabled={!customAnswer.trim()}
+                  onClick={useCustomAnswer}
+                  className="h-9 rounded-full bg-surface-warm-white px-spacing-4 text-xs text-foreground-primary hover:bg-surface-warm-white/86 disabled:opacity-50"
+                >
+                  Pakai jawaban ini
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setCustomAnswerOpen(true)}
+              className="flex w-full items-center justify-between gap-spacing-4 text-left"
+            >
+              <span>
+                <span className="block text-sm font-semibold text-surface-warm-white/84">
+                  Jawaban sendiri
+                </span>
+                <span className="mt-spacing-1 block text-xs leading-5 text-surface-warm-white/58">
+                  {customAnswerSelected
+                    ? selected
+                    : "Pakai ini kalau pilihan AI belum pas untuk keputusan ini."}
+                </span>
+              </span>
+              <span className="border-b border-surface-warm-white/20 pb-0.5 text-xs text-surface-warm-white/56">
+                Tulis
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
-      {question.options.length ? (
-        <div className="divide-y divide-surface-warm-white/8">
-          {question.options.map((option) => {
-            const isSelected = selectedAnswer === option.label;
-            const isRecommended =
-              question.recommendedOptionLabel === option.label;
-            return (
-              <button
-                key={option.label}
-                type="button"
-                onClick={() => chooseAnswer(option.label, "option")}
-                className={`group grid w-full grid-cols-[1fr_auto] items-start gap-spacing-4 px-spacing-5 py-spacing-4 text-left transition ${isSelected ? "bg-surface-warm-white/[0.075]" : "hover:bg-surface-warm-white/[0.045]"}`}
-              >
-                <span>
-                  <span className="block text-sm font-semibold text-surface-warm-white">
-                    {option.label}
-                  </span>
-                  <span className="mt-spacing-1 block text-xs leading-5 text-surface-warm-white/54">
-                    {option.description}
-                  </span>
-                  {isRecommended ? (
-                    <span className="mt-spacing-2 block text-[11px] font-medium text-[#c7f8cf]/82">
-                      Rekomendasi paling aman
-                    </span>
-                  ) : null}
-                </span>
-                <span
-                  className={`mt-1 size-3 border ${isSelected ? "border-[#8ce99a] bg-[#8ce99a]" : "border-surface-warm-white/22 group-hover:border-surface-warm-white/44"}`}
-                />
-              </button>
-            );
-          })}
-          <div
-            className={`px-spacing-5 py-spacing-4 transition ${customAnswerOpen || customAnswerSelected ? "bg-surface-warm-white/[0.075]" : "bg-transparent"}`}
-          >
-            {customAnswerOpen ? (
-              <div className="space-y-spacing-3">
-                <label
-                  htmlFor={`custom-answer-${question.id}`}
-                  className="text-xs font-medium text-surface-warm-white/58"
-                >
-                  Jawaban sendiri untuk keputusan ini
-                </label>
-                <textarea
-                  id={`custom-answer-${question.id}`}
-                  rows={3}
-                  value={customAnswer}
-                  onChange={(event) => setCustomAnswer(event.target.value)}
-                  placeholder="Tulis jawabanmu sendiri..."
-                  className="w-full resize-none rounded-[14px] border border-surface-warm-white/10 bg-[#181817] px-spacing-4 py-spacing-3 text-sm leading-6 text-surface-warm-white outline-none placeholder:text-surface-warm-white/34 focus:border-surface-warm-white/28"
-                />
-                <div className="flex items-center justify-end gap-spacing-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomAnswerOpen(false);
-                      setCustomAnswer("");
-                    }}
-                    className="rounded-full px-spacing-3 py-spacing-2 text-xs text-surface-warm-white/54 hover:bg-surface-warm-white/8"
-                  >
-                    Batal
-                  </button>
-                  <Button
-                    type="button"
-                    disabled={!customAnswer.trim()}
-                    onClick={useCustomAnswer}
-                    className="h-9 rounded-full bg-surface-warm-white px-spacing-4 text-xs text-foreground-primary hover:bg-surface-warm-white/86 disabled:opacity-50"
-                  >
-                    Pakai jawaban ini
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setCustomAnswerOpen(true)}
-                className="flex w-full items-center justify-between gap-spacing-4 text-left"
-              >
-                <span>
-                  <span className="block text-sm font-semibold text-surface-warm-white/84">
-                    Jawaban sendiri
-                  </span>
-                  <span className="mt-spacing-1 block text-xs leading-5 text-surface-warm-white/58">
-                    {customAnswerSelected
-                      ? selectedAnswer
-                      : "Pakai ini kalau pilihan AI belum pas untuk keputusan ini."}
-                  </span>
-                </span>
-                <span className="border-b border-surface-warm-white/20 pb-0.5 text-xs text-surface-warm-white/56">
-                  Tulis
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-wrap items-center gap-spacing-3 p-spacing-4 text-xs leading-5 text-surface-warm-white/54">
-          <span>
-            {hasError ? "Opsi belum siap." : "Menyiapkan opsi pilihan..."}
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isRefreshing}
-            onClick={onRefresh}
-            className="h-8 rounded-full border-surface-warm-white/12 bg-transparent text-xs text-surface-warm-white/78 hover:bg-surface-warm-white/8"
-          >
-            {isRefreshing ? "Menyiapkan..." : "Generate opsi"}
-          </Button>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between gap-spacing-3 border-t border-surface-warm-white/8 px-spacing-5 py-spacing-4">
-        <button
-          type="button"
-          disabled={step === 0}
-          onClick={() => setStep((value) => Math.max(0, value - 1))}
-          className="rounded-full px-spacing-3 py-spacing-2 text-xs text-surface-warm-white/54 hover:bg-surface-warm-white/8 disabled:opacity-30"
-        >
-          Kembali
-        </button>
+      <div className="flex items-center justify-end border-t border-surface-warm-white/8 px-spacing-5 py-spacing-4">
         <Button
           type="button"
-          disabled={!canContinue}
-          onClick={continueStep}
+          disabled={!canSubmit}
+          onClick={submitAnswer}
           className="rounded-full bg-surface-warm-white text-foreground-primary hover:bg-surface-warm-white/86 disabled:opacity-50"
         >
-          {isLastStep ? "Kirim jawaban" : "Lanjut"}
+          Kirim jawaban
         </Button>
       </div>
     </div>
@@ -566,11 +498,7 @@ export function WorkspaceCardView({
   onBuild,
 }: {
   card: WorkspaceCard;
-  hasError: boolean;
-  isRefreshing: boolean;
-  onAnswer: (answer: string) => void;
   onBuild: () => void;
-  onRefresh: () => void;
 }) {
   if (card.type === "none") {
     return null;

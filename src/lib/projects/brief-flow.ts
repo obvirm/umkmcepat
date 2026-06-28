@@ -25,79 +25,64 @@ export type WorkspaceTurnToolInput = {
   workspaceCard?: WorkspaceCard;
 };
 
+// The tool input is a best-effort side channel. The schema stays intentionally
+// permissive (no strict mode, no length/enum/required constraints) so a slightly
+// malformed model output never fails the whole turn. The server is the single
+// authority that validates, normalizes, and falls back. See normalizeWorkspaceTurn.
 export const workspaceTurnToolInputSchema = jsonSchema<WorkspaceTurnToolInput>({
   type: "object",
-  additionalProperties: false,
   properties: {
     briefPatch: {
       type: "object",
-      additionalProperties: false,
+      description:
+        "Known brief fields captured so far. Fill only what the user has actually decided. Leave unknown fields out.",
       properties: {
-        businessType: { type: "string", minLength: 2, maxLength: 120 },
-        offer: { type: "string", minLength: 2, maxLength: 160 },
-        targetCustomer: { type: "string", minLength: 2, maxLength: 160 },
-        contactOrCta: { type: "string", minLength: 2, maxLength: 160 },
-        stylePreference: { type: "string", minLength: 2, maxLength: 160 },
-        notes: {
-          type: "array",
-          maxItems: 3,
-          items: { type: "string", minLength: 2, maxLength: 160 },
-        },
+        businessType: { type: "string" },
+        offer: { type: "string" },
+        targetCustomer: { type: "string" },
+        contactOrCta: { type: "string" },
+        stylePreference: { type: "string" },
+        notes: { type: "array", items: { type: "string" } },
       },
     },
-    projectTitle: { type: "string", minLength: 4, maxLength: 80 },
+    projectTitle: {
+      type: "string",
+      description:
+        "A concise, specific Indonesian project name useful in a dashboard.",
+    },
     workspaceCard: {
       type: "object",
-      additionalProperties: false,
-      required: ["type"],
+      description:
+        "Interactive UI card. Use type 'question' to ask the next single decision while clarifying, or type 'build_recommendation' once the brief is fully clear.",
       properties: {
-        type: { enum: ["questions", "build_recommendation"] },
-        questions: {
-          type: "array",
-          minItems: 1,
-          maxItems: 2,
-          items: {
-            type: "object",
-            additionalProperties: false,
-            required: ["id", "question", "options"],
-            properties: {
-              id: {
-                enum: [
-                  "businessType",
-                  "offer",
-                  "targetCustomer",
-                  "contactOrCta",
-                  "stylePreference",
-                ],
-              },
-              question: { type: "string", minLength: 8, maxLength: 160 },
-              options: {
-                type: "array",
-                minItems: 3,
-                maxItems: 5,
-                items: {
-                  type: "object",
-                  additionalProperties: false,
-                  required: ["label", "description"],
-                  properties: {
-                    label: { type: "string", minLength: 2, maxLength: 48 },
-                    description: {
-                      type: "string",
-                      minLength: 4,
-                      maxLength: 96,
-                    },
-                  },
+        type: { type: "string" },
+        question: {
+          type: "object",
+          description:
+            "Exactly one decision to ask this turn, with 3-5 specific options.",
+          properties: {
+            id: { type: "string" },
+            question: { type: "string" },
+            recommendedOptionLabel: { type: "string" },
+            whyThisQuestionMatters: { type: "string" },
+            options: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  label: { type: "string" },
+                  description: { type: "string" },
                 },
               },
             },
           },
         },
-        title: { type: "string", minLength: 4, maxLength: 80 },
+        title: { type: "string" },
         summary: {
           type: "array",
-          minItems: 3,
-          maxItems: 7,
-          items: { type: "string", minLength: 2, maxLength: 120 },
+          description:
+            "Flexible implementation spec shaped by the user's real needs. Avoid fixed template labels.",
+          items: { type: "string" },
         },
       },
     },
@@ -108,7 +93,7 @@ export function applyBriefPatch(
   brief: ProjectBrief,
   patch: WorkspaceTurnToolInput["briefPatch"],
 ): ProjectBrief {
-  if (!patch) {
+  if (!patch || typeof patch !== "object") {
     return brief;
   }
 
@@ -131,16 +116,20 @@ export function applyBriefPatch(
   return next;
 }
 
+// Single authority for turning best-effort model output into a valid turn.
+// Never throws: any malformed input degrades to a deterministic fallback card.
 export function normalizeWorkspaceTurn(
-  input: WorkspaceTurnToolInput | undefined,
+  input: unknown,
   fallbackBrief: ProjectBrief,
 ) {
-  const brief = applyBriefPatch(fallbackBrief, input?.briefPatch);
+  const value =
+    input && typeof input === "object" ? (input as WorkspaceTurnToolInput) : {};
+  const brief = applyBriefPatch(fallbackBrief, value.briefPatch);
 
   return {
     brief,
-    projectTitle: cleanText(input?.projectTitle, 80),
-    workspaceCard: normalizeWorkspaceCard(input?.workspaceCard, brief),
+    projectTitle: cleanText(value.projectTitle, 80),
+    workspaceCard: normalizeWorkspaceCard(value.workspaceCard, brief),
   };
 }
 
@@ -151,20 +140,19 @@ export function createFallbackWorkspaceCard(
     return buildRecommendationCard(brief);
   }
 
+  const nextField = getMissingBriefFields(brief)[0];
+
+  if (!nextField) {
+    return buildRecommendationCard(brief);
+  }
+
   return {
-    type: "questions",
-    questions: getMissingBriefFields(brief)
-      .slice(0, 2)
-      .map((field) => buildFallbackQuestion(field, brief)),
+    type: "question",
+    question: buildFallbackQuestion(nextField, brief),
   };
 }
 
 export function createPendingWorkspaceCard(brief: ProjectBrief): WorkspaceCard {
-  return createFallbackWorkspaceCard(brief);
-}
-
-// ponytail: deterministic card ceiling = generic-but-valid; upgrade with richer local heuristics per vertical.
-export function generateNextWorkspaceCard(brief: ProjectBrief) {
   return createFallbackWorkspaceCard(brief);
 }
 
@@ -182,64 +170,97 @@ export function parseWorkspaceCard(
     return createFallbackWorkspaceCard(brief);
   }
 
-  if (card.type === "build_recommendation") {
-    return normalizeWorkspaceCard(card as WorkspaceCard, brief);
-  }
-
-  if (card.type !== "questions") {
-    return createFallbackWorkspaceCard(brief);
-  }
-
-  const questions = Array.isArray(card.questions)
-    ? card.questions.filter(
-        (question): question is BriefQuestion =>
-          Boolean(question) &&
-          typeof question === "object" &&
-          isBriefQuestionId((question as BriefQuestion).id) &&
-          typeof (question as BriefQuestion).question === "string" &&
-          Array.isArray((question as BriefQuestion).options),
-      )
-    : [];
-
-  return normalizeWorkspaceCard({ type: "questions", questions }, brief);
+  return normalizeWorkspaceCard(card, brief);
 }
 
 function normalizeWorkspaceCard(
-  card: WorkspaceCard | undefined,
+  card: unknown,
   brief: ProjectBrief,
 ): WorkspaceCard {
-  if (!card) {
+  if (!card || typeof card !== "object") {
     return createFallbackWorkspaceCard(brief);
   }
 
-  if (card.type === "build_recommendation") {
-    return buildRecommendationCard(brief, card.title, card.summary);
+  const value = card as Partial<WorkspaceCard> & {
+    question?: unknown;
+    // Backward compatibility: older stored cards used a questions[] array.
+    questions?: unknown;
+  };
+
+  if (value.type === "build_recommendation") {
+    const summary = Array.isArray(value.summary)
+      ? (value.summary as unknown[]).filter(
+          (item): item is string => typeof item === "string",
+        )
+      : undefined;
+    return buildRecommendationCard(
+      brief,
+      typeof value.title === "string" ? value.title : undefined,
+      summary,
+    );
   }
 
-  if (card.type !== "questions") {
-    return createFallbackWorkspaceCard(brief);
+  const rawQuestion =
+    value.question ??
+    (Array.isArray(value.questions) ? value.questions[0] : undefined);
+  const question = normalizeQuestion(rawQuestion, brief);
+
+  return question
+    ? { type: "question", question }
+    : createFallbackWorkspaceCard(brief);
+}
+
+function normalizeQuestion(
+  raw: unknown,
+  brief: ProjectBrief,
+): BriefQuestion | null {
+  if (!raw || typeof raw !== "object") {
+    return null;
   }
 
+  const candidate = raw as Partial<BriefQuestion>;
   const missing = new Set(getMissingBriefFields(brief));
-  const questions = card.questions
-    .filter((question: BriefQuestion) => missing.has(question.id))
-    .slice(0, 2)
-    .map((question: BriefQuestion) => ({
-      id: question.id,
-      question: cleanText(question.question, 160),
-      options: question.options
-        .map((option: { label: string; description: string }) => ({
+
+  if (!isBriefQuestionId(candidate.id) || !missing.has(candidate.id)) {
+    return null;
+  }
+
+  const question = cleanText(candidate.question, 160);
+  const options = Array.isArray(candidate.options)
+    ? candidate.options
+        .filter(
+          (option): option is { label: string; description: string } =>
+            Boolean(option) && typeof option === "object",
+        )
+        .map((option) => ({
           label: cleanText(option.label, 48),
           description: cleanText(option.description, 96),
         }))
         .filter((option) => option.label && option.description)
-        .slice(0, 5),
-    }))
-    .filter((question) => question.question && question.options.length >= 3);
+        .slice(0, 5)
+    : [];
 
-  return questions.length
-    ? { type: "questions", questions }
-    : createFallbackWorkspaceCard(brief);
+  if (!question || options.length < 3) {
+    return null;
+  }
+
+  const recommendedOptionLabel = cleanText(
+    candidate.recommendedOptionLabel,
+    48,
+  );
+
+  return {
+    id: candidate.id,
+    question,
+    options,
+    recommendedOptionLabel: options.some(
+      (option) => option.label === recommendedOptionLabel,
+    )
+      ? recommendedOptionLabel
+      : undefined,
+    whyThisQuestionMatters:
+      cleanText(candidate.whyThisQuestionMatters, 180) || undefined,
+  };
 }
 
 function buildFallbackQuestion(

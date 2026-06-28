@@ -28,7 +28,7 @@ import {
   GeneratedPreviewFrame,
   ModePill,
   ProcessingControl,
-  QuestionStepperComposer,
+  QuestionComposer,
   WorkspaceCardView,
   WorkspaceTopBar,
   type BuildProgressStep,
@@ -97,8 +97,6 @@ export function WorkspaceShell({
   const [buildStartedAt, setBuildStartedAt] = useState<number | null>(null);
   const [workspaceCard, setWorkspaceCard] =
     useState<WorkspaceCard>(initialWorkspaceCard);
-  const [isRefreshingCard, setIsRefreshingCard] = useState(false);
-  const [cardError, setCardError] = useState(false);
   const [olderMessages, setOlderMessages] = useState<UIMessage[]>([]);
   const [chatCursor, setChatCursor] = useState<number | null>(
     initialChatCursor,
@@ -275,7 +273,7 @@ export function WorkspaceShell({
   const isBuilding = buildStatus === "building";
   const isProcessing = isResponding || isBuilding;
   const visibleMessages = [...olderMessages, ...messages];
-  const hasActiveQuestionCard = workspaceCard.type === "questions";
+  const hasActiveQuestionCard = workspaceCard.type === "question";
   const hasPreview = sourceStatus === "passed" || buildStatus === "ready";
   const showPreviewPanel = !previewCollapsed;
   const showChatPanel = !chatCollapsed;
@@ -413,34 +411,6 @@ export function WorkspaceShell({
     element.scrollTop = element.scrollHeight;
     previousLiveMessageCount.current = messages.length;
   }, [messages.length]);
-
-  const refreshWorkspaceCard = useCallback(
-    async (regenerate = false) => {
-      setIsRefreshingCard(true);
-      setCardError(false);
-
-      try {
-        const response = await fetch(
-          `/api/projects/${projectId}/brief-card${regenerate ? "?regenerate=1" : ""}`,
-        );
-        const result = (await response.json().catch(() => null)) as {
-          workspaceCard?: WorkspaceCard;
-        } | null;
-
-        if (!response.ok || !result?.workspaceCard) {
-          setCardError(true);
-          return;
-        }
-
-        setWorkspaceCard(result.workspaceCard);
-      } catch {
-        setCardError(true);
-      } finally {
-        setIsRefreshingCard(false);
-      }
-    },
-    [projectId],
-  );
 
   useEffect(() => {
     const workspaceUpdate = getLatestWorkspaceUpdateFromMessages(messages);
@@ -675,10 +645,6 @@ export function WorkspaceShell({
                 <WorkspaceCardView
                   card={workspaceCard}
                   onBuild={() => void startBuild()}
-                  onRefresh={() => void refreshWorkspaceCard()}
-                  isRefreshing={isRefreshingCard}
-                  hasError={cardError}
-                  onAnswer={submitChatText}
                 />
               ) : null}
 
@@ -708,13 +674,9 @@ export function WorkspaceShell({
                   mode={isBuilding ? "Buat" : "Diskusi"}
                   onStop={stopCurrentJob}
                 />
-              ) : hasActiveQuestionCard &&
-                workspaceCard.type === "questions" ? (
-                <QuestionStepperComposer
-                  card={workspaceCard}
-                  hasError={cardError}
-                  isRefreshing={isRefreshingCard}
-                  onRefresh={() => void refreshWorkspaceCard(true)}
+              ) : hasActiveQuestionCard && workspaceCard.type === "question" ? (
+                <QuestionComposer
+                  question={workspaceCard.question}
                   onSubmit={(answer, workspaceAnswers) =>
                     submitChatText(answer, { workspaceAnswers })
                   }
