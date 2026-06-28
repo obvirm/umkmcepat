@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Check,
   Code2,
   Globe2,
   Monitor,
@@ -135,12 +134,12 @@ export function GeneratedPreviewFrame({
   viewport: "desktop" | "mobile";
 }) {
   return (
-    <div className="flex justify-center">
+    <div className="flex h-full min-h-0 justify-center overflow-hidden bg-[#10100f]">
       <iframe
         title="Generated website preview"
         src={`/api/projects/${projectId}/preview/`}
         sandbox="allow-scripts"
-        className={`${viewport === "mobile" ? "h-[760px] max-w-[390px]" : "h-[760px] max-w-6xl"} w-full border-0 bg-white`}
+        className={`${viewport === "mobile" ? "max-w-[390px]" : "max-w-none"} h-full w-full border-0 bg-white`}
       />
     </div>
   );
@@ -170,9 +169,9 @@ export function ModePill({
   tone: "idle" | "busy";
 }) {
   return (
-    <span className="inline-flex items-center gap-spacing-2 rounded-full border border-surface-warm-white/10 bg-surface-warm-white/[0.055] px-spacing-3 py-spacing-2 text-xs font-medium text-surface-warm-white/58">
+    <span className="inline-flex items-center gap-spacing-2 text-xs font-medium text-surface-warm-white/48">
       <span
-        className={`size-1.5 rounded-full ${tone === "busy" ? "animate-pulse bg-surface-warm-white/70" : "bg-[#8ce99a]"}`}
+        className={`h-px w-5 ${tone === "busy" ? "animate-pulse bg-surface-warm-white/70" : "bg-[#8ce99a]"}`}
       />
       Mode {mode}
     </span>
@@ -250,11 +249,9 @@ export function BuildProgressPanel({
                 <div
                   className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-full border ${isError ? "border-[#ffb4a6]/40 bg-[#ffb4a6]/10 text-[#ffb4a6]" : isActive ? "border-surface-warm-white/18 bg-surface-warm-white/10 text-surface-warm-white" : "border-[#8ce99a]/30 bg-[#8ce99a]/10 text-[#8ce99a]"}`}
                 >
-                  {isActive ? (
-                    <span className="size-3 animate-pulse rounded-full bg-current" />
-                  ) : (
-                    <Check className="size-4" />
-                  )}
+                  <span
+                    className={`block ${isActive ? "size-3 animate-pulse rounded-full bg-current" : "size-2 bg-current"}`}
+                  />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-surface-warm-white">
@@ -406,10 +403,10 @@ export function QuestionStepperComposer({
   }
 
   return (
-    <div className="mt-spacing-3 overflow-hidden rounded-[24px] border border-surface-warm-white/10 bg-[#242421] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+    <div className="mt-spacing-3 overflow-hidden border-y border-surface-warm-white/10 bg-[#1d1d1a] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
       <div className="border-b border-surface-warm-white/8 px-spacing-5 py-spacing-4">
-        <p className="text-xs font-medium text-surface-warm-white/56">
-          Keputusan {step + 1} dari {card.questions.length}
+        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-surface-warm-white/38">
+          Keputusan {step + 1} / {card.questions.length}
         </p>
         <h2 className="mt-spacing-1 max-w-3xl text-base font-semibold leading-6 text-surface-warm-white">
           {question.question}
@@ -419,18 +416,18 @@ export function QuestionStepperComposer({
             {question.whyThisQuestionMatters}
           </p>
         ) : null}
-        <div className="mt-spacing-4 grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-spacing-2">
+        <div className="mt-spacing-4 flex gap-spacing-2">
           {card.questions.map((item) => (
             <div
               key={item.id}
-              className={`h-1 rounded-full ${item.id === question.id ? "bg-surface-warm-white/72" : answers[item.id] ? "bg-[#8ce99a]/70" : "bg-surface-warm-white/10"}`}
+              className={`h-px flex-1 ${item.id === question.id ? "bg-surface-warm-white/72" : answers[item.id] ? "bg-[#8ce99a]/70" : "bg-surface-warm-white/10"}`}
             />
           ))}
         </div>
       </div>
 
       {question.options.length ? (
-        <div className="grid gap-spacing-2 p-spacing-4 sm:grid-cols-2">
+        <div className="divide-y divide-surface-warm-white/8">
           {question.options.map((option) => {
             const isSelected = selectedAnswer === option.label;
             const isRecommended =
@@ -440,24 +437,29 @@ export function QuestionStepperComposer({
                 key={option.label}
                 type="button"
                 onClick={() => chooseAnswer(option.label, "option")}
-                className={`rounded-[16px] border px-spacing-4 py-spacing-3 text-left transition ${isSelected ? "border-[#8ce99a]/55 bg-[#8ce99a]/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]" : "border-surface-warm-white/10 bg-[#1f1f1d] hover:border-surface-warm-white/24 hover:bg-surface-warm-white/[0.055]"}`}
+                className={`group grid w-full grid-cols-[1fr_auto] items-start gap-spacing-4 px-spacing-5 py-spacing-4 text-left transition ${isSelected ? "bg-surface-warm-white/[0.075]" : "hover:bg-surface-warm-white/[0.045]"}`}
               >
-                <span className="flex items-center gap-spacing-2 text-sm font-semibold text-surface-warm-white">
-                  {option.label}
+                <span>
+                  <span className="block text-sm font-semibold text-surface-warm-white">
+                    {option.label}
+                  </span>
+                  <span className="mt-spacing-1 block text-xs leading-5 text-surface-warm-white/54">
+                    {option.description}
+                  </span>
                   {isRecommended ? (
-                    <span className="rounded-full border border-[#8ce99a]/22 bg-[#8ce99a]/10 px-spacing-2 py-0.5 text-[10px] font-semibold text-[#c7f8cf]">
-                      Saran AI
+                    <span className="mt-spacing-2 block text-[11px] font-medium text-[#c7f8cf]/82">
+                      Rekomendasi paling aman
                     </span>
                   ) : null}
                 </span>
-                <span className="mt-spacing-1 block text-xs leading-5 text-surface-warm-white/54">
-                  {option.description}
-                </span>
+                <span
+                  className={`mt-1 size-3 border ${isSelected ? "border-[#8ce99a] bg-[#8ce99a]" : "border-surface-warm-white/22 group-hover:border-surface-warm-white/44"}`}
+                />
               </button>
             );
           })}
           <div
-            className={`rounded-[16px] border px-spacing-4 py-spacing-3 transition sm:col-span-2 ${customAnswerOpen || customAnswerSelected ? "border-[#8ce99a]/45 bg-[#8ce99a]/10" : "border-dashed border-surface-warm-white/14 bg-transparent"}`}
+            className={`px-spacing-5 py-spacing-4 transition ${customAnswerOpen || customAnswerSelected ? "bg-surface-warm-white/[0.075]" : "bg-transparent"}`}
           >
             {customAnswerOpen ? (
               <div className="space-y-spacing-3">
@@ -512,7 +514,7 @@ export function QuestionStepperComposer({
                       : "Pakai ini kalau pilihan AI belum pas untuk keputusan ini."}
                   </span>
                 </span>
-                <span className="rounded-full border border-surface-warm-white/10 px-spacing-3 py-spacing-1 text-xs text-surface-warm-white/56">
+                <span className="border-b border-surface-warm-white/20 pb-0.5 text-xs text-surface-warm-white/56">
                   Tulis
                 </span>
               </button>
@@ -576,20 +578,30 @@ export function WorkspaceCardView({
 
   if (card.type === "build_recommendation") {
     return (
-      <div className="rounded-[22px] border border-[#8ce99a]/30 bg-[#8ce99a]/10 p-spacing-5">
-        <div className="flex items-center justify-between gap-spacing-4">
-          <div>
-            <p className="text-sm font-semibold text-surface-warm-white">
+      <div className="border-y border-surface-warm-white/10 bg-[#1b1b18] px-spacing-5 py-spacing-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
+        <div className="flex items-start justify-between gap-spacing-5">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-surface-warm-white/38">
+              Rancangan build
+            </p>
+            <h2 className="mt-spacing-2 text-base font-semibold leading-6 text-surface-warm-white">
               {card.title}
-            </p>
-            <p className="mt-spacing-2 text-sm text-surface-warm-white/62">
-              {card.summary.join(" · ")}
-            </p>
+            </h2>
+            <ul className="mt-spacing-4 space-y-spacing-3 text-sm leading-6 text-surface-warm-white/66">
+              {card.summary.slice(0, 7).map((item, index) => (
+                <li
+                  key={`${item}-${index}`}
+                  className="border-t border-surface-warm-white/8 pt-spacing-3 first:border-t-0 first:pt-0"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
           <Button
             type="button"
             onClick={onBuild}
-            className="shrink-0 rounded-full bg-surface-warm-white text-foreground-primary hover:bg-surface-warm-white/86"
+            className="mt-spacing-6 shrink-0 rounded-[12px] bg-surface-warm-white px-spacing-5 text-foreground-primary hover:bg-surface-warm-white/86"
           >
             Mulai build
           </Button>

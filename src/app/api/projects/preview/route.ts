@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 
   const project = await prisma.project.findFirst({
     where: { id: body.projectId, userId },
-    select: { id: true, status: true, prompt: true },
+    select: { id: true, prompt: true, status: true, title: true },
   });
 
   if (!project) {
@@ -200,8 +200,10 @@ export async function POST(request: Request) {
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
     onFinish: async ({ messages }) => {
+      const title = workspaceTurn.projectTitle || project.title;
+
       await prisma.$executeRaw`
-        UPDATE "Project" SET "chatMessages" = ${JSON.stringify(messages)}::jsonb, "brief" = ${JSON.stringify(workspaceTurn.brief)}::jsonb, "workspaceCard" = ${JSON.stringify(workspaceTurn.workspaceCard)}::jsonb WHERE id = ${project.id} AND "userId" = ${userId}
+        UPDATE "Project" SET "chatMessages" = ${JSON.stringify(messages)}::jsonb, "brief" = ${JSON.stringify(workspaceTurn.brief)}::jsonb, "workspaceCard" = ${JSON.stringify(workspaceTurn.workspaceCard)}::jsonb, "title" = ${title} WHERE id = ${project.id} AND "userId" = ${userId}
       `;
 
       const compaction = await maybeCompactProjectChat({
@@ -232,6 +234,7 @@ function buildSystemPrompt({
 Write user-visible chat copy in natural, concise Indonesian.
 Do not reveal chain-of-thought.
 Do not write JSON, XML, markdown schemas, or long option lists in chat text.
+Do not use emojis, decorative symbols, or hype labels in chat text or tool fields.
 Do not send raw HTML/CSS/JS in chat text.
 
 Active mode: ${mode === "build" ? "Build" : "Discuss"}.
@@ -241,11 +244,13 @@ Mandatory tool contract:
 - The tool is the hidden channel for brief updates and interactive UI. Do not explain tool/JSON internals to the user.
 - If the brief is incomplete, tool.workspaceCard.type must be "questions".
 - If the brief is ready to build, tool.workspaceCard.type must be "build_recommendation".
+- For build_recommendation, write summary as a flexible implementation spec, not fixed categories. It may be short or long, but it must reflect the user's actual needs and avoid template labels like Usaha/Fokus/Audiens/Aksi/Visual.
 - Use at most 2 questions. Every question must have 3-5 options.
 - question.id must be one missing brief field: businessType, offer, targetCustomer, contactOrCta, stylePreference.
 - Options must be specific to the user's business, not generic templates.
 - You may mention a recommended direction briefly in chat, but detailed choices belong in the tool card.
 - If the user answered the previous card, write the answer into briefPatch.
+- Set projectTitle when you can name the project more clearly than the user's raw first prompt. Keep it concise, specific, Indonesian, and useful in a dashboard.
 
 Chat style:
 - 1-3 sentences.

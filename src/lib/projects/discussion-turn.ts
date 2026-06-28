@@ -158,6 +158,7 @@ Discussion rules:
 - If the user has detailed/special requirements, still provide the most relevant options and let the UI provide free-text fallback.
 - If code/system can answer, do not ask the user.
 - Do not recommend build before the brief is roughly 80% clear.
+- When returning buildRecommendation.summary, write a flexible implementation spec shaped by the user's real needs. Do not force fixed categories like Usaha/Fokus/Audiens/Aksi/Visual.
 - User-facing copy must be Indonesian.
 
 Hidden context:

@@ -21,6 +21,7 @@ export type WorkspaceTurnToolInput = {
   briefPatch?: Partial<Pick<ProjectBrief, BriefQuestion["id"]>> & {
     notes?: string[];
   };
+  projectTitle?: string;
   workspaceCard?: WorkspaceCard;
 };
 
@@ -44,6 +45,7 @@ export const workspaceTurnToolInputSchema = jsonSchema<WorkspaceTurnToolInput>({
         },
       },
     },
+    projectTitle: { type: "string", minLength: 4, maxLength: 80 },
     workspaceCard: {
       type: "object",
       additionalProperties: false,
@@ -137,6 +139,7 @@ export function normalizeWorkspaceTurn(
 
   return {
     brief,
+    projectTitle: cleanText(input?.projectTitle, 80),
     workspaceCard: normalizeWorkspaceCard(input?.workspaceCard, brief),
   };
 }
@@ -341,6 +344,10 @@ function getBriefPatchFields(): BriefQuestion["id"][] {
 
 function cleanText(value: unknown, maxLength: number) {
   return typeof value === "string"
-    ? value.trim().replace(/\s+/g, " ").slice(0, maxLength)
+    ? value
+        .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .slice(0, maxLength)
     : "";
 }
